@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM ubuntu:20.04
-ENV TZ=Europe/Berlin
+FROM ubuntu:22.04
+ENV TZ=Asia/Tokyo
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get clean && \
