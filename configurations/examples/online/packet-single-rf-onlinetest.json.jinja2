@@ -5,7 +5,7 @@
     "DATA_SOURCES": [
         {
             "loader": {
-                "class": "PacketSnifferPcap",
+                "class": "PacketSnifferLoop",
                 "kwargs": {
                     "network_interface": "wlp0s20f3",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"

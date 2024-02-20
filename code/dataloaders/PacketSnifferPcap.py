@@ -46,27 +46,7 @@ class PacketSnifferPcap(IDataLoader):
                 packet_count += 1
             else:
                 break
-                
-        # while True:
-        #     start_time_ref = time.process_time_ns()
-        #     if process.poll() and process.returncode:
-        #         log.error(process.stdout.readlines())
-        #         raise RuntimeError(f"PCAP feature extractor exited with error code {process.returncode}!")
 
-        #     # Read one line at a time
-        #     packet_feature_string = process.stdout.readline().strip()
-        #     print(packet_feature_string)
-
-        #     #if not packet_feature_string:
-        #     #    break  # Break out of the loop if there is no more output
-
-        #     packet_features = {
-        #         PacketFeature.CPP_FEATURE_STRING: packet_feature_string
-        #     }
-        #     sum_processing_time += time.process_time_ns() - start_time_ref
-        #     yield packet_features
-        #     packet_count += 1
-            
 
         report_performance(type(self).__name__, log, packet_count, sum_processing_time)
 

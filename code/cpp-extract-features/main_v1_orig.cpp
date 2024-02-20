@@ -20,14 +20,6 @@ auto& USAGE_STR = "Usage: ./pcap-feature-extraction [function]\n\n"
                   "  test-file <abspath>    Open file and read one packet\n";
 
 
-// Declare a global variable
-int gMaxPacketCount = 10000;  // Set the maximum packet count
-
-// Declare another global variable to store the captured packet count
-int gCapturedPacketCount = 0;
-
-bool waitForQuota = true;
-
 /**
  * List available network devices.
  */
@@ -88,72 +80,57 @@ int test_file(const char* path) {
  *    tcp_flags - 0 or 1 for [CWR, ECE, URG, ACK, PSH, RST, SYN, FIN]
  */
 static void packet_to_features(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev, void* cookie) {
-    pcpp::Packet packet(rawPacket);
+  pcpp::Packet packet(rawPacket);
+  auto* ip_layer = packet.getLayerOfType<pcpp::IPv4Layer>();
+  if (ip_layer == nullptr) {
+    return;
+  }
 
-    // Extract IPv4 and TCP layers
-    auto* ip_layer = packet.getLayerOfType<pcpp::IPv4Layer>();
-    if (ip_layer == nullptr) {
-        return;
-    }
+  auto* tcp_layer = packet.getLayerOfType<pcpp::TcpLayer>();
+  if (tcp_layer == nullptr) {
+    return;
+  }
 
-    auto* tcp_layer = packet.getLayerOfType<pcpp::TcpLayer>();
-    if (tcp_layer == nullptr) {
-        return;
-    }
+  auto src_ip = ip_layer->getSrcIPv4Address().toString();
+  auto dst_ip = ip_layer->getDstIPv4Address().toString();
+  auto src_port = tcp_layer->getSrcPort();
+  auto dst_port = tcp_layer->getDstPort();
 
-    // Extract information from IPv4 and TCP layers
-    auto src_ip = ip_layer->getSrcIPv4Address().toString();
-    auto dst_ip = ip_layer->getDstIPv4Address().toString();
-    auto src_port = tcp_layer->getSrcPort();
-    auto dst_port = tcp_layer->getDstPort();
+  auto flag_cwr = tcp_layer->getTcpHeader()->cwrFlag;
+  auto flag_ece = tcp_layer->getTcpHeader()->eceFlag;
+  auto flag_urg = tcp_layer->getTcpHeader()->urgFlag;
+  auto flag_ack = tcp_layer->getTcpHeader()->ackFlag;
+  auto flag_psh = tcp_layer->getTcpHeader()->pshFlag;
+  auto flag_rst = tcp_layer->getTcpHeader()->rstFlag;
+  auto flag_syn = tcp_layer->getTcpHeader()->synFlag;
+  auto flag_fin = tcp_layer->getTcpHeader()->finFlag;
 
-    auto flag_cwr = tcp_layer->getTcpHeader()->cwrFlag;
-    auto flag_ece = tcp_layer->getTcpHeader()->eceFlag;
-    auto flag_urg = tcp_layer->getTcpHeader()->urgFlag;
-    auto flag_ack = tcp_layer->getTcpHeader()->ackFlag;
-    auto flag_psh = tcp_layer->getTcpHeader()->pshFlag;
-    auto flag_rst = tcp_layer->getTcpHeader()->rstFlag;
-    auto flag_syn = tcp_layer->getTcpHeader()->synFlag;
-    auto flag_fin = tcp_layer->getTcpHeader()->finFlag;
+  auto& TCP_PROTO = "tcp";
 
-    auto& TCP_PROTO = "tcp";
+  // Timestamp (received in nanoseconds, forwarded in milliseconds).
+  auto ts_ns = rawPacket->getPacketTimeStamp().tv_sec*1000000000L + rawPacket->getPacketTimeStamp().tv_nsec;
 
-    // Timestamp (received in nanoseconds, forwarded in milliseconds).
-    auto ts_ns = rawPacket->getPacketTimeStamp().tv_sec * 1000000000L + rawPacket->getPacketTimeStamp().tv_nsec;
-
-    // Print packet information
-    printf(
-        "%s,%s,%d,%d,%s,%ld,%zu,%zu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%zu\n",
-        src_ip.c_str(),
-        dst_ip.c_str(),
-        src_port,
-        dst_port,
-        TCP_PROTO,
-        ts_ns / 1000,
-        ip_layer->getHeaderLen(),
-        ip_layer->getDataLen(),
-        flag_cwr,
-        flag_ece,
-        flag_urg,
-        flag_ack,
-        flag_psh,
-        flag_rst,
-        flag_syn,
-        flag_fin,
-        tcp_layer->getHeaderLen()
-    );
-
-    // Increment the captured packet count
-    gCapturedPacketCount++;
-    std::cout << gCapturedPacketCount << std::endl;
-    // Check if the maximum packet count is reached
-    if (gCapturedPacketCount >= gMaxPacketCount) {
-        waitForQuota = false;
-        std::cout << "Maximum packet count reached. Stopping capture." << std::endl;
-        dev->stopCapture();
-    }
+  printf(
+    "%s,%s,%d,%d,%s,%ld,%zu,%zu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%hu,%zu\n",
+    src_ip.c_str(),
+    dst_ip.c_str(),
+    src_port,
+    dst_port,
+    TCP_PROTO,
+    ts_ns / 1000,
+    ip_layer->getHeaderLen(),
+    ip_layer->getDataLen(),
+    flag_cwr,
+    flag_ece,
+    flag_urg,
+    flag_ack,
+    flag_psh,
+    flag_rst,
+    flag_syn,
+    flag_fin,
+    tcp_layer->getHeaderLen()
+  );
 }
-
 
 
 /**
@@ -200,11 +177,12 @@ void stream_device(const std::string& device_name) {
 
   try {
     dev->startCapture(packet_to_features, nullptr);
-    // pcpp::multiPlatformSleep(10);
+    pcpp::multiPlatformSleep(10);
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
+  dev->stopCapture();
 }
 
 int main(int argc, char *argv[]) {
@@ -219,7 +197,6 @@ int main(int argc, char *argv[]) {
         exit (1);
       }
       i++;
-      
       stream_file(argv[i]);
       exit(0);
     }
@@ -229,12 +206,7 @@ int main(int argc, char *argv[]) {
         exit (1);
       }
       i++;
-      std::cout << "R: Testing capture" << std::endl;
       stream_device(argv[i]);
-      while (waitForQuota) {
-        pcpp::multiPlatformSleep(1);
-      }
-      std::cout << gCapturedPacketCount << std::endl;
       exit(0);
     }
     if (strcmp(argv[i], "test-devices") == 0) {
