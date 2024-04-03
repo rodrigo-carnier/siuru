@@ -45,17 +45,21 @@ class PacketSnifferLoop(IDataLoader):
     def get_samples(self) -> Generator[Dict[IFeature, Any], None, None]:
         # Call stream_device directly and receive the captured packets
         log.info("Getting the samples!")
+        log.info("Getting the samples1!")
         captured_packets = self.stream_device()
-
+        log.info("Getting the samples2!")
         # Yield the captured packets
         for packet in captured_packets:
+            log.info("### Getting one more")
             packet_features = {PacketFeature.CPP_FEATURE_STRING: packet}
             yield packet_features
 
     def stream_device(self) -> List[str]:
         captured_packets = []
-
-        while True:
+        packet_count = 0
+        
+        while packet_count<10:
+            packet_count = packet_count+1
             if self.process.poll() is not None:
                 # print("Here is p.poll", process.poll())
                 log.error(self.process.stdout.readlines())
@@ -63,18 +67,19 @@ class PacketSnifferLoop(IDataLoader):
                 if self.process.returncode != 0:
                     raise RuntimeError(f"Sniffer feature extractor exited with error code {self.process.returncode}!")
             packet = self.process.stdout.readline()
+            log.info("Getting the samples3")
             if packet:
                 captured_packets.append(packet.strip())
             else:
                 break
 
 
-        report_performance(type(self).__name__, log, packet_count, sum_processing_time)
+        # report_performance(type(self).__name__, log, packet_count, sum_processing_time)
 
         # Data loaders only exist once per data source, therefore they are
         # suitable for tracking the overall number of packets processed. This
         # value will be reported by the main pipeline in the end.
-        global_variables.global_pipeline_packet_count += packet_count
+        # global_variables.global_pipeline_packet_count += packet_count
 
         return captured_packets
 

@@ -28,6 +28,10 @@ def main(args_config_path, args_influx_token):
     pipeline_execution_start = time.process_time_ns()
     log_time_tag = time_now()
 
+    ####################
+    ### CONFIG FILES ###
+    ####################
+
     # Load configuration file that specifies pipeline components.
     config_path = os.path.abspath(args_config_path)
     config_file_name = os.path.basename(config_path).split('.')[0]
@@ -51,6 +55,10 @@ def main(args_config_path, args_influx_token):
 
     class_initialization_start = time.process_time_ns()
 
+    ###############
+    ### LOGGING ###
+    ###############
+
     # Initialize file loggers.
     if "LOG" in configuration:
         for log_config in configuration["LOG"]:
@@ -69,17 +77,27 @@ def main(args_config_path, args_influx_token):
     # Re-logging the path because file-based logger was not initialized before.
     log.debug(f"Running configuration: {config_path}")
 
+    
     # Feature stream is a Python generator object: https://wiki.python.org/moin/Generators
     # It allows to process the samples memory-efficiently, avoiding the need to store all data in memory at the same time.
     feature_stream = itertools.chain([])
 
     # Initialize data loaders classes corresponding to each component under DATA_SOURCES in configuration.
     for data_source in configuration["DATA_SOURCES"]:
+        
+        ##################################
+        ### Data loading (get samples) ###
+        ##################################
+
         loader_name = data_source["loader"]["class"]
         loader_class = globals()[loader_name]
         log.info(f"Adding {loader_class.__name__} to pipeline.")
         loader: IDataLoader = loader_class(**data_source["loader"]["kwargs"])
         new_feature_stream = loader.get_samples()
+
+        #######################
+        ### Data Formatting ###
+        #######################
 
         # Initialize preprocessors specific to the data sources. Allowing each data source to specify its own preprocessor means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
         for preprocessor_specification in data_source["preprocessors"]:
@@ -103,6 +121,10 @@ def main(args_config_path, args_influx_token):
         log.info(f"{count} elements.")
         exit(0)
 
+    ####################################
+    ### INIT MODEL(S) AND ENCODER(S) ###
+    ####################################
+
     # Initialize model class based on the component specification in the configuration.
     model_specification = configuration["MODEL"]
     model_name = model_specification["class"]
@@ -118,6 +140,10 @@ def main(args_config_path, args_influx_token):
         **model_specification["encoder"]["kwargs"]
     )
     log.info("Encoding features.")
+
+    ################
+    ### ENCODING ###
+    ################
 
     # This moment is important for performance measurement because encoding is the first step
     # where features are actually processed. Until here, the generator data has not been consumed, so no data processing needed to take place).
@@ -139,6 +165,11 @@ def main(args_config_path, args_influx_token):
         for k, v in first_sample_data.items():
             log.debug(f" | {k}: {v}")
 
+
+    ################
+    ### TRAINING ###
+    ################
+
     if model_specification["train_new_model"]:
         # Train the model.
         model_instance.train(
@@ -146,6 +177,11 @@ def main(args_config_path, args_influx_token):
         )
 
     else:
+
+    ###############
+    ### TESTING ###
+    ###############
+
         # Prediction time!
         reporter_instances: List[IReporter] = []
 
@@ -164,6 +200,12 @@ def main(args_config_path, args_influx_token):
         # each reporter.
         for reporter_instance in reporter_instances:
             reporter_instance.end_processing()
+
+
+
+    ########################
+    ### EVAL PERFORMANCE ###
+    ########################
 
     pipeline_stopping_time = time.process_time_ns()
     full_pipeline_time = pipeline_stopping_time - pipeline_execution_start
