@@ -147,6 +147,10 @@ def main(args_config_path, args_influx_token):
 
     # This moment is important for performance measurement because encoding is the first step
     # where features are actually processed. Until here, the generator data has not been consumed, so no data processing needed to take place).
+
+    for item in itertools.islice(feature_stream, 10):
+        print(item)
+
     encoding_start = time.process_time_ns()
 
     encoded_feature_generator = encoder_instance.encode(feature_stream)
