@@ -19,7 +19,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 0
+                        "label_value": 1
                     }
                 }
             ]
@@ -134,7 +134,7 @@
     {
         "class": "Kmeans",
         "train_new_model": true,
-        "skip_saving_model": false,
+        "skip_saving_model": true,
         "model_name": "packet-single-kmeans",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
@@ -160,7 +160,7 @@
     },
     "OUTPUT": [
         {
-            "class": "DistanceReporter",
+            "class": "ClusterReporter",
             "kwargs": {}
         }
     ],

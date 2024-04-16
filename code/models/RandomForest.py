@@ -12,6 +12,10 @@ from common.features import EncodedSampleGenerator, IFeature, PredictionField, S
 from common.functions import report_performance
 from models.IAnomalyDetectionModel import IAnomalyDetectionModel
 
+import matplotlib.pyplot as plt
+import pickle
+
+
 log = logging.getLogger()
 
 
@@ -63,6 +67,64 @@ class RandomForestModel(IAnomalyDetectionModel):
                 labels.append(samples[PredictionField.GROUND_TRUTH])
                 encoded_features.append(encoding[0])
             data_prep_time += time.process_time_ns() - start
+
+
+        ### PRINTING FIGURE IN FILE
+        # Extract the column you want to plot
+        column_to_plot = [[] for _ in range(12)]  # Initialize empty lists for each column
+
+        for i in range(12):  # Iterate over indices from 0 to 11
+            column_to_plot[i] = [arr[i] for arr in encoded_features]
+
+        # Plot the columns
+        plt.plot(column_to_plot[0])
+        plt.title('ip_header_size')
+        plt.savefig('/models/rf-ip_header_size.png')
+
+        plt.plot(column_to_plot[1])
+        plt.title('ip_data_size')
+        plt.savefig('/models/rf-ip_data_size.png')
+
+        plt.plot(column_to_plot[2])
+        plt.title('tcp_header_size')
+        plt.savefig('/models/rf-tcp_header_size.png')
+
+        plt.plot(column_to_plot[3])
+        plt.title('tcp_size')
+        plt.savefig('/models/rf-tcp_size.png')
+
+        plt.plot(column_to_plot[4])
+        plt.title('tcp_cwr')
+        plt.savefig('/models/rf-tcp_cwr.png')
+
+        plt.plot(column_to_plot[5])
+        plt.title('tcp_ece')
+        plt.savefig('/models/rf-tcp_ece.png')
+
+        plt.plot(column_to_plot[6])
+        plt.title('tcp_urg')
+        plt.savefig('/models/rf-tcp_urg.png')
+
+        plt.plot(column_to_plot[7])
+        plt.title('tcp_ack')
+        plt.savefig('/models/rf-tcp_ack.png')
+
+        plt.plot(column_to_plot[8])
+        plt.title('tcp_psh')
+        plt.savefig('/models/rf-tcp_psh.png')
+
+        plt.plot(column_to_plot[9])
+        plt.title('tcp_rst')
+        plt.savefig('/models/rf-tcp_rst.png')
+
+        plt.plot(column_to_plot[10])
+        plt.title('tcp_syn')
+        plt.savefig('/models/rf-tcp_syn.png')
+
+        plt.plot(column_to_plot[11])
+        plt.title('tcp_fin')
+        plt.savefig('/models/rf-tcp_fin.png')
+
 
         training_start = time.process_time_ns()
         self.model_instance = RandomForestClassifier()

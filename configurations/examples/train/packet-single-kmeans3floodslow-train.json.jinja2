@@ -19,27 +19,6 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 0
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "preprocessors": [
-                {
-                    "class": "CppPacketProcessor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelProcessor",
-                    "kwargs": {
                         "label_value": 1
                     }
                 }
@@ -50,48 +29,6 @@
                 "class": "PcapFileLoader",
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "preprocessors": [
-                {
-                    "class": "CppPacketProcessor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelProcessor",
-                    "kwargs": {
-                        "label_value": 1
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-train.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "preprocessors": [
-                {
-                    "class": "CppPacketProcessor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelProcessor",
-                    "kwargs": {
-                        "label_value": 1
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -132,10 +69,10 @@
     ],
     "MODEL":
     {
-        "class": "RandomForestModel",
+        "class": "Kmeans",
         "train_new_model": true,
         "skip_saving_model": true,
-        "model_name": "packet-single-rf",
+        "model_name": "packet-single-kmeans3floodslow",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -160,7 +97,7 @@
     },
     "OUTPUT": [
         {
-            "class": "AccuracyReporter",
+            "class": "ClusterReporter",
             "kwargs": {}
         }
     ],

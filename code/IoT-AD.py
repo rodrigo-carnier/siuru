@@ -99,7 +99,8 @@ def main(args_config_path, args_influx_token):
         ### Data Formatting ###
         #######################
 
-        # Initialize preprocessors specific to the data sources. Allowing each data source to specify its own preprocessor means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
+        # Initialize preprocessors specific to the data sources. Allowing each data source to specify its own preprocessor
+        # means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
         for preprocessor_specification in data_source["preprocessors"]:
             preprocessor_name = preprocessor_specification["class"]
             preprocessor_class = globals()[preprocessor_name]
@@ -148,11 +149,7 @@ def main(args_config_path, args_influx_token):
     # This moment is important for performance measurement because encoding is the first step
     # where features are actually processed. Until here, the generator data has not been consumed, so no data processing needed to take place).
 
-    for item in itertools.islice(feature_stream, 10):
-        print(item)
-
     encoding_start = time.process_time_ns()
-
     encoded_feature_generator = encoder_instance.encode(feature_stream)
 
     # Sanity check - peek at the first sample, print its fields and encoded format.
@@ -204,6 +201,8 @@ def main(args_config_path, args_influx_token):
         # each reporter.
         for reporter_instance in reporter_instances:
             reporter_instance.end_processing()
+        
+        
 
 
 

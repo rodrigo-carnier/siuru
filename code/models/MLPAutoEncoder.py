@@ -109,7 +109,7 @@ class MLPAutoEncoderModel(IAnomalyDetectionModel):
         sum_samples = 0
         for sample, encoded_sample in data:
             start_time_ref = time.process_time_ns()
-            prediction = self.model_instance.predict(encoded_sample)
+            prediction = self.model_instance.predict(encoded_sample.astype('float32'))
 
             if isinstance(sample, list):
                 # Handle the prediction for multi-sample encoding.
