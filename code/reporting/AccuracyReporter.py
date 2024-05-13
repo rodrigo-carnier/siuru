@@ -16,7 +16,7 @@ class AccuracyReporter(IReporter):
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
-        self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
+        self.predicted_labels.append(features[PredictionField.OUTPUT_CLASS])
 
     def end_processing(self):
         log = PipelineLogger.get_logger()
@@ -41,6 +41,7 @@ class AccuracyReporter(IReporter):
     def input_signature() -> List[IFeature]:
         return [
             PredictionField.MODEL_NAME,
-            PredictionField.OUTPUT_BINARY,
+            PredictionField.OUTPUT_CLASS,
             PredictionField.GROUND_TRUTH,
+            
         ]

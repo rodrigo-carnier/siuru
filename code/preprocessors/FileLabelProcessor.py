@@ -35,6 +35,7 @@ class FileLabelProcessor(IPreprocessor):
         source_file: Optional[str] = None,
         label_file: Optional[str] = None,
         label_value: Optional[Any] = None,
+        label_name: Optional[Any] = None
     ):
         if label_file:
             # TODO Allow loading files with labels if some dataset requires it.
@@ -44,6 +45,11 @@ class FileLabelProcessor(IPreprocessor):
         else:
             self.value = label_value
         log.info(f"Label for data: {self.value}")
+
+        if label_name:
+            self.label_name = label_name
+            log.info(f"Label name for data: {self.label_name}")
+
 
     def process(self, samples: SampleGenerator) -> SampleGenerator:
         sum_processing_time = 0

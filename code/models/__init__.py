@@ -1,4 +1,6 @@
 from .IAnomalyDetectionModel import IAnomalyDetectionModel
 from .MLPAutoEncoder import MLPAutoEncoderModel
 from .RandomForest import RandomForestModel
-from .Kmeans import Kmeans
+from .RandomForestMulticlass import RandomForestMulticlassModel
+from .Kmeans import KmeansModel
+from .IsolationForest import IsolationForestModel

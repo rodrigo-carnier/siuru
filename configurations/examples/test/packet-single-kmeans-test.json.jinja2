@@ -15,6 +15,12 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
                 }
             ]
         },
@@ -30,6 +36,12 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
                 }
             ]
         },
@@ -45,6 +57,12 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 2
+                    }
                 }
             ]
         },
@@ -60,6 +78,12 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 3
+                    }
                 }
             ]
         },
@@ -75,6 +99,12 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 4
+                    }
                 }
             ]
         },
@@ -90,13 +120,19 @@
                 {
                     "class": "CppPacketProcessor",
                     "kwargs": {}
+                },
+                {
+                    "class": "FileLabelProcessor",
+                    "kwargs": {
+                        "label_value": 5
+                    }
                 }
             ]
         }
     ],
     "MODEL":
     {
-        "class": "Kmeans",
+        "class": "KmeansModel",
         "train_new_model": false,
         "model_name": "packet-single-kmeans",
         "model_storage_base_path": "{{ project_root }}/models",
@@ -123,7 +159,7 @@
     },
     "OUTPUT": [
         {
-            "class": "ClusterReporter",
+            "class": "AccuracyReporter",
             "kwargs": {}
         }
     ],

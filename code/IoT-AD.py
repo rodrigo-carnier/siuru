@@ -186,16 +186,19 @@ def main(args_config_path, args_influx_token):
         # Prediction time!
         reporter_instances: List[IReporter] = []
 
+        # Initialize reporter
         for output in configuration["OUTPUT"]:
             reporter_name = output["class"]
             reporter_class = globals()[reporter_name]
             reporter_instance = reporter_class(**output["kwargs"])
             reporter_instances.append(reporter_instance)
 
+        # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
         for predicted_sample in model_instance.predict(encoded_feature_generator):
             for reporter_instance in reporter_instances:
                 reporter_instance.report(predicted_sample)
 
+        print("cheguei aqui 2")
         # Reporters may require special shutdown steps, for example disconnecting from
         # remote database or printing summaries of the processing -- call the handle for
         # each reporter.

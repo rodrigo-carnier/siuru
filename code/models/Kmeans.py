@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-class Kmeans(IAnomalyDetectionModel):
+class KmeansModel(IAnomalyDetectionModel):
     """
     Generic interface for anomaly detection model classes to implement.
     """
@@ -231,7 +231,7 @@ class Kmeans(IAnomalyDetectionModel):
         # Define the number of clusters
         # 1 - benighn
         # 2 - flood
-        n_clusters = 2
+        n_clusters = 6
 
         self.model_instance = KMeans(n_clusters=n_clusters, random_state=18, n_init=10)
 
@@ -308,31 +308,27 @@ class Kmeans(IAnomalyDetectionModel):
             log.error(f"Failed to load model from: {self.store_file}")
 
     def predict(self, data: EncodedSampleGenerator, **kwargs) -> SampleGenerator:
-        
-        # self.model_instance.fit(concatenated_data_array, concatenated_data_array)
-
         sum_processing_time = 0
         sum_samples = 0
         for sample, encoded_sample in data:
             start_time_ref = time.process_time_ns()
-            # print(encoded_sample)
             encoded_sample = np.array(encoded_sample, dtype=float)
             prediction = self.model_instance.predict(encoded_sample)
             if isinstance(sample, list):
-                for i, sample in enumerate(sample):
-                    sample[PredictionField.MODEL_NAME] = self.model_name
-                    sample[PredictionField.OUTPUT_BINARY] = prediction[i]
+                for i, s in enumerate(sample):
+                    s[PredictionField.MODEL_NAME] = self.model_name
+                    s[PredictionField.OUTPUT_CLASS] = prediction[i]
                     sum_processing_time += time.process_time_ns() - start_time_ref
                     sum_samples += 1
-                    yield sample
+                    yield s
             else:
                 sample[PredictionField.MODEL_NAME] = self.model_name
-                sample[PredictionField.OUTPUT_BINARY] = prediction[0]
+                sample[PredictionField.OUTPUT_CLASS] = prediction[0]
                 sum_processing_time += time.process_time_ns() - start_time_ref
                 sum_samples += 1
                 yield sample
 
-
+        report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
         
 
         # # Get the centroids of the clusters

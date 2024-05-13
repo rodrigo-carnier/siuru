@@ -19,8 +19,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 0,
-                        "label_name": "benign"
+                        "label_value": 0
                     }
                 }
             ]
@@ -41,8 +40,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 1,
-                        "label_name": "bruteforce"
+                        "label_value": 1
                     }
                 }
             ]
@@ -63,8 +61,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 2,
-                        "label_name": "flood"
+                        "label_value": 2
                     }
                 }
             ]
@@ -85,8 +82,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 3,
-                        "label_name": "malariados"
+                        "label_value": 3
                     }
                 }
             ]
@@ -107,8 +103,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 4,
-                        "label_name": "malformed"
+                        "label_value": 4
                     }
                 }
             ]
@@ -129,8 +124,7 @@
                 {
                     "class": "FileLabelProcessor",
                     "kwargs": {
-                        "label_value": 5,
-                        "label_name": "slowite"
+                        "label_value": 5
                     }
                 }
             ]
@@ -138,10 +132,10 @@
     ],
     "MODEL":
     {
-        "class": "KmeansModel",
+        "class": "RandomForestModel",
         "train_new_model": true,
         "skip_saving_model": false,
-        "model_name": "packet-single-kmeans",
+        "model_name": "packet-single-rf-mclass",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
