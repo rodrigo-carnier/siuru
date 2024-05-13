@@ -1,0 +1,8 @@
+{
+    "0": "benign",
+    "1": "bruteforce",
+    "2": "flood",
+    "3": "malaria",
+    "4": "malformed",
+    "5": "slowite"
+}
