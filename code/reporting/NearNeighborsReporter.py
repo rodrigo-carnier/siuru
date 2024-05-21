@@ -7,24 +7,35 @@ from common.features import IFeature, PredictionField
 from common.pipeline_logger import PipelineLogger
 from reporting.IReporter import IReporter
 
+import numpy as np
 
-class AccuracyReporter(IReporter):
+
+class NearNeighborsReporter(IReporter):
+    """
+    Can only be used when PredictionField.GROUND_TRUTH is known!
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.ground_truths = []
         self.predicted_labels = []
+        self.anomaly_scores = []
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
-        # self.predicted_labels.append(features[PredictionField.OUTPUT_CLASS])
+        self.anomaly_scores.append(features[PredictionField.ANOMALY_SCORE])
 
     def end_processing(self):
+        print("cheguei aqui 3")
         log = PipelineLogger.get_logger()
         labels = sorted(set(self.ground_truths + self.predicted_labels))
 
+        # cnf_matrix_binary = confusion_matrix(self.ground_truths_bin, self.inlier_scores_nonneg, labels=labels_bin)
         cnf_matrix = confusion_matrix(self.ground_truths, self.predicted_labels, labels=labels)
         log.info(f"\n---\nReport\n"
+                #  f"\nConfusion matrix binary:\n\n{cnf_matrix_binary}\n\n"
+                #  f"Labels: {labels_bin}\n"
                  f"\nConfusion matrix:\n\n{cnf_matrix}\n\n"
                  f"Labels: {labels}\n"
                  f"(i-th row, j-th column: samples with true label i and predicted label j)\n\n"
@@ -37,13 +48,12 @@ class AccuracyReporter(IReporter):
                  f"F1 score: "
                  f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
                  )
-
     @staticmethod
     def input_signature() -> List[IFeature]:
         return [
             PredictionField.MODEL_NAME,
-            PredictionField.OUTPUT_CLASS,
             PredictionField.OUTPUT_BINARY,
             PredictionField.GROUND_TRUTH,
+            PredictionField.ANOMALY_SCORE,
             
         ]

@@ -10,7 +10,7 @@ from reporting.IReporter import IReporter
 from sklearn.cluster import KMeans
 import numpy as np
 
-from models.IsolationForest import IsolationForestModel
+from models.batch.unsupervised.IsolationForest import IsolationForestModel
 
 class OutlierReporter(IReporter):
     def __init__(self, **kwargs):
