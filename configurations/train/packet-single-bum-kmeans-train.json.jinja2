@@ -11,16 +11,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 0,
-                        "label_name": "benign"
+                        "label_value": 0
                     }
                 }
             ]
@@ -33,16 +32,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 1,
-                        "label_name": "bruteforce"
+                        "label_value": 1
                     }
                 }
             ]
@@ -55,16 +53,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 2,
-                        "label_name": "flood"
+                        "label_value": 2
                     }
                 }
             ]
@@ -77,16 +74,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 3,
-                        "label_name": "malariados"
+                        "label_value": 3
                     }
                 }
             ]
@@ -99,16 +95,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 4,
-                        "label_name": "malformed"
+                        "label_value": 4
                     }
                 }
             ]
@@ -121,16 +116,15 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 5,
-                        "label_name": "slowite"
+                        "label_value": 5
                     }
                 }
             ]

@@ -5,12 +5,12 @@ from typing import List
 import common.global_variables as global_variables
 from common.features import IFeature, PacketFeature, SampleGenerator
 from common.functions import report_performance
-from preprocessors.IPreprocessor import IPreprocessor
+from featextractors.IFeatExtractor import IFeatExtractor
 
 from common.pipeline_logger import PipelineLogger
 
 
-class CppPacketProcessor(IPreprocessor):
+class CppPacketExtractor(IFeatExtractor):
     """
     Helper class to map C++ feature extractor output to features.
     """
@@ -51,7 +51,7 @@ class CppPacketProcessor(IPreprocessor):
             PacketFeature.TCP_DATA_SIZE,
         ]
 
-    def process(self, samples: SampleGenerator) -> SampleGenerator:
+    def extract(self, samples: SampleGenerator) -> SampleGenerator:
         sum_processing_time = 0
         valid_packet_count = 0
         invalid_packet_count = 0

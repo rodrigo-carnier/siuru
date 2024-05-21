@@ -4,13 +4,13 @@ from typing import List, Optional, Any
 from common.features import IFeature, PredictionField, PacketFeature, SampleGenerator
 from common.functions import report_performance
 from common.pipeline_logger import PipelineLogger
-from preprocessors.IPreprocessor import IPreprocessor
+from featextractors.IFeatExtractor import IFeatExtractor
 
 
 log = PipelineLogger.get_logger()
 
 
-class FileLabelProcessor(IPreprocessor):
+class FileLabelExtractor(IFeatExtractor):
     # 1 stands for anomalous and 0 for non-anomalous data.
     DEFAULT_LABELS = {
         "MQTTset/Data/PCAP/capture_flood.pcap": 1,
@@ -51,7 +51,7 @@ class FileLabelProcessor(IPreprocessor):
             log.info(f"Label name for data: {self.label_name}")
 
 
-    def process(self, samples: SampleGenerator) -> SampleGenerator:
+    def extract(self, samples: SampleGenerator) -> SampleGenerator:
         sum_processing_time = 0
         packet_count = 0
 

@@ -12,12 +12,12 @@ from common.features import (
 from common.functions import report_performance
 from common.pipeline_logger import PipelineLogger
 
-from preprocessors.IPreprocessor import IPreprocessor
+from featextractors.IFeatExtractor import IFeatExtractor
 
 
-class WindowFlowFeatureProcessor(IPreprocessor):
+class WindowFlowFeatureExtractor(IFeatExtractor):
     """
-    Stores flow statistics during a time window every time a packet is processed.
+    Stores flow statistics during a time window every time a packet is extracted.
     Yields if the last yield for the flow identifier was more than <window> ago.
     After yield, the values for the flow identifier are reset.
 
@@ -40,7 +40,7 @@ class WindowFlowFeatureProcessor(IPreprocessor):
             lambda: 0
         )
 
-    def process(self, samples: SampleGenerator) -> SampleGenerator:
+    def extract(self, samples: SampleGenerator) -> SampleGenerator:
         sum_processing_time = 0
         packet_count = 0
 

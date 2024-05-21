@@ -11,13 +11,13 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 }
             ]

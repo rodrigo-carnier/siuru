@@ -7,17 +7,17 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 0
                     }
@@ -28,17 +28,17 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }

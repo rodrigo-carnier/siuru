@@ -95,20 +95,27 @@ def main(args_config_path, args_influx_token):
         loader: IDataLoader = loader_class(**data_source["loader"]["kwargs"])
         new_feature_stream = loader.get_samples()
 
-        #######################
-        ### Data Formatting ###
-        #######################
+        ##########################
+        ### Feature Extraction ###
+        ##########################
 
-        # Initialize preprocessors specific to the data sources. Allowing each data source to specify its own preprocessor
+        # Initialize feature extractors specific to the data sources. Allowing each data source to specify its own feature extractor
         # means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
-        for preprocessor_specification in data_source["preprocessors"]:
-            preprocessor_name = preprocessor_specification["class"]
-            preprocessor_class = globals()[preprocessor_name]
-            log.info(f"Adding {preprocessor_class.__name__} to pipeline.")
-            preprocessor: IPreprocessor = preprocessor_class(
-                **preprocessor_specification["kwargs"]
+
+        ### TODO: create a different submodule for data formatting when necessary
+        ### RMC 2024-05-21: renamed module from preprocessor to featureextractor, because I will implement true data processing now
+        ### RMC 2024-05-21: the description above is concentrating an additional function in the feature extractors: data formatting of data from different sources.
+        ###                 Data formatting and feature extractionare different functions. The former serves the purpose described above. The latter selects different
+        ###                 sets of features, and in the case of flows, aggregates packet features.
+
+        for featextractor_specification in data_source["featextractors"]:
+            featextractor_name = featextractor_specification["class"]
+            featextractor_class = globals()[featextractor_name]
+            log.info(f"Adding {featextractor_class.__name__} to pipeline.")
+            featextractor: IFeatExtractor = featextractor_class(
+                **featextractor_specification["kwargs"]
             )
-            new_feature_stream = preprocessor.process(new_feature_stream)
+            new_feature_stream = featextractor.extract(new_feature_stream)
 
         feature_stream = itertools.chain(feature_stream, new_feature_stream)
 

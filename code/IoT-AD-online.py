@@ -106,15 +106,16 @@ def main(args_config_path, args_influx_token):
             #feature_stream = capture_and_process_packets(loader, feature_stream, data_source)
             feature_stream = loader.get_samples()
 
-            # Initialize preprocessors specific to the data sources. Allowing each data source to specify its own preprocessor means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
-            for preprocessor_specification in data_source["preprocessors"]:
-                preprocessor_name = preprocessor_specification["class"]
-                preprocessor_class = globals()[preprocessor_name]
-                log.info(f"Adding {preprocessor_class.__name__} to pipeline.")
-                preprocessor: IPreprocessor = preprocessor_class(
-                    **preprocessor_specification["kwargs"]
+            # Initialize feature extractors specific to the data sources. Allowing each data source to specify its own feature extractor
+            # means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
+            for featextractor_specification in data_source["featextractors"]:
+                featextractor_name = featextractor_specification["class"]
+                featextractor_class = globals()[featextractor_name]
+                log.info(f"Adding {featextractor_class.__name__} to pipeline.")
+                featextractor: IFeatExtractor = featextractor_class(
+                    **featextractor_specification["kwargs"]
                 )
-                feature_stream = preprocessor.process(feature_stream)
+                new_feature_stream = featextractor.extract(new_feature_stream)
 
             #feature_stream = itertools.chain(feature_stream, new_feature_stream)
 

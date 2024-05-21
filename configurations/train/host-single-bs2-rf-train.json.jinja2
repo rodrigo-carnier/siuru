@@ -7,21 +7,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 0
                     }
@@ -32,21 +32,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-test.pcapng",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }
@@ -57,21 +57,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }
@@ -82,21 +82,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }
@@ -107,21 +107,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }
@@ -132,21 +132,21 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
-            "preprocessors": [
+            "featextractors": [
                 {
-                    "class": "CppPacketProcessor",
+                    "class": "CppPacketExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "HostFeatureProcessor",
+                    "class": "HostFeatureExtractor",
                     "kwargs": {}
                 },
                 {
-                    "class": "FileLabelProcessor",
+                    "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
                     }

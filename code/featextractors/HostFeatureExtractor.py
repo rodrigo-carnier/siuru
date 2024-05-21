@@ -10,10 +10,10 @@ from common.features import (
 from common.functions import report_performance
 from common.pipeline_logger import PipelineLogger
 
-from preprocessors.IPreprocessor import IPreprocessor
+from featextractors.IFeatExtractor import IFeatExtractor
 
 
-class HostFeatureProcessor(IPreprocessor):
+class HostFeatureExtractor(IFeatExtractor):
     def __init__(self):
         self.overall_packet_counter = 0
 
@@ -28,7 +28,7 @@ class HostFeatureProcessor(IPreprocessor):
 
         self.sum_inter_arrival_times_from_host: Dict[str, int] = defaultdict(lambda: 0)
 
-    def process(self, samples: SampleGenerator) -> SampleGenerator:
+    def extract(self, samples: SampleGenerator) -> SampleGenerator:
         sum_processing_time = 0
         packet_count = 0
 

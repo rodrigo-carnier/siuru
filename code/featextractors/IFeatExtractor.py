@@ -4,16 +4,16 @@ from typing import List
 from common.features import IFeature, SampleGenerator
 
 
-class IPreprocessor(ABC):
+class IFeatExtractor(ABC):
     """
-    Generic interface for data preprocessor classes to implement.
+    Generic interface for feature extractor classes to implement.
     """
 
     @staticmethod
     @abstractmethod
     def input_signature() -> List[IFeature]:
         """
-        Returns a list of features that the preprocessor requires in each input sample
+        Returns a list of features that the extractor requires in each input sample
         for internal processing.
         """
         pass
@@ -22,16 +22,16 @@ class IPreprocessor(ABC):
     @abstractmethod
     def output_signature() -> List[IFeature]:
         """
-        Returns a list of features that the preprocessor promises to deliver
+        Returns a list of features that the extractor promises to deliver
         (in addition to the existing features) in each sample when the generator
         is called.
         """
         pass
 
     @abstractmethod
-    def process(self, samples: SampleGenerator) -> SampleGenerator:
+    def extract(self, samples: SampleGenerator) -> SampleGenerator:
         """
-        Applies preprocessing steps to samples in the input generator, then yields the
+        Applies feature extracting steps to samples in the input generator, then yields the
         modified samples. The number of yielded samples can be different from the input
         sample count!
         """
