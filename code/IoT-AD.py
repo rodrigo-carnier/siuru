@@ -119,6 +119,14 @@ def main(args_config_path, args_influx_token):
 
         feature_stream = itertools.chain(feature_stream, new_feature_stream)
 
+        ###############################
+        ### Preprocessing / Scaling ###
+        ###############################
+
+        
+
+
+
     # If no model is specified, count the number of samples in the loaded data.
     # Just a convenience function, might be removed later.
     if len(configuration["MODEL"]) == 0:

@@ -1,3 +1,17 @@
+        def caseanomtype1():
+            return "Anomaly (1): Bruteforce"
+        def caseanomtype2():
+            return "Anomaly (1): MalariaDOS"
+        def caseanomtype3():
+            return "Anomalies (2): Brute + MalDOS"
+        def caseanomtype4():
+            return "Anomalies (5): all MQTTset"
+        casesan = {
+            1: caseanomtype1,
+            2: caseanomtype2,
+            3: caseanomtype3,
+            4: caseanomtype4
+        }
 {
     "DESCRIPTION": [
         ""
@@ -49,7 +63,7 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -70,7 +84,7 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -91,7 +105,7 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -112,7 +126,7 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },

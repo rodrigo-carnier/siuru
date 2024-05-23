@@ -318,13 +318,13 @@ class KMeansModel(IAnomalyDetectionModel):
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name
-                    s[PredictionField.OUTPUT_CLASS] = prediction[i]
+                    s[PredictionField.OUTPUT_BINARY] = prediction[i]
                     sum_processing_time += time.process_time_ns() - start_time_ref
                     sum_samples += 1
                     yield s
             else:
                 sample[PredictionField.MODEL_NAME] = self.model_name
-                sample[PredictionField.OUTPUT_CLASS] = prediction[0]
+                sample[PredictionField.OUTPUT_BINARY] = prediction[0]
                 sum_processing_time += time.process_time_ns() - start_time_ref
                 sum_samples += 1
                 yield sample

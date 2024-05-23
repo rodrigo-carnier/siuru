@@ -61,71 +61,7 @@
                 {
                     "class": "FileLabelExtractor",
                     "kwargs": {
-                        "label_value": 2
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-train.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "featextractors": [
-                {
-                    "class": "CppPacketExtractor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelExtractor",
-                    "kwargs": {
-                        "label_value": 3
-                    }
-                }
-            ]
-        },
-
-                {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "featextractors": [
-                {
-                    "class": "CppPacketExtractor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelExtractor",
-                    "kwargs": {
-                        "label_value": 4
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-train.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "featextractors": [
-                {
-                    "class": "CppPacketExtractor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelExtractor",
-                    "kwargs": {
-                        "label_value": 5
+                        "label_value": 1
                     }
                 }
             ]
@@ -133,10 +69,10 @@
     ],
     "MODEL":
     {
-        "class": "RandomForestMulticlassModel",
+        "class": "KMeansModel",
         "train_new_model": true,
         "skip_saving_model": false,
-        "model_name": "packet-single-bsm-rf",
+        "model_name": "packet-single-bu2-kmeans3brutemalaria",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {

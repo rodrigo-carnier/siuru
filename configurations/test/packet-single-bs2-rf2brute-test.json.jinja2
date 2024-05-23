@@ -48,9 +48,9 @@
     ],
     "MODEL":
     {
-        "class": "NearNeighborsModel",
+        "class": "RandomForestModel",
         "train_new_model": false,
-        "model_name": "packet-single-ssm-knn2brute",
+        "model_name": "packet-single-bs2-rf2brute",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -75,7 +75,7 @@
     },
     "OUTPUT": [
         {
-            "class": "NearNeighborsReporter",
+            "class": "AccuracyReporter",
             "kwargs": {}
         }
     ],

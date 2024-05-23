@@ -7,7 +7,7 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -28,7 +28,28 @@
             "loader": {
                 "class": "PcapFileLoader",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileLoader",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },
@@ -48,9 +69,10 @@
     ],
     "MODEL":
     {
-        "class": "IsolationForestModel",
-        "train_new_model": false,
-        "model_name": "packet-single-bu2-if2flood",
+        "class": "RandomForestModel",
+        "train_new_model": true,
+        "skip_saving_model": false,
+        "model_name": "packet-single-bs2-rf3brutemalaria",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -75,14 +97,14 @@
     },
     "OUTPUT": [
         {
-            "class": "OutlierReporter",
+            "class": "AccuracyReporter",
             "kwargs": {}
         }
     ],
     "LOG": [
         {
             "level": "DEBUG",
-            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-train-log.txt"
         }
     ],
     "VERSION": "{{ git_tag }}"

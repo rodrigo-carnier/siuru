@@ -22,6 +22,8 @@ log = PipelineLogger.get_logger()
 import matplotlib.pyplot as plt
 import pickle
 
+from enum import Enum
+
 
 class NearNeighborsModel(IAnomalyDetectionModel):
     """
@@ -115,12 +117,14 @@ class NearNeighborsModel(IAnomalyDetectionModel):
     def predict(self, data: EncodedSampleGenerator, **kwargs) -> SampleGenerator:
         sum_processing_time = 0
         sum_samples = 0
+        label_samp = []
         for sample, encoded_sample in data:
             start_time_ref = time.process_time_ns()
             # encoded_sample = np.array(encoded_sample, dtype=float)
             prediction = self.model_instance.predict(encoded_sample)
             scores = self.model_instance.score(encoded_sample, prediction)
-            self.model_instance = self.model_instance.partial_fit(encoded_sample, prediction)
+            # label_samp = np.full((1, 1), sample[PredictionField.GROUND_TRUTH])
+            # self.model_instance = self.model_instance.partial_fit(encoded_sample, label_samp)
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name
