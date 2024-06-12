@@ -123,8 +123,8 @@ class NearNeighborsModel(IAnomalyDetectionModel):
             # encoded_sample = np.array(encoded_sample, dtype=float)
             prediction = self.model_instance.predict(encoded_sample)
             scores = self.model_instance.score(encoded_sample, prediction)
-            # label_samp = np.full((1, 1), sample[PredictionField.GROUND_TRUTH])
-            # self.model_instance = self.model_instance.partial_fit(encoded_sample, label_samp)
+            label_samp = np.full((1, 1), sample[PredictionField.GROUND_TRUTH])
+            self.model_instance = self.model_instance.partial_fit(encoded_sample, label_samp)
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name

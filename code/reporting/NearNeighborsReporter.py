@@ -45,12 +45,14 @@ class NearNeighborsReporter(IReporter):
 
 
         caseclass = 1;
-        caseanom = 2;
+        caseanom = 1;
         # labelsName = ["Benign", "Malicious"]
-        labelsName = ["Benign", "Bruteforce"]
+        # labelsName = ["Benign", "Bruteforce"]
         # labelsName = ["Benign", "MalariaDOS"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Flood", "SlowITE", "Malformed"]
+        labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE", "Flood"]
         
         def caseclasstype1():
             return "Binary class"
@@ -103,8 +105,8 @@ class NearNeighborsReporter(IReporter):
         plt.xlabel('Predicted Labels')
         plt.ylabel('True Labels')
         # plt.title(f'Confusion Matrix:',switch_caseclass(caseclass), switch_caseanom(caseanom))
-        title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
-        plt.title(title)
+        # title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
+        # plt.title(title)
         # Save the plot to a file
         plt.savefig(image_path)
         plt.close()  # Close the figure to free up memory
@@ -123,7 +125,6 @@ class NearNeighborsReporter(IReporter):
                  f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
                  )
 
-    @staticmethod
     def input_signature() -> List[IFeature]:
         return [
             PredictionField.MODEL_NAME,
