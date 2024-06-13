@@ -43,6 +43,7 @@ class NearNeighborsReporter(IReporter):
         # cnf_matrix[1, 1], cnf_matrix[1, 0] = cnf_matrix[1, 0], cnf_matrix[1, 1]
 
 
+        ##### LABELS FOR FIGURES
 
         caseclass = 1;
         caseanom = 3;
@@ -88,21 +89,43 @@ class NearNeighborsReporter(IReporter):
             return casesan.get(case, lambda: "Invalid case")()
 
 
+
+        ##### OUTPUT FILES
+
         # Generate the file name with current date and time
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         output_dir = 'configurations/zplots'
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        text_path = os.path.join(output_dir, f'confusion_matrix_{current_time}.pkl')
-        image_path = os.path.join(output_dir, f'confusion_matrix_{current_time}.png')
+        imagepkl_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.pkl')
+        image_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.png')
+        imagetime_path = os.path.join(output_dir, f'{current_time}_timeseriesanomaly.png')
+        text_path = os.path.join(output_dir, f'{current_time}_features_scores_labels.txt')
         
         # Create text file with results of confusion matrix
-        with open(text_path, 'wb') as file:
+        with open(imagepkl_path, 'wb') as file:
             pickle.dump(cnf_matrix, file)
 
+        with open(text_path, "w") as file:
+            
+            # Print headers for readability (optional)
+            file.write("Label\tScore\n")
+            file.write("-" * 20 + "\n")
+            
+            # Iterate over the range of the maximum length
+            for i in range(len(self.predicted_labels)):
+                # Get elements or default to empty if the vector is shorter
+                elem1 = self.predicted_labels[i]
+                elem2 = self.anomaly_scores[i]
+                
+                # Write elements side by side with a tab separator
+                file.write(f"{elem1}\t{elem2}\n")
 
-        # Plot confusion matrix
+
+
+        ##### FIGURE OF CONFUSION MATRIX
+
         plt.figure(figsize=(8, 6))
         sns.set(font_scale=1.4)
         sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName)
@@ -114,6 +137,48 @@ class NearNeighborsReporter(IReporter):
         # Save the plot to a file
         plt.savefig(image_path)
         plt.close()  # Close the figure to free up memory
+
+
+
+        ##### PRINTING A TIME-SERIES ANOMALY DETECTION
+
+        # Example data
+        timestamps = np.arange(0, len(self.predicted_labels))  # Example: time points from 0 to 99
+        anomaly_scores = np.array(self.anomaly_scores)
+
+        # Plotting the time-series scores
+        plt.figure(figsize=(10, 6))  # Create a figure with a specific size
+
+        plt.plot(timestamps, anomaly_scores, label='Anomaly Scores', color='b', linestyle='-', marker='.', markersize=0.5)
+
+        # Adding labels and title
+        plt.xlabel('Sample')
+        plt.ylabel('Anomaly Score')
+        plt.title('Time-Series Anomaly Scores')
+
+        # Adding a grid for better readability
+        plt.grid(True)
+
+        # Optional: Highlighting thresholds or specific anomalies
+        # Example: Highlight scores above a threshold (e.g., 0.8)
+        threshold = 0.230
+        # high_anomalies = anomaly_scores > threshold
+        # plt.plot(timestamps[high_anomalies], anomaly_scores[high_anomalies], 'ro', label='High Anomalies')
+        plt.axhline(y=threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+
+
+        # Add a legend
+        plt.legend()
+
+        # Save the plot to a file (optional)
+        plt.savefig(imagetime_path)
+
+        # Display the plot
+        plt.show()
+
+
+
+        ##### PRINTING CONFUSION MATRIX RESULTS IN STDOUT
 
         log.info(f"\n---\nReport\n"
                  f"\nConfusion matrix:\n\n{cnf_matrix}\n\n"
