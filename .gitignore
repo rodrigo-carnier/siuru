@@ -6,3 +6,13 @@
 /influxdb/
 /logs/
 /models/
+**/__pycache__/
+
+/configurations/zplots/
+/siuru-venv/
+
+command-examples
+useful_code_info
+/code/cpp-extract-features/tests/
+/code/testcodes/
+/code/Kafka/kafka-pcap/tests/

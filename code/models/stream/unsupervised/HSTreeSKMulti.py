@@ -24,7 +24,7 @@ import pickle
 from enum import Enum
 
 
-class HSTreeMultiModel(IAnomalyDetectionModel):
+class HSTreeSKMultiModel(IAnomalyDetectionModel):
     """
     Generic interface for anomaly detection model classes to implement.
     """

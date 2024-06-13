@@ -45,11 +45,12 @@ class NearNeighborsReporter(IReporter):
 
 
         caseclass = 1;
-        caseanom = 1;
+        caseanom = 3;
         # labelsName = ["Benign", "Malicious"]
         # labelsName = ["Benign", "Bruteforce"]
         # labelsName = ["Benign", "MalariaDOS"]
-        labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
+        labelsName = ["Benign", "Flood"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE", "Flood"]
@@ -70,14 +71,17 @@ class NearNeighborsReporter(IReporter):
         def caseanomtype2():
             return "Anomaly (1): MalariaDOS"
         def caseanomtype3():
-            return "Anomalies (2): Brute + MalDOS"
+            return "Anomaly (1): Flood"
         def caseanomtype4():
+            return "Anomalies (2): Brute + MalDOS"
+        def caseanomtype5():
             return "Anomalies (5): all MQTTset"
         casesan = {
             1: caseanomtype1,
             2: caseanomtype2,
             3: caseanomtype3,
-            4: caseanomtype4
+            4: caseanomtype4,
+            5: caseanomtype5
         }
         
         def switch_caseanom(case):

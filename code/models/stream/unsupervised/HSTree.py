@@ -48,15 +48,14 @@ class HSTreeModel(IAnomalyDetectionModel):
 
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
         # [[1004 3517]         [   0  955]]
-
-
-
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=3, height=5, window_size=2000, seed=42)
         # [[1619 2902]  [   0  955]]
-        self.anomaly_threshold = None
         # self.model_instance = anomaly.HalfSpaceTrees(seed=42)
+
         # self.model_instance = compose.Pipeline(preprocessing.MinMaxScaler(),anomaly.HalfSpaceTrees(n_trees=5, height=3, window_size=3, seed=42))
         # self.auc = metrics.ROCAUC()
+
+        self.anomaly_threshold = None
         self.trainingScores = None
         super().__init__(
             model_name,
@@ -105,17 +104,16 @@ class HSTreeModel(IAnomalyDetectionModel):
         
         training_start = time.process_time_ns()
 
+        # Necessary to scale samples, but River only works with dictionaries, so transforming
         feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
             'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
             'feature11', 'feature12']
-
         encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
-        
         scaler = preprocessing.MinMaxScaler()
         for x in encoded_features:
             scaler.learn_one(x)
             x = scaler.transform_one(x)  # Scale the features
-            self.model_instance.learn_one(x)
+            self.model_instance.learn_one(x) # After scaling, learn
 
         training_time = time.process_time_ns() - training_start
 
@@ -138,23 +136,24 @@ class HSTreeModel(IAnomalyDetectionModel):
         sum_samples = 0
         
         self.anomaly_threshold = 0.873
+
         for sample, encoded_sample in data:
             start_time_ref = time.process_time_ns()
 
+            # Necessary to scale samples, but River only works with dictionaries, so transforming
             feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
                 'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
                 'feature11', 'feature12']
-
             encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
             scaler = preprocessing.MinMaxScaler()
             for x in encoded_sample:
-                score = self.model_instance.score_one(x)
-                if score > self.anomaly_threshold:
+                scaler.learn_one(x)
+                x = scaler.transform_one(x)  # Scale the features
+                score = self.model_instance.score_one(x) # Prediction gives score only
+                if score > self.anomaly_threshold: # Have to decide label using threshold
                     prediction = 1
                 else:
                     prediction = 0
-                scaler.learn_one(x)
-                x = scaler.transform_one(x)  # Scale the features
                 self.model_instance.learn_one(x)
             print(score, prediction)
             if isinstance(sample, list):
