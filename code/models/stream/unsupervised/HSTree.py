@@ -44,7 +44,8 @@ class HSTreeModel(IAnomalyDetectionModel):
         **kwargs,
     ):
         
-        self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
+        self.model_instance = anomaly.HalfSpaceTrees(n_trees=5, height=7, window_size=2000, seed=42)
+        #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
 
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
         # [[1004 3517]         [   0  955]]
@@ -112,10 +113,10 @@ class HSTreeModel(IAnomalyDetectionModel):
             'feature11', 'feature12']
         encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
         for x in encoded_features:
-            print(x)
+            #print(x)
             self.scaler.learn_one(x)
             x = self.scaler.transform_one(x)  # Scale the features
-            print(x)
+            #print(x)
             self.model_instance.learn_one(x) # After scaling, learn
 
         training_time = time.process_time_ns() - training_start
@@ -138,7 +139,7 @@ class HSTreeModel(IAnomalyDetectionModel):
         sum_processing_time = 0
         sum_samples = 0
         
-        self.anomaly_threshold = 0.230
+        self.anomaly_threshold = 0.2
         # self.anomaly_threshold = 0.873
 
         i=0
@@ -163,6 +164,8 @@ class HSTreeModel(IAnomalyDetectionModel):
                 else:
                     prediction = 0
                 self.model_instance.learn_one(x)
+            if i<25:
+                print(score, prediction)
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name

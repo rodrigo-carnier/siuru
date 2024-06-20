@@ -5,28 +5,7 @@
     "DATA_SOURCES": [
         {
             "loader": {
-                "class": "PcapFileLoader",
-                "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
-                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
-                }
-            },
-            "featextractors": [
-                {
-                    "class": "CppPacketExtractor",
-                    "kwargs": {}
-                },
-                {
-                    "class": "FileLabelExtractor",
-                    "kwargs": {
-                        "label_value": 1
-                    }
-                }
-            ]
-        },
-        {
-            "loader": {
-                "class": "PcapFileLoader",
+                "class": "PcapFileConverter",
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
@@ -47,9 +26,30 @@
         },
         {
             "loader": {
-                "class": "PcapFileLoader",
+                "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-train.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
                 }
             },

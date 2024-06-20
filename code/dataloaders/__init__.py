@@ -3,6 +3,7 @@
 
 from .IDataLoader import IDataLoader
 from .PcapFileLoader import PcapFileLoader
+from .PcapFileConverter import PcapFileConverter
 from .PacketSniffer import PacketSniffer
 from .PacketSnifferPcap import PacketSnifferPcap
 from .PacketSnifferLoop import PacketSnifferLoop

@@ -14,6 +14,7 @@ import seaborn as sns
 from datetime import datetime
 import pickle
 
+
 class NearNeighborsReporter(IReporter):
     """
     Can only be used when PredictionField.GROUND_TRUTH is known!
@@ -126,11 +127,16 @@ class NearNeighborsReporter(IReporter):
 
         ##### FIGURE OF CONFUSION MATRIX
 
-        plt.figure(figsize=(8, 6))
-        sns.set(font_scale=1.4)
+        
+
+        plt.figure(figsize=(8, 5))
+        sns.set(font_scale=2.5)
         sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName)
         plt.xlabel('Predicted Labels')
         plt.ylabel('True Labels')
+        plt.tight_layout()
+        plt.subplots_adjust(top=1)  # Set to 1 to remove the top margin
+        plt.subplots_adjust(bottom=0.20)  # Adjust bottom margin to make room for x-axis label
         # plt.title(f'Confusion Matrix:',switch_caseclass(caseclass), switch_caseanom(caseanom))
         # title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
         # plt.title(title)

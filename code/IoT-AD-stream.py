@@ -11,7 +11,7 @@ import common.global_variables as global_variables
 from common.functions import report_performance, time_now, project_root, git_tag
 from dataloaders import *
 from models import *
-from preprocessors import *
+from featextractors import *
 from encoders import *
 from reporting import *
 
@@ -77,7 +77,14 @@ def main(args_config_path, args_influx_token):
     # Re-logging the path because file-based logger was not initialized before.
     log.debug(f"Running configuration: {config_path}")
 
-    
+    ##################
+    ### DATA INPUT ###
+    ##################
+
+
+    # List to store all feature streams (generators) from different datasets
+    new_feature_streams = []
+
     # Feature stream is a Python generator object: https://wiki.python.org/moin/Generators
     # It allows to process the samples memory-efficiently, avoiding the need to store all data in memory at the same time.
     feature_stream = itertools.chain([])
@@ -99,8 +106,9 @@ def main(args_config_path, args_influx_token):
         ### Feature Extraction ###
         ##########################
 
-        # Initialize feature extractors specific to the data sources. Allowing each data source to specify its own feature extractor
-        # means data from different storage formats and with different processing needs can be combined to train models or perform prediction.
+        # Initialize feature extractors specific to the data sources. Allowing each data source
+        # to specify its own feature extractor means data from different storage formats and
+        # with different processing needs can be combined to train models or perform prediction.
 
         ### TODO: create a different submodule for data formatting when necessary
         ### RMC 2024-05-21: renamed module from preprocessor to featureextractor, because I will implement true data processing now
@@ -117,8 +125,19 @@ def main(args_config_path, args_influx_token):
             )
             new_feature_stream = featextractor.extract(new_feature_stream)
 
-        feature_stream = itertools.chain(feature_stream, new_feature_stream)
+        new_feature_streams.append(new_feature_stream)
 
+    # Define the number of samples to extract from each subdataset
+    #n_samples_per_subdataset = [4000]  # Example: specify the number of samples from each subdataset
+    n_samples_per_subdataset = [4000, 100, 20]  # Example: specify the number of samples from each subdataset
+    #n_samples_per_subdataset = configuration.get("N_SAMPLES_PER_SUBDATASET", [])
+
+    print("cheguei aqui 0")
+    # Randomize and sample packets
+    feature_stream, sample_order = loader.randomize_and_sample_packets(new_feature_streams, n_samples_per_subdataset)
+
+    print("cheguei aqui 1")
+    
     # If no model is specified, count the number of samples in the loaded data.
     # Just a convenience function, might be removed later.
     if len(configuration["MODEL"]) == 0:
@@ -275,3 +294,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.config_path, args.influx_token)
+

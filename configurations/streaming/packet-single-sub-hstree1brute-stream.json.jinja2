@@ -5,7 +5,7 @@
     "DATA_SOURCES": [
         {
             "loader": {
-                "class": "PcapFileLoader",
+                "class": "PcapFileConverter",
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
@@ -26,7 +26,7 @@
         },
         {
             "loader": {
-                "class": "PcapFileLoader",
+                "class": "PcapFileConverter",
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-test.pcapng",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
