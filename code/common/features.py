@@ -83,6 +83,7 @@ class PredictionField(str, enum.Enum):
     GROUND_TRUTH = "ground_truth"
     OUTPUT_CLASS = "output_class"
     ANOMALY_SCORE = "anomaly_score"
+    ANOMALY_THRESHOLD = "anomaly_threshold"
 
 
 # IFeature is one component of a data point throughout the pipeline,

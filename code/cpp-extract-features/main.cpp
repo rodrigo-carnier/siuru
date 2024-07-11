@@ -145,11 +145,11 @@ static void packet_to_features(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice*
 
     // Increment the captured packet count
     gCapturedPacketCount++;
-    std::cout << gCapturedPacketCount << std::endl;
+    std::cerr << gCapturedPacketCount << std::endl;
     // Check if the maximum packet count is reached
     if (gCapturedPacketCount >= gMaxPacketCount) {
         waitForQuota = false;
-        std::cout << "Maximum packet count reached. Stopping capture." << std::endl;
+        std::cerr << "Maximum packet count reached. Stopping capture." << std::endl;
         dev->stopCapture();
     }
 }

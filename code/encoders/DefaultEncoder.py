@@ -56,7 +56,6 @@ class DefaultEncoder(IDataEncoder):
                 [sample[f] for f in self.feature_filter],
                 dtype=np.float32,
             ).reshape(1, -1)
-
             sum_processing_time += time.process_time_ns() - start_time_ref
             packet_count += 1
 

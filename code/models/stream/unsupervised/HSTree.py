@@ -44,7 +44,7 @@ class HSTreeModel(IAnomalyDetectionModel):
         **kwargs,
     ):
         
-        self.model_instance = anomaly.HalfSpaceTrees(n_trees=5, height=7, window_size=2000, seed=42)
+        self.model_instance = anomaly.HalfSpaceTrees(n_trees=5, height=7, window_size=500, seed=42)
         #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
 
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
@@ -59,6 +59,9 @@ class HSTreeModel(IAnomalyDetectionModel):
         self.scaler = preprocessing.StandardScaler()
         self.anomaly_threshold = None
         self.trainingScores = None
+        self.score_window_size = 50  # Number of scores to store
+        self.threshold_coef = 1.5
+        self.last_scores = []  
         
         super().__init__(
             model_name,
@@ -154,11 +157,25 @@ class HSTreeModel(IAnomalyDetectionModel):
             encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
             
             for x in encoded_sample:
+                # print("Before scaling")
                 # print(x)
                 self.scaler.learn_one(x)
                 x = self.scaler.transform_one(x)  # Scale the features
+                # print("After scaling")
                 # print(x)
                 score = self.model_instance.score_one(x) # Prediction gives score only
+
+                # Update last_scores and maintain only the last `score_window_size` scores
+                self.last_scores.append(score)
+                if len(self.last_scores) > self.score_window_size:
+                    self.last_scores.pop(0)  # Remove the oldest score to keep the size consistent
+
+                # Calculate the anomaly threshold as 20% of the mean of the last scores
+                if self.last_scores:
+                    self.anomaly_threshold = self.threshold_coef * (sum(self.last_scores) / len(self.last_scores))
+                    self.anomaly_threshold = 0.2
+                
+
                 if score > self.anomaly_threshold: # Have to decide label using threshold
                     prediction = 1
                 else:
@@ -171,6 +188,7 @@ class HSTreeModel(IAnomalyDetectionModel):
                     s[PredictionField.MODEL_NAME] = self.model_name
                     s[PredictionField.OUTPUT_BINARY] = prediction[i]
                     s[PredictionField.ANOMALY_SCORE] = score[i]
+                    s[PredictionField.ANOMALY_THRESHOLD] = self.anomaly_threshold[i]
                     sum_processing_time += time.process_time_ns() - start_time_ref
                     sum_samples += 1
                     yield s
@@ -178,6 +196,7 @@ class HSTreeModel(IAnomalyDetectionModel):
                 sample[PredictionField.MODEL_NAME] = self.model_name
                 sample[PredictionField.OUTPUT_BINARY] = prediction
                 sample[PredictionField.ANOMALY_SCORE] = score
+                sample[PredictionField.ANOMALY_THRESHOLD] = self.anomaly_threshold
                 sum_processing_time += time.process_time_ns() - start_time_ref
                 sum_samples += 1
                 yield sample

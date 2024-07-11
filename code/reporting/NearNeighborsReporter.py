@@ -25,11 +25,13 @@ class NearNeighborsReporter(IReporter):
         self.ground_truths = []
         self.predicted_labels = []
         self.anomaly_scores = []
+        self.anomaly_threshold = []
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
         self.anomaly_scores.append(features[PredictionField.ANOMALY_SCORE])
+        self.anomaly_threshold.append(features[PredictionField.ANOMALY_THRESHOLD])
 
     def end_processing(self):
         print("cheguei aqui 3")
@@ -167,10 +169,12 @@ class NearNeighborsReporter(IReporter):
 
         # Optional: Highlighting thresholds or specific anomalies
         # Example: Highlight scores above a threshold (e.g., 0.8)
-        threshold = 0.230
+        # threshold = 0.230
         # high_anomalies = anomaly_scores > threshold
         # plt.plot(timestamps[high_anomalies], anomaly_scores[high_anomalies], 'ro', label='High Anomalies')
-        plt.axhline(y=threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+        # plt.plot(y=anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+        anomaly_threshold = np.array(self.anomaly_threshold)
+        plt.plot(timestamps, anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
 
 
         # Add a legend

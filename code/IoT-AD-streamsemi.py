@@ -6,9 +6,6 @@ import time
 from typing import List
 
 from jinja2 import Template
-from collections import deque
-from collections import Counter
-
 
 import common.global_variables as global_variables
 from common.functions import report_performance, time_now, project_root, git_tag
@@ -86,12 +83,7 @@ def main(args_config_path, args_influx_token):
 
 
     # List to store all feature streams (generators) from different datasets
-    stream_concept_total = []
-    new_feature_stream = []
-    feature_streams = []
-    packets_per_subset = []
-    concept_id_per_subset = []
-    shuffling_labels = []
+    new_feature_streams = []
 
     # Feature stream is a Python generator object: https://wiki.python.org/moin/Generators
     # It allows to process the samples memory-efficiently, avoiding the need to store all data in memory at the same time.
@@ -99,26 +91,16 @@ def main(args_config_path, args_influx_token):
 
     # Initialize data loaders classes corresponding to each component under DATA_SOURCES in configuration.
     for data_source in configuration["DATA_SOURCES"]:
-
+        
         ##################################
         ### Data loading (get samples) ###
         ##################################
+
         loader_name = data_source["loader"]["class"]
         loader_class = globals()[loader_name]
         log.info(f"Adding {loader_class.__name__} to pipeline.")
         loader: IDataLoader = loader_class(**data_source["loader"]["kwargs"])
-
-        # Reading only part of the dataset in case the config file indicates so
-        use_full_dataset = data_source["loader"]["kwargs"].get("use_full_dataset", True)
-        if use_full_dataset:
-            new_feature_stream = loader.get_samples(use_full_dataset=use_full_dataset)
-        else:
-            n_packets = data_source["loader"]["kwargs"].get("n_packets")
-            packets_per_subset.append(n_packets)
-            concept_id = data_source["loader"]["kwargs"].get("stream_concept_id")
-            concept_id_per_subset.append(concept_id)
-            shuffling_labels.append(len(shuffling_labels) + 1)
-            new_feature_stream = loader.get_samples(use_full_dataset=use_full_dataset, n_packets=n_packets)
+        new_feature_stream = loader.get_samples()
 
         ##########################
         ### Feature Extraction ###
@@ -143,50 +125,19 @@ def main(args_config_path, args_influx_token):
             )
             new_feature_stream = featextractor.extract(new_feature_stream)
 
-        #feature_streams = itertools.chain(feature_streams, new_feature_stream)
-        feature_streams.append(new_feature_stream)
-        print(type(new_feature_stream))
-        print(type(feature_streams))
-    
-    
-    # Count occurrences of each concept ID
-    concept_counts = Counter(concept_id_per_subset)
-    # Extract the counts in the order of appearance in concept_id_per_subset
-    n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
+        new_feature_streams.append(new_feature_stream)
 
+    # Define the number of samples to extract from each subdataset
+    #n_samples_per_subdataset = [4000]  # Example: specify the number of samples from each subdataset
+    n_samples_per_subdataset = [4000, 100, 20]  # Example: specify the number of samples from each subdataset
+    #n_samples_per_subdataset = configuration.get("N_SAMPLES_PER_SUBDATASET", [])
+
+    print("cheguei aqui 0")
     # Randomize and sample packets
-    print("cheguei aqui 0a")
+    feature_stream, sample_order = loader.randomize_and_sample_packets(new_feature_streams, n_samples_per_subdataset)
 
-    print(n_subsets_per_concept, packets_per_subset, shuffling_labels)
-    feature_stream, sample_order = loader.randomize_packets_per_concept(feature_streams, n_subsets_per_concept, packets_per_subset, shuffling_labels)
-    print(type(feature_streams))
-    print(type(feature_stream))
-    
-    print("cheguei aqui 0d")
-    # print(feature_stream)
-    # print((stream_concept, len(concept_sample_order)))
-    #stream_concept_total.extend(stream_concept)
-    
-    #print("cheguei aqui 0e")
-
-    # Create two copies of the iterator using tee
-    iter1 = itertools.tee(feature_stream)
-    count = 0
-    for _ in iter1:
-        count += 1
-
-    print(count)  # Output: 10
-
-    # print("cheguei aqui 0f")
-
-    #sample_order = sample_order + concept_sample_order
-    # print("cheguei aqui 0g")
-    #print(sample_order)
-    #print(len(sample_order))
-
-    #feature_stream = itertools.chain(feature_stream, stream_concept_total)
-    # print("cheguei aqui 1")
-    #print(len(sample_order))
+    print(sample_order)
+    print("cheguei aqui 1")
     
     # If no model is specified, count the number of samples in the loaded data.
     # Just a convenience function, might be removed later.
@@ -284,6 +235,7 @@ def main(args_config_path, args_influx_token):
         
         
 
+    print(model_instance.summary)
 
     ########################
     ### EVAL PERFORMANCE ###
