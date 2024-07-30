@@ -46,15 +46,17 @@ class NearNeighborsReporter(IReporter):
         # cnf_matrix[1, 1], cnf_matrix[1, 0] = cnf_matrix[1, 0], cnf_matrix[1, 1]
 
 
-        ##### LABELS FOR FIGURES
+        ###########################################################################
+        
+        # LABELS FOR FIGURES
 
         caseclass = 1;
         caseanom = 3;
+        labelsName = ["Benign", "Malicious"]
         # labelsName = ["Benign", "Malicious"]
         # labelsName = ["Benign", "Bruteforce"]
         # labelsName = ["Benign", "MalariaDOS"]
-        labelsName = ["Benign", "Flood"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
+                # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE"]
         # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE", "Flood"]
@@ -92,8 +94,9 @@ class NearNeighborsReporter(IReporter):
             return casesan.get(case, lambda: "Invalid case")()
 
 
-
-        ##### OUTPUT FILES
+        ###########################################################################
+        
+        # OUTPUT FILES
 
         # Generate the file name with current date and time
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -126,29 +129,82 @@ class NearNeighborsReporter(IReporter):
                 file.write(f"{elem1}\t{elem2}\n")
 
 
-
-        ##### FIGURE OF CONFUSION MATRIX
+        ### PERFORMANCE METRICS
+        TN, FP, FN, TP = cnf_matrix.ravel()
+        accuracy = (TP+TN)/(TP+TN+FP+FN)
+        precision = (TP)/(TP+FP)
+        recall = (TP)/(TP+FN)
+        f1 = 2*(precision*recall)/(precision+recall)
+        # accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
+        # precision = precision_score(self.ground_truths, self.predicted_labels, average='macro')
+        # recall = recall_score(self.ground_truths, self.predicted_labels, average='macro')
+        # f1 = f1_score(self.ground_truths, self.predicted_labels, average='macro')
 
         
+        ###########################################################################
+        # FIGURE OF CONFUSION MATRIX WITH PERFORMANCE METRICS
+        # plt.figure(figsize=(8, 8))  # Increase the height to make room for the text
+        # # plt.figure(figsize=(8, 5))
+        # sns.set(font_scale=2.5)
+        # sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName)
+        # plt.xlabel('Predicted Labels')
+        # plt.ylabel('True Labels')
+        # plt.tight_layout()
+        # plt.subplots_adjust(top=0.93)  # Set to 1 to remove the top margin
+        # plt.subplots_adjust(bottom=0.25)  # Adjust bottom margin to make room for x-axis label
+        
+        #         # plt.title(f'Confusion Matrix:',switch_caseclass(caseclass), switch_caseanom(caseanom))
+        # # title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
+        # # plt.title(title)
+        # # Save the plot to a file
+        
+        # metrics_text = (
+        #     f"Accuracy: {accuracy:.2f}\n"
+        #     f"Precision: {precision:.2f}\n"
+        #     f"Recall: {recall:.2f}\n"
+        #     f"F1 Score: {f1:.2f}"
+        # )
+        # plt.figtext(0.5, 0.01, metrics_text, ha='center', va='top', fontsize=18, wrap=True)
+        # # plt.text(0.5, -0.2, metrics_text, ha='center', va='top', transform=plt.gca().transAxes, fontsize=18)
+        
+        # plt.savefig(image_path)
+        # plt.close()  # Close the figure to free up memory
 
-        plt.figure(figsize=(8, 5))
+
+        ###########################################################################
+
+        ##### CREATE A FIGURE WITH GRIDSPEC
+        fig = plt.figure(constrained_layout=True, figsize=(8, 8))
+        gs = fig.add_gridspec(2, 1, height_ratios=[4, 1])  # 2 rows, 1 column
+
+        ##### CONFUSION MATRIX PLOT
+        ax1 = fig.add_subplot(gs[0])
         sns.set(font_scale=2.5)
-        sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName)
-        plt.xlabel('Predicted Labels')
-        plt.ylabel('True Labels')
-        plt.tight_layout()
-        plt.subplots_adjust(top=1)  # Set to 1 to remove the top margin
-        plt.subplots_adjust(bottom=0.20)  # Adjust bottom margin to make room for x-axis label
-        # plt.title(f'Confusion Matrix:',switch_caseclass(caseclass), switch_caseanom(caseanom))
-        # title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
-        # plt.title(title)
+        sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName, ax=ax1)
+        ax1.set_xlabel('Predicted Labels', fontsize=20)
+        ax1.set_ylabel('True Labels', fontsize=20)
+        ax1.tick_params(axis='x', labelsize=20)
+        ax1.tick_params(axis='y', labelsize=20)
+
+        ##### PERFORMANCE METRICS TEXT
+        ax2 = fig.add_subplot(gs[1])
+        metrics_text = (
+        f"Accuracy: {accuracy * 100:.2f}%\n"
+        f"Precision: {precision * 100:.2f}%\n"
+        f"Recall:      {recall * 100:.2f}%\n"
+        f"F1 Score:  {f1 * 100:.2f}%"
+        )
+        ax2.text(0, 0, metrics_text, ha='left', va='center', fontsize=24)
+        ax2.axis('off')  # Hide the axis
+
         # Save the plot to a file
         plt.savefig(image_path)
         plt.close()  # Close the figure to free up memory
 
 
-
-        ##### PRINTING A TIME-SERIES ANOMALY DETECTION
+        ###########################################################################
+        
+        # PRINTING A TIME-SERIES ANOMALY DETECTION
 
         # Example data
         timestamps = np.arange(0, len(self.predicted_labels))  # Example: time points from 0 to 99
@@ -197,12 +253,36 @@ class NearNeighborsReporter(IReporter):
                  f"Accuracy:"
                  f"{accuracy_score(self.ground_truths, self.predicted_labels)}\n"
                  f"Precision:"
-                 f"{precision_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
+                 f"{precision_score(self.ground_truths, self.predicted_labels)}\n"
                  f"Recall:"
-                 f"{recall_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
+                 f"{recall_score(self.ground_truths, self.predicted_labels)}\n"
                  f"F1 score: "
-                 f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
+                 f"{f1_score(self.ground_truths, self.predicted_labels)}\n---"
                  )
+
+        
+        # # True labels
+        # self.ground_truths = np.array([0] * 2699 + [1] * 2700)  # Combining TN, FP for 0s and FN, TP for 1s
+
+        # # Predicted labels
+        # self.predicted_labels = np.array([0] * 2465 + [1] * 234 + [0] * 859 + [1] * 1841)  # Corresponding predicted labels
+
+        # ### PERFORMANCE METRICS
+        # accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
+        # precision = precision_score(self.ground_truths, self.predicted_labels, average='macro')
+        # recall = recall_score(self.ground_truths, self.predicted_labels, average='macro')
+        # f1 = f1_score(self.ground_truths, self.predicted_labels, average='macro')
+
+        # log.info(f"Accuracy:"
+        #          f"{accuracy_score(self.ground_truths, self.predicted_labels)}\n"
+        #          f"Precision:"
+        #          f"{precision_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
+        #          f"Recall:"
+        #          f"{recall_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
+        #          f"F1 score: "
+        #          f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
+        #          )
+           
 
     def input_signature() -> List[IFeature]:
         return [
