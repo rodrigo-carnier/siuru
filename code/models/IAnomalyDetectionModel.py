@@ -13,7 +13,7 @@ class IAnomalyDetectionModel(ABC):
     def __init__(
         self,
         model_name: str,
-        train_new_model: bool = True,
+        new_model: bool = True,
         skip_saving_model: bool = False,
         model_storage_base_path: Optional[str] = None,
         model_relative_path: Optional[str] = None,
@@ -25,11 +25,11 @@ class IAnomalyDetectionModel(ABC):
 
         :param model_name: Name of the model. Will be used as the name of the storage
             file (must exist in prediction mode) and for tagging the prediction.
-        :param train_new_model: If true, data will be passed to the train() function
+        :param new_model: If true, data will be passed to the train() function
             and a new model is created. Otherwise, the model must exist under the
             provided path and data will be passed to the predict() function.
         :param skip_saving_model: Train a model, but do not store it. Can be used to
-            test the training pipeline. train_new_model must be set to true for this
+            test the training pipeline. new_model must be set to true for this
             parameter to take effect.
         :param model_storage_base_path: The base path in the project where models
             will be stored or searched for.
@@ -42,7 +42,7 @@ class IAnomalyDetectionModel(ABC):
             to the model implementation.
         """
         self.model_name = model_name
-        self.train_new_model = train_new_model
+        self.new_model = new_model
         self.skip_saving_model = skip_saving_model
 
         assert model_storage_base_path
@@ -52,7 +52,7 @@ class IAnomalyDetectionModel(ABC):
             os.path.join(model_storage_base_path, model_relative_path)
         )
 
-        if self.train_new_model and not self.skip_saving_model:
+        if self.new_model:
             if os.path.exists(self.store_file):
                 raise RuntimeError(f"Model file already exists: {self.store_file}")
             elif not os.path.exists(os.path.dirname(self.store_file)):
@@ -61,10 +61,10 @@ class IAnomalyDetectionModel(ABC):
             if full_config_json:
                 self.save_configuration(full_config_json)
 
-        if not self.train_new_model and not os.path.exists(self.store_file):
+        if not self.new_model and not os.path.exists(self.store_file):
             # The specified model is not available.
             raise RuntimeError(f"No file found under the path: {self.store_file}")
-        elif not self.train_new_model:
+        elif not self.new_model:
             self.load()
 
     def save_configuration(self, config: str):

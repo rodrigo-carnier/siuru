@@ -68,7 +68,7 @@ class CppPacketExtractor(IFeatExtractor):
             s[PacketFeature.IP_SOURCE_PORT] = parts[2]
             s[PacketFeature.IP_DESTINATION_PORT] = parts[3]
             s[PacketFeature.PROTOCOL] = parts[4]
-            # s[PacketFeature.TIMESTAMP] = int(parts[5])
+            s[PacketFeature.TIMESTAMP] = int(parts[5])
             s[PacketFeature.IP_HEADER_SIZE] = int(parts[6])
             s[PacketFeature.IP_DATA_SIZE] = int(parts[7])
             s[PacketFeature.TCP_CWR_FLAG] = int(parts[8])

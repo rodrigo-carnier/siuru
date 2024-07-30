@@ -151,8 +151,10 @@
     "MODEL":
     {
         "class": "HSTreeModel",
-        "train_new_model": false,
-        "model_name": "packet-single-sub-hstree-unsup",
+        "dataflow": "stream",
+        "ml_task": "test",
+        "new_model": true,
+        "model_name": "packet-single-sub-hstree-unsup-bal",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {

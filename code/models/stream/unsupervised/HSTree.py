@@ -37,14 +37,15 @@ class HSTreeModel(IAnomalyDetectionModel):
     def __init__(
         self,
         model_name,
-        train_new_model=True,
+        new_model=True,
         skip_saving_model=False,
         model_storage_base_path=None,
         model_relative_path=None,
+        save_interval=500,  # Interval to save model periodically
         **kwargs,
     ):
         
-        self.model_instance = anomaly.HalfSpaceTrees(n_trees=5, height=7, window_size=500, seed=42)
+        self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=25, seed=42)
         #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
 
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
@@ -59,13 +60,15 @@ class HSTreeModel(IAnomalyDetectionModel):
         self.scaler = preprocessing.StandardScaler()
         self.anomaly_threshold = None
         self.trainingScores = None
-        self.score_window_size = 50  # Number of scores to store
-        self.threshold_coef = 1.5
-        self.last_scores = []  
+        self.score_window_size = 25  # Number of scores to store
+        self.threshold_coef = 1.55
+        self.last_scores = []
+        self.save_interval = save_interval
+        self.sample_count = 0
         
         super().__init__(
             model_name,
-            train_new_model=train_new_model,
+            new_model=new_model,
             skip_saving_model=skip_saving_model,
             model_storage_base_path=model_storage_base_path,
             model_relative_path=model_relative_path,
@@ -122,6 +125,10 @@ class HSTreeModel(IAnomalyDetectionModel):
             #print(x)
             self.model_instance.learn_one(x) # After scaling, learn
 
+            # self.sample_count += 1
+            # if self.sample_count % self.save_interval == 0:
+            #     self._save_model()
+
         training_time = time.process_time_ns() - training_start
 
         report_performance(type(self).__name__ + "-preparation", log, len(labels),
@@ -130,8 +137,11 @@ class HSTreeModel(IAnomalyDetectionModel):
                            training_time)
 
         if not self.skip_saving_model:
-            dump(self.model_instance, self.store_file)
+            self._save_model()
 
+    def _save_model(self):
+        dump(self.model_instance, self.store_file)
+        log.info(f"Model saved to {self.store_file}")
 
     def load(self, **kwargs):
         self.model_instance = load(self.store_file)
@@ -173,7 +183,7 @@ class HSTreeModel(IAnomalyDetectionModel):
                 # Calculate the anomaly threshold as 20% of the mean of the last scores
                 if self.last_scores:
                     self.anomaly_threshold = self.threshold_coef * (sum(self.last_scores) / len(self.last_scores))
-                    self.anomaly_threshold = 0.2
+                    # self.anomaly_threshold = 0.2
                 
 
                 if score > self.anomaly_threshold: # Have to decide label using threshold
@@ -181,6 +191,11 @@ class HSTreeModel(IAnomalyDetectionModel):
                 else:
                     prediction = 0
                 self.model_instance.learn_one(x)
+
+                self.sample_count += 1
+                if self.sample_count % self.save_interval == 0:
+                    self._save_model()
+
             if i<25:
                 print(score, prediction)
             if isinstance(sample, list):
