@@ -84,7 +84,6 @@ def main(args_config_path, args_influx_token):
     ### DATA INPUT ###
     ##################
 
-
     # List to store all feature streams (generators) from different datasets
     stream_concept_total = []
     new_feature_stream = []
@@ -143,10 +142,10 @@ def main(args_config_path, args_influx_token):
             )
             new_feature_stream = featextractor.extract(new_feature_stream)
 
-        #feature_streams = itertools.chain(feature_streams, new_feature_stream)
         feature_streams.append(new_feature_stream)
-        print(type(new_feature_stream))
-        print(type(feature_streams))
+        #feature_streams = itertools.chain(feature_streams, new_feature_stream)
+        # print(type(new_feature_stream))
+        # print(type(feature_streams))
     
     
     # Count occurrences of each concept ID
@@ -155,39 +154,21 @@ def main(args_config_path, args_influx_token):
     n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
 
     # Randomize and sample packets
-    print("cheguei aqui 0a")
-
-    print(n_subsets_per_concept, packets_per_subset, shuffling_labels)
+    log.info(f"Randomizing order of packets from different datasets into a single random stream.")
+    log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {packets_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
     feature_stream, sample_order = loader.randomize_packets_per_concept(feature_streams, n_subsets_per_concept, packets_per_subset, shuffling_labels)
-    print(type(feature_streams))
-    print(type(feature_stream))
+    # print(type(feature_streams))
+    # print(type(feature_stream))
     
-    print("cheguei aqui 0d")
-    # print(feature_stream)
-    # print((stream_concept, len(concept_sample_order)))
-    #stream_concept_total.extend(stream_concept)
-    
-    #print("cheguei aqui 0e")
-
     # Create two copies of the iterator using tee
     iter1 = itertools.tee(feature_stream)
     count = 0
     for _ in iter1:
         count += 1
-
-    print(count)  # Output: 10
-
-    # print("cheguei aqui 0f")
-
-    #sample_order = sample_order + concept_sample_order
-    # print("cheguei aqui 0g")
-    #print(sample_order)
-    #print(len(sample_order))
+    # print(count)  # Output: 10
 
     #feature_stream = itertools.chain(feature_stream, stream_concept_total)
-    # print("cheguei aqui 1")
-    #print(len(sample_order))
-    
+   
     # If no model is specified, count the number of samples in the loaded data.
     # Just a convenience function, might be removed later.
     if len(configuration["MODEL"]) == 0:
@@ -230,6 +211,10 @@ def main(args_config_path, args_influx_token):
 
     # Sanity check - peek at the first sample, print its fields and encoded format.
     peeker, encoded_feature_generator = itertools.tee(encoded_feature_generator)
+    peeker1, encoded_feature_generator1 = itertools.tee(encoded_feature_generator)
+    first_sample1 = next(peeker1)
+    first_sample_data1, _ = first_sample1
+    print(first_sample_data1)
     first_sample = next(peeker)
     if not first_sample:
         log.warning("No data in encoded feature stream!")
@@ -240,26 +225,66 @@ def main(args_config_path, args_influx_token):
             # Extract first sample from list as encoded by MultiSampleEncoder. Otherwise, the first_sample_data object is already a dict containing the features of a single sample.
             first_sample_data = first_sample_data[0]
         for k, v in first_sample_data.items():
+            if k == "cpp_feature_string":
+                v = v.rstrip()  # Remove the newline character from the cpp_feature_string item
             log.debug(f" | {k}: {v}")
 
 
-    ################
-    ### TRAINING ###
-    ################
+    #############################
+    ### TRAIN MODEL OFFLINE ###
+    #############################
 
-    if model_specification["train_new_model"]:
-        # Train the model.
-        model_instance.train(
-            encoded_feature_generator, path_to_store=model_instance.store_file
-        )
+    if model_specification["ml_task"] == "train":
+    #if model_specification["train"]:
+    #if you want to perform training and testing in the same run, do the following:
+    # 1) delete model_specification["ml_task"] == "train": (and equivalent line from training code block)
+    # 2) uncomment line below
+    # 3) delete flag "ml_task" from config file
+    # 4) create 2 new boolean flags: "train" and "test"
 
-    else:
+        if model_specification["new_model"]:
+    
+            if model_specification["dataflow"] == "batch":
+            # perform training for the first time
+                # Train the model via batch of data
+                model_instance.train(
+                    encoded_feature_generator, path_to_store=model_instance.store_file
+                )
+            
+            if model_specification["dataflow"] == "stream":
+                model_instance.train(
+                    encoded_feature_generator, path_to_store=model_instance.store_file
+                )
+            
+        else:
 
-    ######################
-    ### STREAM TESTING ###
-    ######################
+            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
+            # model_instance.load(model_instance.store_file)
+            
+            # Also, if models exists and flag "train" is true, the model will be incrementally improved on top of previous training
+        
+            if model_specification["dataflow"] == "batch":
+                log.error("Batch ML does not incrementally improve already existing models!")
+                exit(1)
+        
+            if model_specification["dataflow"] == "stream":
+                model_instance.train(
+                    encoded_feature_generator, path_to_store=model_instance.store_file
+                )
 
-        # Prediction time!
+    ####################################################
+    ### TEST MODEL OFFLINE / TRAIN-TEST MODEL ONLINE ###
+    ####################################################
+    
+    if model_specification["ml_task"] == "test":
+    #if model_specification["test"]:
+    #if you want to perform training and testing in the same run, do the following:
+    # 1) delete model_specification["ml_task"] == "test": (and equivalent line from training code block)
+    # 2) uncomment line below
+    # 3) delete flag "ml_task" from config file
+    # 4) create 2 new boolean flags: "train" and "test"
+    
+
         reporter_instances: List[IReporter] = []
 
         # Initialize reporter
@@ -269,10 +294,38 @@ def main(args_config_path, args_influx_token):
             reporter_instance = reporter_class(**output["kwargs"])
             reporter_instances.append(reporter_instance)
 
-        # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
-        for predicted_sample in model_instance.predict(encoded_feature_generator):
-            for reporter_instance in reporter_instances:
-                reporter_instance.report(predicted_sample)
+        if model_specification["new_model"]:
+    
+            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+            for predicted_sample in model_instance.predict(encoded_feature_generator):
+                for reporter_instance in reporter_instances:
+                    reporter_instance.report(predicted_sample)
+
+           # TODO: substitute lines below the if above by the commented lines below, to differentiate between batch and stream testing in case you need it.
+            # There will be one of the blocks below for each testing.
+            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
+            #     test()
+            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
+            #     streamtest()
+
+ 
+        else:
+
+            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
+            # model_instance.load(model_instance.store_file)
+            
+            # TODO: substitute lines below the else above by the commented lines below, to differentiate between batch and stream testing in case you need it.
+            # There will be one of the blocks below for each testing.
+            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
+            #     test()
+            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
+            #     streamtest()
+ 
+
+            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+            for predicted_sample in model_instance.predict(encoded_feature_generator):
+                for reporter_instance in reporter_instances:
+                    reporter_instance.report(predicted_sample)
 
         
         print("cheguei aqui 2")
@@ -281,8 +334,7 @@ def main(args_config_path, args_influx_token):
         # each reporter.
         for reporter_instance in reporter_instances:
             reporter_instance.end_processing()
-        
-        
+            
 
 
     ########################
