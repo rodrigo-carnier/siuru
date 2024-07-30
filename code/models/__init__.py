@@ -6,5 +6,6 @@ from .batch.unsupervised.KMeans import KMeansModel
 from .batch.unsupervised.IsolationForest import IsolationForestModel
 from .stream.supervised.NearNeighbors import NearNeighborsModel
 from .stream.unsupervised.HSTree import HSTreeModel
+from .stream.unsupervised.LocalOutlier import LocalOutlierModel
 # from .stream.unsupervised.HSTreeSKMulti import HSTreeSKMultiModel
 # from .stream.unsupervised.HoeffTree import HoeffTreeModel
