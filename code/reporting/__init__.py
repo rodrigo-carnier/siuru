@@ -5,3 +5,4 @@ from .DistanceReporter import DistanceReporter
 from .ClusterReporter import ClusterReporter
 from .OutlierReporter import OutlierReporter
 from .NearNeighborsReporter import NearNeighborsReporter
+from .StreamReporter import StreamReporter
