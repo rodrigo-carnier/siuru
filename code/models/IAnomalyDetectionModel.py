@@ -52,7 +52,7 @@ class IAnomalyDetectionModel(ABC):
             os.path.join(model_storage_base_path, model_relative_path)
         )
 
-        if self.new_model:
+        if self.new_model and not skip_saving_model:
             if os.path.exists(self.store_file):
                 raise RuntimeError(f"Model file already exists: {self.store_file}")
             elif not os.path.exists(os.path.dirname(self.store_file)):

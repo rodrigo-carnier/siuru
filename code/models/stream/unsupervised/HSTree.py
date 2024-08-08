@@ -57,11 +57,16 @@ class HSTreeModel(IAnomalyDetectionModel):
         # self.model_instance = compose.Pipeline(preprocessing.MinMaxScaler(),anomaly.HalfSpaceTrees(n_trees=5, height=3, window_size=3, seed=42))
         # self.auc = metrics.ROCAUC()
 
-        self.scaler = preprocessing.StandardScaler()
+        self.scaler = preprocessing.MinMaxScaler()
+        # self.scaler = preprocessing.StandardScaler()
+        # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
+        # self.scaler = preprocessing.RobustScaler()
+
+        
         self.anomaly_threshold = None
         self.trainingScores = None
         self.score_window_size = 25  # Number of scores to store
-        self.threshold_coef = 1.55
+        self.threshold_coef = 1.1
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
@@ -193,7 +198,7 @@ class HSTreeModel(IAnomalyDetectionModel):
                 self.model_instance.learn_one(x)
 
                 self.sample_count += 1
-                if self.sample_count % self.save_interval == 0:
+                if self.sample_count % self.save_interval == 0 and not self.skip_saving_model:
                     self._save_model()
 
             if i<25:

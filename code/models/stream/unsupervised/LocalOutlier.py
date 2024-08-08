@@ -37,18 +37,20 @@ class LocalOutlierModel(IAnomalyDetectionModel):
     def __init__(
         self,
         model_name,
-        train_new_model=True,
+        new_model=True,
         skip_saving_model=False,
         model_storage_base_path=None,
         model_relative_path=None,
-        save_interval=500,  # Interval to save model periodically
+        save_interval=3000,  # Interval to save model periodically
         **kwargs,
     ):
         
-        self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=1)
-        # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=5)
+        # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=1)
+        self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=5)
         # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=10)
         # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=20)
+        # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=50)
+        # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=100)
         # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=1, distance_func=minkowski_distance)
         # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=5, distance_func=minkowski_distance)
         # self.model_instance = anomaly.LocalOutlierFactor(n_neighbors=10, distance_func=minkowski_distance)
@@ -65,14 +67,16 @@ class LocalOutlierModel(IAnomalyDetectionModel):
         self.score_window_size = 25  # Number of scores to store
         self.threshold_coef = 1.0
 
-        # Scaler. HSTree requires StandardScaler.
-        # TODO: Check other methods' best scalers.
+        # Scaling values of features
+        # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.StandardScaler()
+        # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
+        # self.scaler = preprocessing.RobustScaler()
 
         
         super().__init__(
             model_name,
-            train_new_model=train_new_model,
+            new_model=new_model,
             skip_saving_model=skip_saving_model,
             model_storage_base_path=model_storage_base_path,
             model_relative_path=model_relative_path,
@@ -133,7 +137,7 @@ class LocalOutlierModel(IAnomalyDetectionModel):
             # if self.sample_count % self.save_interval == 0:
             #     self._save_model()
 
-        training_time = time.process_time_ns() - training_start
+        trself.model_instance,aining_time = time.process_time_ns() - training_start
 
         report_performance(type(self).__name__ + "-preparation", log, len(labels),
                            data_prep_time)
@@ -171,12 +175,10 @@ class LocalOutlierModel(IAnomalyDetectionModel):
             encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
             
             for x in encoded_sample:
-                # print("Before scaling")
-                # print(x)
+                # print(f"Before scaling: {x}")
                 # self.scaler.learn_one(x)
                 # x = self.scaler.transform_one(x)  # Scale the features
-                # print("After scaling")
-                # print(x)
+                # print(f"After scaling: {x}")
                 score = self.model_instance.score_one(x) # Prediction gives score only
 
                 # Update last_scores and maintain only the last `score_window_size` scores
@@ -197,11 +199,13 @@ class LocalOutlierModel(IAnomalyDetectionModel):
                 self.model_instance.learn_one(x)
 
                 self.sample_count += 1
-                if self.sample_count % self.save_interval == 0:
+                if self.sample_count % self.save_interval == 0 and not self.skip_saving_model:
                     self._save_model()
 
-            if i<25:
+            if i<100:
                 print(score, prediction)
+            if i%500==0:
+                print(i)
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name

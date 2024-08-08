@@ -144,22 +144,24 @@ def main(args_config_path, args_influx_token):
 
         feature_streams.append(new_feature_stream)
         #feature_streams = itertools.chain(feature_streams, new_feature_stream)
-        # print(type(new_feature_stream))
-        # print(type(feature_streams))
     
-    
-    # Count occurrences of each concept ID
-    concept_counts = Counter(concept_id_per_subset)
-    # Extract the counts in the order of appearance in concept_id_per_subset
-    n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
+    if configuration["MODEL"]["randomize_stream"]:
+        # Count occurrences of each concept ID
+        concept_counts = Counter(concept_id_per_subset)
+        # Extract the counts in the order of appearance in concept_id_per_subset
+        n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
 
-    # Randomize and sample packets
-    log.info(f"Randomizing order of packets from different datasets into a single random stream.")
-    log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {packets_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-    feature_stream, sample_order = loader.randomize_packets_per_concept(feature_streams, n_subsets_per_concept, packets_per_subset, shuffling_labels)
-    # print(type(feature_streams))
-    # print(type(feature_stream))
+        # Randomize and sample packets
+        log.info(f"Randomizing order of packets from different datasets into a single random stream.")
+        log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {packets_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
+        feature_stream, sample_order = loader.randomize_packets_per_concept(feature_streams, n_subsets_per_concept, packets_per_subset, shuffling_labels)
+    else:
+        def chain_generators(streams):
+            for stream in streams:
+                yield from stream
     
+        feature_stream = chain_generators(feature_streams)
+
     # Create two copies of the iterator using tee
     iter1 = itertools.tee(feature_stream)
     count = 0
@@ -328,18 +330,23 @@ def main(args_config_path, args_influx_token):
                     reporter_instance.report(predicted_sample)
 
         
-        print("cheguei aqui 2")
         # Reporters may require special shutdown steps, for example disconnecting from
         # remote database or printing summaries of the processing -- call the handle for
         # each reporter.
         for reporter_instance in reporter_instances:
             reporter_instance.end_processing()
+
+        if not model_specification["skip_saving_model"]:
+            model_instance._save_model()
             
 
 
     ########################
     ### EVAL PERFORMANCE ###
     ########################
+
+    # Function to convert nanoseconds to hours, minutes, seconds, and milliseconds
+
 
     pipeline_stopping_time = time.process_time_ns()
     full_pipeline_time = pipeline_stopping_time - pipeline_execution_start

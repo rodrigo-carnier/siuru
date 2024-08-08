@@ -22,6 +22,11 @@ class PipelineLogger:
             )
             handler.setFormatter(formatter)
             PipelineLogger._log.addHandler(handler)
+            
+            # Suppress matplotlib debug messages
+            logging.getLogger('matplotlib').setLevel(logging.WARNING)
+            logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+            
         return PipelineLogger._log
 
     @staticmethod

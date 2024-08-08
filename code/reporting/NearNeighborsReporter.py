@@ -34,8 +34,9 @@ class NearNeighborsReporter(IReporter):
         self.anomaly_threshold.append(features[PredictionField.ANOMALY_THRESHOLD])
 
     def end_processing(self):
-        print("cheguei aqui 3")
+
         log = PipelineLogger.get_logger()
+        
         labels = sorted(set(self.ground_truths + self.predicted_labels))
 
         # Calculate confusion matrix
