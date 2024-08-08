@@ -171,11 +171,11 @@
         "class": "RandomForestModel",
         "train_new_model": true,
         "skip_saving_model": false,
-        "model_name": "window-multi-bs2-rf",
+        "model_name": "window-single-bs2-rf",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
-            "class": "MultiSampleEncoder",
+            "class": "DefaultEncoder",
             "kwargs": {
                 "feature_filter": [
                     "window_flow_pkt_count",

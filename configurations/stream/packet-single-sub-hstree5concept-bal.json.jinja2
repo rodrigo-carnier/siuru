@@ -146,6 +146,102 @@
                     }
                 }
             ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 4,
+                    "use_full_dataset": false,
+                    "n_packets": 900
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malformed/malformed-train.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 4,
+                    "use_full_dataset": false,
+                    "n_packets": 900
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 5,
+                    "use_full_dataset": false,
+                    "n_packets": 900
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 5,
+                    "use_full_dataset": false,
+                    "n_packets": 900
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
         }
     ],
     "MODEL":
@@ -153,8 +249,10 @@
         "class": "HSTreeModel",
         "dataflow": "stream",
         "ml_task": "test",
-        "new_model": false,
-        "model_name": "packet-single-sub-hstree-unsup-bal-batch",
+        "randomize_stream": true,
+        "new_model": true,
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-hstree-unsup5-bal",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -179,7 +277,7 @@
     },
     "OUTPUT": [
         {
-            "class": "NearNeighborsReporter",
+            "class": "StreamReporter",
             "kwargs": {}
         }
     ],

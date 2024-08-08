@@ -1,0 +1,99 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+    "DATA_SOURCES": [
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 58
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/flood/flood-train.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 58
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "MODEL":
+    {
+        "class": "HSTreeModel",
+        "dataflow": "stream",
+        "ml_task": "test",
+        "randomize_stream": true,
+        "new_model": true,
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-hstree-unsup1-flood-bal",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "encoder":
+        {
+            "class": "DefaultEncoder",
+            "kwargs": {
+                "feature_filter": [
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin"
+                ]
+            }
+        }
+    },
+    "OUTPUT": [
+        {
+            "class": "StreamReporter",
+            "kwargs": {}
+        }
+    ],
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}

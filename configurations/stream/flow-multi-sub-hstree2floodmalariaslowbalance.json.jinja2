@@ -11,13 +11,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 4000
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -35,13 +41,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 200
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -59,13 +71,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
-                    "n_packets": 4000
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -83,13 +101,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
-                    "n_packets": 300
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -107,13 +131,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 3,
                     "use_full_dataset": false,
-                    "n_packets": 4000
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -131,13 +161,19 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 3,
                     "use_full_dataset": false,
-                    "n_packets": 500
+                    "n_packets": 900
                 }
             },
             "featextractors": [
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -153,33 +189,29 @@
         "class": "HSTreeModel",
         "dataflow": "stream",
         "ml_task": "test",
+        "randomize_stream": false,
         "new_model": true,
-        "model_name": "packet-single-sub-hstree-unsup-imb",
+        "skip_saving_model": false,
+        "model_name": "flow-multi-sub-hstree-unsup",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
-            "class": "DefaultEncoder",
+            "class": "MultiSampleEncoder",
             "kwargs": {
                 "feature_filter": [
-                    "ip_header_size",
-                    "ip_data_size",
-                    "tcp_header_size",
-                    "tcp_size",
-                    "tcp_cwr",
-                    "tcp_ece",
-                    "tcp_urg",
-                    "tcp_ack",
-                    "tcp_psh",
-                    "tcp_rst",
-                    "tcp_syn",
-                    "tcp_fin"
-                ]
+                    "window_flow_pkt_count",
+                    "window_flow_sum_pkt_size",
+                    "window_flow_avg_pkt_size",
+                    "window_flow_inter_arrival_avg"
+                ],
+                "max_time_window_ms": 100,
+                "max_array_size": 1000
             }
         }
     },
     "OUTPUT": [
         {
-            "class": "NearNeighborsReporter",
+            "class": "StreamReporter",
             "kwargs": {}
         }
     ],
