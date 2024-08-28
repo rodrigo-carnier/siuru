@@ -9,7 +9,7 @@
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-                    "stream_concept_id": 2,
+                    "stream_concept_id": 1,
                     "use_full_dataset": false,
                     "n_packets": 900
                 }
@@ -31,9 +31,9 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-test.pcapng",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-                    "stream_concept_id": 2,
+                    "stream_concept_id": 1,
                     "use_full_dataset": false,
                     "n_packets": 900
                 }
@@ -57,7 +57,7 @@
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-                    "stream_concept_id": 3,
+                    "stream_concept_id": 2,
                     "use_full_dataset": false,
                     "n_packets": 900
                 }
@@ -81,7 +81,7 @@
                 "kwargs": {
                     "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-                    "stream_concept_id": 3,
+                    "stream_concept_id": 2,
                     "use_full_dataset": false,
                     "n_packets": 900
                 }
@@ -108,7 +108,7 @@
         "randomize_stream": true,
         "new_model": true,
         "skip_saving_model": true,
-        "model_name": "packet-single-sub-hstree-unsup3-bal",
+        "model_name": "packet-single-sub-hstree-unsup2-bal",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {

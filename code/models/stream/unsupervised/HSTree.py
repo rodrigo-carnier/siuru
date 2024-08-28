@@ -47,18 +47,17 @@ class HSTreeModel(IAnomalyDetectionModel):
         
         self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=25, seed=42)
         #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
-
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
-        # [[1004 3517]         [   0  955]]
         # self.model_instance = anomaly.HalfSpaceTrees(n_trees=3, height=5, window_size=2000, seed=42)
-        # [[1619 2902]  [   0  955]]
         # self.model_instance = anomaly.HalfSpaceTrees(seed=42)
 
         # self.model_instance = compose.Pipeline(preprocessing.MinMaxScaler(),anomaly.HalfSpaceTrees(n_trees=5, height=3, window_size=3, seed=42))
         # self.auc = metrics.ROCAUC()
 
-        self.scaler = preprocessing.MinMaxScaler()
-        # self.scaler = preprocessing.StandardScaler()
+
+        ### RESULTS OF F2F MEETING 25-07-2024 -> I used the StandardScaler, not the MinMaxScaler to achieve that performance
+        self.scaler = preprocessing.StandardScaler()
+        # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
 
@@ -66,7 +65,7 @@ class HSTreeModel(IAnomalyDetectionModel):
         self.anomaly_threshold = None
         self.trainingScores = None
         self.score_window_size = 25  # Number of scores to store
-        self.threshold_coef = 1.1
+        self.threshold_coef = 1.0
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0

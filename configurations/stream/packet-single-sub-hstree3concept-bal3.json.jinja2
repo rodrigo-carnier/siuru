@@ -31,7 +31,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
@@ -55,7 +55,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
@@ -79,7 +79,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-test.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
@@ -103,7 +103,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 3,
                     "use_full_dataset": false,
@@ -127,7 +127,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/slowite/slowite-test.pcap",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 3,
                     "use_full_dataset": false,
@@ -156,7 +156,7 @@
         "randomize_stream": true,
         "new_model": true,
         "skip_saving_model": true,
-        "model_name": "packet-single-sub-hstree-unsup3-bal",
+        "model_name": "packet-single-sub-hstree-unsup3-bal3",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
