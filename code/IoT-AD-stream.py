@@ -130,7 +130,7 @@ def main(args_config_path, args_influx_token):
         ### TODO: create a different submodule for data formatting when necessary
         ### RMC 2024-05-21: renamed module from preprocessor to featureextractor, because I will implement true data processing now
         ### RMC 2024-05-21: the description above is concentrating an additional function in the feature extractors: data formatting of data from different sources.
-        ###                 Data formatting and feature extractionare different functions. The former serves the purpose described above. The latter selects different
+        ###                 Data formatting and feature extraction are different functions. The former serves the purpose described above. The latter selects different
         ###                 sets of features, and in the case of flows, aggregates packet features.
 
         for featextractor_specification in data_source["featextractors"]:
@@ -144,23 +144,61 @@ def main(args_config_path, args_influx_token):
 
         feature_streams.append(new_feature_stream)
         #feature_streams = itertools.chain(feature_streams, new_feature_stream)
-    
-    if configuration["MODEL"]["randomize_stream"]:
-        # Count occurrences of each concept ID
-        concept_counts = Counter(concept_id_per_subset)
-        # Extract the counts in the order of appearance in concept_id_per_subset
-        n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
 
+
+    ###########################################
+    ### PREPARING SIMULATION OF STREAM DATA ###
+    ###########################################
+
+    # Count occurrences of each concept ID
+    concept_counts = Counter(concept_id_per_subset)
+    # Extract the counts in the order of appearance in concept_id_per_subset
+    n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
+    max_flows_per_pick = 3
+
+    samples_per_subset = []
+
+    copy_streams = []
+    for generator in feature_streams:
+        iter1, generator  = itertools.tee(generator)
+        copy_streams.append(generator)
+        count = 0    
+        count = sum(1 for _ in iter1)
+        samples_per_subset.append(count)
+    
+    feature_streams = copy_streams
+
+    
+
+
+
+    # Important step of streaming-data simulation, where samples are either randomized for packet-based feature extraction or interleaved for flow-based feature extraction.
+    # Default loop is False for both in case neither was defined in the configuration file
+
+    print(f"### TESTING LABELS {shuffling_labels} and samples per subset {samples_per_subset}")
+
+    if configuration["MODEL"].get("interleave_samples", False):
         # Randomize and sample packets
-        log.info(f"Randomizing order of packets from different datasets into a single random stream.")
-        log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {packets_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-        feature_stream, sample_order = loader.randomize_packets_per_concept(feature_streams, n_subsets_per_concept, packets_per_subset, shuffling_labels)
+        log.info(f"Interleaving order of samples (probably flow) from different datasets into a single random stream.")
+        log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
+        feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick)
+
+
+    elif configuration["MODEL"].get("randomize_samples", False):
+        # Randomize and sample packets
+        log.info(f"Randomizing order of samples (probably packets) from different datasets into a single random stream.")
+        log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
+        feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels)
+    
     else:
         def chain_generators(streams):
             for stream in streams:
                 yield from stream
     
         feature_stream = chain_generators(feature_streams)
+
+    print(samples_per_subset, sample_order)
+
 
     # Create two copies of the iterator using tee
     iter1 = itertools.tee(feature_stream)
@@ -169,17 +207,6 @@ def main(args_config_path, args_influx_token):
         count += 1
     # print(count)  # Output: 10
 
-    #feature_stream = itertools.chain(feature_stream, stream_concept_total)
-   
-    # If no model is specified, count the number of samples in the loaded data.
-    # Just a convenience function, might be removed later.
-    if len(configuration["MODEL"]) == 0:
-        log.info("No model specified - counting input data points:")
-        count = 0
-        for _ in feature_stream:
-            count += 1
-        log.info(f"{count} elements.")
-        exit(0)
 
     ####################################
     ### INIT MODEL(S) AND ENCODER(S) ###
@@ -213,10 +240,7 @@ def main(args_config_path, args_influx_token):
 
     # Sanity check - peek at the first sample, print its fields and encoded format.
     peeker, encoded_feature_generator = itertools.tee(encoded_feature_generator)
-    peeker1, encoded_feature_generator1 = itertools.tee(encoded_feature_generator)
-    first_sample1 = next(peeker1)
-    first_sample_data1, _ = first_sample1
-    print(first_sample_data1)
+    print(peeker)
     first_sample = next(peeker)
     if not first_sample:
         log.warning("No data in encoded feature stream!")
