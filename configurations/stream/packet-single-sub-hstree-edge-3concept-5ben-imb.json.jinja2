@@ -1,0 +1,483 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+    "DATA_SOURCES": [
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor1.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/flamesensor1.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/irreceiver1.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/phsensor1.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/soilsensor1.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/tcpsynflood.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 251
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor2.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/flamesensor2.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/irreceiver2.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/phsensor2.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/soilsensor2.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/portscanning.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 251
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor3.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/flamesensor3.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/irreceiver3.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/phsensor3.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/soilsensor3.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/udpflood.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 251
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "MODEL":
+    {
+        "class": "HSTreeModel",
+        "dataflow": "stream",
+        "ml_task": "test",
+        "randomize_stream": true,
+        "new_model": true,
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-hstree-unsup3-edge",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "encoder":
+        {
+            "class": "DefaultEncoder",
+            "kwargs": {
+                "feature_filter": [
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin"
+                ]
+            }
+        }
+    },
+    "OUTPUT": [
+        {
+            "class": "StreamReporter",
+            "kwargs": {}
+        }
+    ],
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}

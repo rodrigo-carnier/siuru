@@ -1,0 +1,103 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+    "DATA_SOURCES": [
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor11.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 5000
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/pwdattack.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 5001
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "WindowFlowFeatureExtractor",
+                    "kwargs": {
+                        "window_size_ms": 10
+                    }
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "MODEL":
+    {
+        "class": "LocalOutlierModel",
+        "dataflow": "stream",
+        "ml_task": "test",
+        "randomize_samples": true,
+        "new_model": true,
+        "skip_saving_model": true,
+        "model_name": "flow-single-sub-lof-unsup-edge",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "encoder":
+        {
+            "class": "DefaultEncoder",
+            "kwargs": {
+                "feature_filter": [
+                    "window_flow_pkt_count",
+                    "window_flow_sum_pkt_size",
+                    "window_flow_avg_pkt_size",
+                    "window_flow_inter_arrival_avg"
+                ]
+            }
+        }
+    },
+    "OUTPUT": [
+        {
+            "class": "StreamReporter",
+            "kwargs": {}
+        }
+    ],
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}

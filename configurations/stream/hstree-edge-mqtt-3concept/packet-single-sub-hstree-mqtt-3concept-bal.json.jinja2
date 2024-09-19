@@ -20,12 +20,6 @@
                     "kwargs": {}
                 },
                 {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
-                },
-                {
                     "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 0
@@ -48,12 +42,6 @@
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
-                },
-                {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -80,12 +68,6 @@
                     "kwargs": {}
                 },
                 {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
-                },
-                {
                     "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 0
@@ -97,7 +79,7 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-test.pcapng",
+                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
@@ -108,12 +90,6 @@
                 {
                     "class": "CppPacketExtractor",
                     "kwargs": {}
-                },
-                {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
                 },
                 {
                     "class": "FileLabelExtractor",
@@ -140,12 +116,6 @@
                     "kwargs": {}
                 },
                 {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
-                },
-                {
                     "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 0
@@ -170,12 +140,6 @@
                     "kwargs": {}
                 },
                 {
-                    "class": "WindowFlowFeatureExtractor",
-                    "kwargs": {
-                        "window_size_ms": 10
-                    }
-                },
-                {
                     "class": "FileLabelExtractor",
                     "kwargs": {
                         "label_value": 1
@@ -189,20 +153,28 @@
         "class": "HSTreeModel",
         "dataflow": "stream",
         "ml_task": "test",
-        "randomize_stream": true,
+        "randomize_samples": true,
         "new_model": true,
-        "skip_saving_model": false,
-        "model_name": "flow-single-sub-hstree-unsup-bal",
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-hstree-unsup3-bal",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
             "class": "DefaultEncoder",
             "kwargs": {
                 "feature_filter": [
-                    "window_flow_pkt_count",
-                    "window_flow_sum_pkt_size",
-                    "window_flow_avg_pkt_size",
-                    "window_flow_inter_arrival_avg"
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin"
                 ]
             }
         }
