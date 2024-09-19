@@ -7,7 +7,7 @@ np.float = float
 np.int = np.int32
 np.bool = np.bool_
 
-from river import anomaly
+from river import tree
 from river import compose
 from river import datasets
 from river import metrics
@@ -29,7 +29,7 @@ import pickle
 from enum import Enum
 
 
-class HSTreeModel(IAnomalyDetectionModel):
+class HoeffAdapTreeModel(IAnomalyDetectionModel):
     """
     Generic interface for anomaly detection model classes to implement.
     """
@@ -41,36 +41,27 @@ class HSTreeModel(IAnomalyDetectionModel):
         skip_saving_model=False,
         model_storage_base_path=None,
         model_relative_path=None,
-        save_interval=3000,  # Interval to save model periodically
+        save_interval=500,  # Interval to save model periodically
         **kwargs,
     ):
-        
-        self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=50, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=25, seed=42)
-        #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=3, height=5, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(seed=42)
 
-        # self.model_instance = compose.Pipeline(preprocessing.MinMaxScaler(),anomaly.HalfSpaceTrees(n_trees=5, height=3, window_size=3, seed=42))
-        # self.auc = metrics.ROCAUC()
+        self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
 
-
-        ### RESULTS OF F2F MEETING 25-07-2024 -> I used the StandardScaler, not the MinMaxScaler to achieve that performance
-        self.scaler = preprocessing.StandardScaler()
+        # self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
 
         
-        self.anomaly_threshold = None
-        self.trainingScores = None
-        self.score_window_size = 25  # Number of scores to store
-        self.threshold_coef = 1.0
+        # self.anomaly_threshold = None
+        # self.trainingScores = None
+        # self.score_window_size = 25  # Number of scores to store
+        # self.threshold_coef = 1.5
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
-        
+
+
         super().__init__(
             model_name,
             new_model=new_model,
@@ -87,7 +78,7 @@ class HSTreeModel(IAnomalyDetectionModel):
         **kwargs,
         ):
         
-        log.info("Pretraining method for stream-data unsupervised model HalfSpace Tree.")
+        log.info("Training method for stream-data supervised model Hoeffding Adaptative Tree Classifier.")
 
         data_prep_time = 0
 
@@ -96,6 +87,7 @@ class HSTreeModel(IAnomalyDetectionModel):
 
         labels = []
         encoded_features = []
+        self.sample_count = 0
 
         data_prep_time = 0
         for samples, encoding in data:
@@ -123,18 +115,17 @@ class HSTreeModel(IAnomalyDetectionModel):
             'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
             'feature11', 'feature12']
         encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
+
+        for x, lab in zip(encoded_features, labels):
+            # self.scaler.learn_one(x)
+            # x = self.scaler.transform_one(x)  # Scale the features
+            self.model_instance.learn_one(x, lab) # After scaling, learn
+
+            self.sample_count += 1
+            if self.sample_count % self.save_interval == 0:
+                self._save_model()
+
         
-        for x in encoded_features:
-            #print(x)
-            self.scaler.learn_one(x)
-            x = self.scaler.transform_one(x)  # Scale the features
-            #print(x)
-            self.model_instance.learn_one(x) # After scaling, learn
-
-            # self.sample_count += 1
-            # if self.sample_count % self.save_interval == 0:
-            #     self._save_model()
-
         training_time = time.process_time_ns() - training_start
 
         report_performance(type(self).__name__ + "-preparation", log, len(labels),
@@ -143,7 +134,7 @@ class HSTreeModel(IAnomalyDetectionModel):
                            training_time)
 
         if not self.skip_saving_model:
-            self._save_model()
+            dump(self.model_instance, self.store_file)
 
     def _save_model(self):
         dump(self.model_instance, self.store_file)
@@ -157,6 +148,7 @@ class HSTreeModel(IAnomalyDetectionModel):
     def predict(self, data: EncodedSampleGenerator, **kwargs) -> SampleGenerator:
         sum_processing_time = 0
         sum_samples = 0
+        self.sample_count = 0
         
         self.anomaly_threshold = 0.2
         # self.anomaly_threshold = 0.873
@@ -171,54 +163,27 @@ class HSTreeModel(IAnomalyDetectionModel):
                 'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
                 'feature11', 'feature12']
             encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
-            # print(f"The encoded features are {encoded_sample}")
 
             for x in encoded_sample:
-                # print("Before scaling")
-                # print(x)
-                self.scaler.learn_one(x)
-                x = self.scaler.transform_one(x)  # Scale the features
-                # print("After scaling")
-                # print(x)
-                score = self.model_instance.score_one(x) # Prediction gives score only
-
-                # Update last_scores and maintain only the last `score_window_size` scores
-                self.last_scores.append(score)
-                if len(self.last_scores) > self.score_window_size:
-                    self.last_scores.pop(0)  # Remove the oldest score to keep the size consistent
-
-                # Calculate the anomaly threshold as 20% of the mean of the last scores
-                if self.last_scores:
-                    self.anomaly_threshold = self.threshold_coef * (sum(self.last_scores) / len(self.last_scores))
-                    # self.anomaly_threshold = 0.2
-                
-
-                if score > self.anomaly_threshold: # Have to decide label using threshold
-                    prediction = 1
-                else:
-                    prediction = 0
-                self.model_instance.learn_one(x)
+                prediction = self.model_instance.predict_one(x)
 
                 self.sample_count += 1
                 if self.sample_count % self.save_interval == 0 and not self.skip_saving_model:
                     self._save_model()
 
             if i<25:
-                print(score, prediction)
+                print(prediction)
+
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
                     s[PredictionField.MODEL_NAME] = self.model_name
                     s[PredictionField.OUTPUT_BINARY] = prediction[i]
-                    s[PredictionField.ANOMALY_SCORE] = score[i]
-                    s[PredictionField.ANOMALY_THRESHOLD] = self.anomaly_threshold[i]
                     sum_processing_time += time.process_time_ns() - start_time_ref
                     sum_samples += 1
                     yield s
             else:
                 sample[PredictionField.MODEL_NAME] = self.model_name
                 sample[PredictionField.OUTPUT_BINARY] = prediction
-                sample[PredictionField.ANOMALY_SCORE] = score
-                sample[PredictionField.ANOMALY_THRESHOLD] = self.anomaly_threshold
                 sum_processing_time += time.process_time_ns() - start_time_ref
                 sum_samples += 1
                 yield sample

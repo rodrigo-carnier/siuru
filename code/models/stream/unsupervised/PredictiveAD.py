@@ -9,9 +9,12 @@ np.bool = np.bool_
 
 from river import anomaly
 from river import compose
-from river import datasets
 from river import metrics
 from river import preprocessing
+from river import time_series
+from river import linear_model
+from river import optim
+
 
 from joblib import dump, load
 
@@ -29,7 +32,7 @@ import pickle
 from enum import Enum
 
 
-class HSTreeModel(IAnomalyDetectionModel):
+class PredictiveADModel(IAnomalyDetectionModel):
     """
     Generic interface for anomaly detection model classes to implement.
     """
@@ -45,22 +48,27 @@ class HSTreeModel(IAnomalyDetectionModel):
         **kwargs,
     ):
         
-        self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=50, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=25, seed=42)
-        #self.model_instance = anomaly.HalfSpaceTrees(n_trees=2, height=6, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=10, height=5, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(n_trees=3, height=5, window_size=2000, seed=42)
-        # self.model_instance = anomaly.HalfSpaceTrees(seed=42)
+        period = 12
+        predictive_model = time_series.SNARIMAX(
+            p=period,
+            d=1,
+            q=period,
+            m=period,
+            sd=1,
+            regressor=(
+                preprocessing.StandardScaler()
+                # preprocessing.MinMaxScaler()
+                # preprocessing.AdaptativeStandardScaler(fading_factor=.3)
+                # preprocessing.RobustScaler()
+                | linear_model.LinearRegression(
+                    optimizer=optim.SGD(0.005),
+                )
+            ),
+        )
 
-        # self.model_instance = compose.Pipeline(preprocessing.MinMaxScaler(),anomaly.HalfSpaceTrees(n_trees=5, height=3, window_size=3, seed=42))
-        # self.auc = metrics.ROCAUC()
 
-
-        ### RESULTS OF F2F MEETING 25-07-2024 -> I used the StandardScaler, not the MinMaxScaler to achieve that performance
-        self.scaler = preprocessing.StandardScaler()
-        # self.scaler = preprocessing.MinMaxScaler()
-        # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
-        # self.scaler = preprocessing.RobustScaler()
+        self.model_instance = anomaly.PredictiveAnomalyDetection(predictive_model, horizon=1, n_std=3.0, warmup_period=25)
+        
 
         
         self.anomaly_threshold = None
@@ -124,16 +132,10 @@ class HSTreeModel(IAnomalyDetectionModel):
             'feature11', 'feature12']
         encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
         
-        for x in encoded_features:
-            #print(x)
-            self.scaler.learn_one(x)
-            x = self.scaler.transform_one(x)  # Scale the features
-            #print(x)
-            self.model_instance.learn_one(x) # After scaling, learn
-
-            # self.sample_count += 1
-            # if self.sample_count % self.save_interval == 0:
-            #     self._save_model()
+        for x, lab in zip(encoded_features, labels):
+            # self.scaler.learn_one(x)
+            # x = self.scaler.transform_one(x)  # Scale the features
+            self.model_instance.learn_one(x, lab) # After scaling, learn
 
         training_time = time.process_time_ns() - training_start
 
@@ -174,13 +176,8 @@ class HSTreeModel(IAnomalyDetectionModel):
             # print(f"The encoded features are {encoded_sample}")
 
             for x in encoded_sample:
-                # print("Before scaling")
-                # print(x)
-                self.scaler.learn_one(x)
-                x = self.scaler.transform_one(x)  # Scale the features
-                # print("After scaling")
-                # print(x)
-                score = self.model_instance.score_one(x) # Prediction gives score only
+                score = self.model_instance.score_one(x, None)  # Use None for the feature input if not applicable
+                self.model_instance.learn_one(x, None)  # Still update the model without the actual label
 
                 # Update last_scores and maintain only the last `score_window_size` scores
                 self.last_scores.append(score)

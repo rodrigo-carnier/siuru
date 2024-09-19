@@ -126,6 +126,7 @@ class LocalOutlierModel(IAnomalyDetectionModel):
             'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
             'feature11', 'feature12']
         encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
+        # print(encoded_features)
         for x in encoded_features:
             #print(x)
             # self.scaler.learn_one(x)
