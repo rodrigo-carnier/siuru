@@ -170,6 +170,9 @@ class HSTreeModel(IAnomalyDetectionModel):
             feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
                 'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
                 'feature11', 'feature12']
+
+            # print("Printing sample")
+            
             encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
             # print(f"The encoded features are {encoded_sample}")
 

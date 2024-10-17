@@ -16,9 +16,6 @@ import seaborn as sns
 from datetime import datetime
 import pickle
 
-
-from models.batch.unsupervised.IsolationForest import IsolationForestModel
-
 class OutlierReporter(IReporter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

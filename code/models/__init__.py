@@ -1,13 +1,13 @@
 from .IAnomalyDetectionModel import IAnomalyDetectionModel
-from .batch.supervised.MLPAutoEncoder import MLPAutoEncoderModel
-from .batch.supervised.RandomForest import RandomForestModel
-from .batch.supervised.RandomForestMulticlass import RandomForestMulticlassModel
-from .batch.unsupervised.KMeans import KMeansModel
-from .batch.unsupervised.IsolationForest import IsolationForestModel
-from .stream.supervised.NearNeighbors import NearNeighborsModel
-from .stream.unsupervised.HSTree import HSTreeModel
-from .stream.unsupervised.LocalOutlier import LocalOutlierModel
-from .stream.unsupervised.HoeffAdapTree import HoeffAdapTreeModel
-from .stream.unsupervised.PredictiveAD import PredictiveADModel
-# from .stream.unsupervised.HSTreeSKMulti import HSTreeSKMultiModel
-# from .stream.unsupervised.HoeffTree import HoeffTreeModel
+from .batching.supervised.MLPAutoEncoder import MLPAutoEncoderModel
+from .batching.supervised.RandomForest import RandomForestModel
+from .batching.supervised.RandomForestMulticlass import RandomForestMulticlassModel
+from .batching.unsupervised.KMeans import KMeansModel
+from .batching.unsupervised.IsolationForest import IsolationForestModel
+from .streaming.supervised.HoeffAdapTree import HoeffAdapTreeModel
+from .streaming.supervised.NearNeighbors import NearNeighborsModel
+from .streaming.unsupervised.HSTree import HSTreeModel
+from .streaming.unsupervised.LocalOutlier import LocalOutlierModel
+from .streaming.unsupervised.PredictiveAD import PredictiveADModel
+# from .streaming.unsupervised.HSTreeSKMulti import HSTreeSKMultiModel
+# from .streaming.unsupervised.HoeffTree import HoeffTreeModel

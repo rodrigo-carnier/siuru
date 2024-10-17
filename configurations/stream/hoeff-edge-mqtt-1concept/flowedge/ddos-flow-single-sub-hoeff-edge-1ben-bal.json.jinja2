@@ -68,12 +68,22 @@
     {
         "class": "HoeffAdapTreeModel",
         "dataflow": "stream",
+        "data_format": "raw_pcap",
         "ml_task": "test",
         "randomize_samples": true,
-        "new_model": false,
+        "new_model": true,
         "skip_saving_model": true,
         "model_name": "flow-single-ssb-hoeff-sup-edge",
         "model_storage_base_path": "{{ project_root }}/models",
+        "model_param":
+        {
+            "grace_period": 0,
+            "delta": 1e-5,
+            "leaf_prediction": "nb",
+            "nb_threshold": 0,
+            "seed": 0,
+            "tau": 0.05
+        },
         "encoder":
         {
             "class": "DefaultEncoder",

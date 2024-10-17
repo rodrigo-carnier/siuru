@@ -77,11 +77,11 @@ class FlowFeature(str, enum.Enum):
 class PredictionField(str, enum.Enum):
     MODEL_NAME = "model_name"
     OUTPUT_BINARY = "output_binary"
+    OUTPUT_CLASS = "output_class"
     OUTPUT_CONFIDENCE = "output_confidence"
     OUTPUT_MULTILABEL = "output_multilabel"
     OUTPUT_DISTANCE = "output_distance"
     GROUND_TRUTH = "ground_truth"
-    OUTPUT_CLASS = "output_class"
     ANOMALY_SCORE = "anomaly_score"
     ANOMALY_THRESHOLD = "anomaly_threshold"
 

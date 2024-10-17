@@ -17,20 +17,35 @@ import pickle
 
 class AccuracyReporter(IReporter):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        
+        # self.model_param = model_param if model_param is not None else {}
+        # self.grace_period = self.model_param.get("grace_period", 0)  # Default to 0 if not provided
         self.ground_truths = []
         self.predicted_labels = []
+        self.counter = 0
+
+        super().__init__(**kwargs)
+
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
         # self.predicted_labels.append(features[PredictionField.OUTPUT_CLASS])
+        self.counter = self.counter +1
 
     def end_processing(self):
         log = PipelineLogger.get_logger()
-        labels = sorted(set(self.ground_truths + self.predicted_labels))
-        print(labels)
 
+        # print(self.ground_truths)
+        # print(self.predicted_labels)
+        # self.ground_truths = self.ground_truths[self.grace_period:]
+        # self.predicted_labels = self.predicted_labels[self.grace_period:]
+        # labels = sorted(set(self.ground_truths + self.predicted_labels))
+        labels = sorted(set([0, 1]))
+
+        print(self.predicted_labels[101:])
+        self.ground_truths = self.ground_truths[101:]
+        self.predicted_labels = self.predicted_labels[101:]
 
         # Calculate confusion matrix
         cnf_matrix = confusion_matrix(self.ground_truths, self.predicted_labels, labels=labels)
@@ -282,6 +297,8 @@ class AccuracyReporter(IReporter):
         plt.ylabel('True Positive Rate')
         plt.title('Receiver Operating Characteristic')
         plt.legend(loc="lower right")
+        print(labels)
+
         plt.savefig(image_roc_auc_path)
 
     @staticmethod

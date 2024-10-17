@@ -9,6 +9,24 @@ from jinja2 import Template
 from collections import deque
 from collections import Counter
 
+import optuna
+
+import numpy as np
+np.float = float
+np.int = np.int32
+np.bool = np.bool_
+
+
+from river import anomaly, tree, linear_model
+from river import preprocessing, stream, datasets
+from river import model_selection, optim, bandit
+from river import metrics, evaluate
+from river import utils
+
+# from scipy import integrate
+
+
+from river.metrics import ConfusionMatrix, ROCAUC
 
 import common.global_variables as global_variables
 from common.functions import report_performance, time_now, project_root, git_tag
@@ -138,7 +156,7 @@ def main(args_config_path, args_influx_token):
 
             ### TODO: create a different submodule for data formatting when necessary
             ### RMC 2024-05-21: renamed module from preprocessor to featureextractor, because I will implement true data processing now
-            ### RMC 2024-05-21: the description above is concentrating an additional function in the feature extractors: data formatting of data from different sources.
+            ### RMC 2024-0from river import stream5-21: the description above is concentrating an additional function in the feature extractors: data formatting of data from different sources.
             ###                 Data formatting and feature extraction are different functions. The former serves the purpose described above. The latter selects different
             ###                 sets of features, and in the case of flows, aggregates packet features.
 
@@ -159,7 +177,7 @@ def main(args_config_path, args_influx_token):
         ### PREPARING SIMULATION OF STREAM DATA ###
         ###########################################
 
-        # Count occurrences of each concept ID
+        # Count occurrencfrom river import streames of each concept ID
         concept_counts = Counter(concept_id_per_subset)
         # Extract the counts in the order of appearance in concept_id_per_subset
         n_subsets_per_concept = [concept_counts[concept_id] for concept_id in sorted(concept_counts)]
@@ -176,9 +194,6 @@ def main(args_config_path, args_influx_token):
             samples_per_subset.append(count)
         
         feature_streams = copy_streams
-
-        
-
 
 
         # Important step of streaming-data simulation, where samples are either randomized for packet-based feature extraction or interleaved for flow-based feature extraction.
@@ -200,13 +215,13 @@ def main(args_config_path, args_influx_token):
             feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels)
         
         else:
-            def chain_generators(streams):
-                for stream in streams:
-                    yield from stream
+            def chain_generators(trafficstreams):
+                for trafficstream in trafficstreams:
+                    yield from trafficstream
         
             feature_stream = chain_generators(feature_streams)
 
-        print(samples_per_subset, sample_order)
+        # print(samples_per_subset, sample_order)
 
 
         # Create two copies of the iterator using tee
@@ -226,16 +241,9 @@ def main(args_config_path, args_influx_token):
         model_specification = configuration["MODEL"]
         model_name = model_specification["class"]
         model_class = globals()[model_name]
-
-        # Extract model_param separately
-        model_param = model_specification.pop("model_param", {})
-
         model_instance: IAnomalyDetectionModel = model_class(
-            full_config_json=json.dumps(configuration, indent=4),
-            **model_specification
-            # **model_param  # Unpack model_param here
+            full_config_json=json.dumps(configuration, indent=4), **model_specification
         )
-
 
 
 
@@ -286,130 +294,394 @@ def main(args_config_path, args_influx_token):
 
 
 
-    elif configuration["MODEL"]["data_format"] == "processed_csv":
-        
-        ################################
-        ### DATA FROM PROCESSED CSV  ###
-        ################################
-
-        print("Implement loading processed csv")
-
-
 
     #############################
-    ### TRAIN MODEL OFFLINE ###
+    #### OPTIMIZE HYPERPARAMS ###
     #############################
 
-    if model_specification["ml_task"] == "train":
-    #if model_specification["train"]:
-    #if you want to perform training and testing in the same run, do the following:
-    # 1) delete model_specification["ml_task"] == "train": (and equivalent line from training code block)
-    # 2) uncomment line below
-    # 3) delete flag "ml_task" from config file
-    # 4) create 2 new boolean flags: "train" and "test"
 
-        if model_specification["new_model"]:
+
+
+    ################################ HARDCODED PREPARISON FOR RIVER (needs to change this preprocessing to the preprocessing class)
     
-            if model_specification["dataflow"] == "batch":
-            # perform training for the first time
-                # Train the model via batch of data
-                model_instance.train(
-                    encoded_feature_generator, path_to_store=model_instance.store_file
-                )
-            
-            if model_specification["dataflow"] == "stream":
-                model_instance.train(
-                    encoded_feature_generator, path_to_store=model_instance.store_file
-                )
-            
+    x = []
+    y = []
+
+    for samples, encoding in encoded_feature_generator:
+        if isinstance(samples, list):
+            # Handle the list with multiple samples used together with
+            # xarray DataArray encodings.
+            for f in samples:
+                y.append(f["ground_truth"])
+            if len(x) == 0:
+                x = encoding
+            else:
+                x = numpy.concatenate((x, encoding), axis=0)
         else:
+            y.append(samples["ground_truth"])
+            x.append(encoding[0])
+    
 
-            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
-            # model_instance.load(model_instance.store_file)
+    # # Necessary to scale samples, but River only works with dictionaries, so transforming
+    # print("testing x")
+    # print(x)
+    feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
+        'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
+        'feature11', 'feature12']
+    encoded_x = [dict(zip(feature_names, arr)) for arr in x]
+
+    # # Create a generator for River
+    # def river_generator():
+    #     for features, target in zip(encoded_x, y):
+    #         yield features, target
+    
+    riverdataset = stream.iter_array(x, y, feature_names=['x1', 'x2', 'x3', 'x4'])
+    # count = 0
+    # for x,y in riverdataset:
+    #     count+count
+
+
+    ############################################### LOGISTIC REGRESSION
+
+    # # optimizer = optim.AdaMax()
+    # model = (
+    #     preprocessing.StandardScaler() |
+    #     linear_model.LogisticRegression()
+    # )
+    # metric = metrics.F1()
+    # evaluate.progressive_val_score(riverdataset, model, metric, print_every=100)
+
+    ############################################### HOEFFDING
+
+    ## RIVER OPT
+
+    # optimizer = optim.Adam()
+    # model = (        
+    #     # preprocessing.StandardScaler() |
+    #     tree.HoeffdingAdaptiveTreeClassifier(optimizer)
+    # )
+    # metric = metrics.Accuracy()
+    # evaluate.progressive_val_score(riverdataset1, model, metric, print_every=100)
+    # # evaluate.progressive_val_score(bikedataset, model, metric, print_every=500)
+
+
+    
+
+    opt_option = 3
+
+
+    if opt_option == 1:
+
+        model = (
+            preprocessing.StandardScaler() |
+            tree.HoeffdingAdaptiveTreeClassifier(grace_period=200, leaf_prediction='nba')
+        )
+        evaluate.progressive_val_score(
+            dataset=riverdataset,
+            model=model,
+            metric=metrics.Accuracy(),
+            print_every=500
+        )
+
+    elif opt_option == 2:
+    
+        
+        model = (
+            preprocessing.StandardScaler() |
+            tree.HoeffdingAdaptiveTreeClassifier(grace_period=200, leaf_prediction='nba')
+        )
+
+        models = utils.expand_param_grid(model, 
+        {
+            'max_depth': [1, 2, 3],
+            'tau': [0.01, 0.05, 0.1],
+            'nb_threshold': [0, 1, 2]
+        },
+        {
+            'optimizer': [
+            (optim.SGD, {'lr': [.1, .01, .005]}),
+                (optim.Adam, {'beta_1': [.01, .001], 'lr': [.1, .01, .001]}),
+                (optim.Adam, {'beta_1': [.1], 'lr': [.001]}),
+            ]
+        }
+        )
+
+        # models = utils.expand_param_grid(model, {
+        #         'max_depth': [1, 2, 3],
+        #         'tau': [0.01, 0.05, 0.1],
+        #         'nb_threshold': [0, 1, 2]
+        #     }
+        # )
+
+
+        sh = model_selection.SuccessiveHalvingClassifier(
+            models,
+            metric=metrics.Accuracy(),
+            budget=5000,
+            eta=2,
+            verbose=True
+        )
+
+        evaluate.progressive_val_score(
+            dataset=riverdataset,
+            model=sh,
+            metric=metrics.Accuracy(),
+            # print_every=500
+        )
+
+        print("Output SuccessiveHalving")
+        print(sh.best_model)
+        # sh.best_model gives you the best pipeline (StandardScaler | HoeffdingAdaptiveTreeClassifier)
+        best_pipeline = sh.best_model
+
+        # Access the HoeffdingAdaptiveTreeClassifier inside the pipeline
+        best_classifier = best_pipeline['HoeffdingAdaptiveTreeClassifier']
+
+        # # Now you can print its parameters
+        print(f"Best Classifier Details: {best_classifier}")
+        print(f"Grace Period: {best_classifier.grace_period}")
+        print(f"Max Depth: {best_classifier.max_depth}")
+        print(f"Tau: {best_classifier.tau}")
+        print(f"Naive Bayes Threshold: {best_classifier.nb_threshold}")
+        print(f"Split criterion: {best_classifier.split_criterion}")
+
+    elif opt_option == 3:
+
+        model = (
+            preprocessing.StandardScaler() |
+            tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, leaf_prediction='nba')
+        )
+
+        models = utils.expand_param_grid(model,
+            {
+                'max_depth': [1, 2, 3],
+                'tau': [0.01, 0.05, 0.1],
+                'nb_threshold': [0, 1, 2],
+                'optimizer': [
+                    (optim.SGD),
+                    (optim.AdaMax),
+                    (optim.Adam),
+                    (optim.AdaGrad),
+                    (optim.AdaDelta),
+                    (optim.AdaBound),
+                    (optim.AMSGrad),
+                    ]
+            }
+        )
+        #         'optimizer': [
+        #             (optim.SGD, {'lr': [.1, .01, .005]}),
+        #             (optim.Adam, {'beta_1': [.01, .001], 'lr': [.1, .01, .001]}),
+        #             (optim.Adam, {'beta_1': [.1], 'lr': [.001]}),
+        #             ]
+        #     }
+        # )
+
+        print(models[2])
+
+
+        sh = model_selection.BanditClassifier(
+            models,
+            metric=metrics.Accuracy(),
+            policy=bandit.EpsilonGreedy(
+                epsilon=0.1,
+                decay=0.001,
+                burn_in=20,
+                seed=42
+            )
+        )
+
+        evaluate.progressive_val_score(
+            dataset=riverdataset,
+            model=sh,
+            metric=metrics.Accuracy(),
+            print_every=100
+        )
+
+        print("Output Bandit")
+        print(sh.best_model)
+        # sh.best_model gives you the best pipeline (StandardScaler | HoeffdingAdaptiveTreeClassifier)
+        best_pipeline = sh.best_model
+
+        # Access the HoeffdingAdaptiveTreeClassifier inside the pipeline
+        best_classifier = best_pipeline['HoeffdingAdaptiveTreeClassifier']
+
+        # # Now you can print its parameters
+        print(f"Best Classifier Details: {best_classifier}")
+        print(f"Grace Period: {best_classifier.grace_period}")
+        print(f"Max Depth: {best_classifier.max_depth}")
+        print(f"Tau: {best_classifier.tau}")
+        print(f"Naive Bayes Threshold: {best_classifier.nb_threshold}")
+        print(f"Split criterion: {best_classifier.split_criterion}")
+
+        # To access the optimizer, assuming it is set as an attribute in the classifier
+        if hasattr(best_classifier, 'optimizer'):
+            optimizer = best_classifier.optimizer
+            print(f"Optimizer Type: {type(optimizer).__name__}")
             
-            # Also, if models exists and flag "train" is true, the model will be incrementally improved on top of previous training
-        
-            if model_specification["dataflow"] == "batch":
-                log.error("Batch ML does not incrementally improve already existing models!")
-                exit(1)
-        
-            if model_specification["dataflow"] == "stream":
-                model_instance.train(
-                    encoded_feature_generator, path_to_store=model_instance.store_file
-                )
+            if isinstance(optimizer, optim.SGD):
+                print(f"Learning Rate (lr): {optimizer.lr}")
+                
+            elif isinstance(optimizer, optim.Adam):
+                print(f"Learning Rate (lr): {optimizer.lr}")
+                print(f"Beta_1: {optimizer.beta_1}")
+                print(f"Beta_2: {optimizer.beta_2}")
+                print(f"Eps: {optimizer.eps}")
 
-    ####################################################
-    ### TEST MODEL OFFLINE / TRAIN-TEST MODEL ONLINE ###
-    ####################################################
-    
-    if model_specification["ml_task"] == "test":
-    #if model_specification["test"]:
-    #if you want to perform training and testing in the same run, do the following:
-    # 1) delete model_specification["ml_task"] == "test": (and equivalent line from training code block)
-    # 2) uncomment if model_specification["test"]:
-    # 3) delete flag "ml_task" from config file
-    # 4) create 2 new boolean flags: "train" and "test"
-    
-
-
-        #####################
-        ### INIT REPORTER ###
-        #####################
-
-        reporter_instances: List[IReporter] = []
-
-        # Initialize reporter
-        for output in configuration["OUTPUT"]:
-            reporter_name = output["class"]
-            reporter_class = globals()[reporter_name]
-            reporter_instance = reporter_class(**output["kwargs"])
-            # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
-            # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
-            reporter_instances.append(reporter_instance)
-
-        if model_specification["new_model"]:
-    
-            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
-            for predicted_sample in model_instance.predict(encoded_feature_generator):
-                for reporter_instance in reporter_instances:
-                    reporter_instance.report(predicted_sample)
-
-           # TODO: substitute lines below the if above by the commented lines below, to differentiate between batch and stream testing in case you need it.
-            # There will be one of the blocks below for each testing.
-            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
-            #     test()
-            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
-            #     streamtest()
-
- 
         else:
-
-            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
-            # model_instance.load(model_instance.store_file)
-            
-            # TODO: substitute lines below the else above by the commented lines below, to differentiate between batch and stream testing in case you need it.
-            # There will be one of the blocks below for each testing.
-            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
-            #     test()
-            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
-            #     streamtest()
- 
-
-            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
-            for predicted_sample in model_instance.predict(encoded_feature_generator):
-                for reporter_instance in reporter_instances:
-                    reporter_instance.report(predicted_sample)
-
+            print("No optimizer found in the classifier.")
         
-        # Reporters may require special shutdown steps, for example disconnecting from
-        # remote database or printing summaries of the processing -- call the handle for
-        # each reporter.
-        for reporter_instance in reporter_instances:
-            reporter_instance.end_processing()
 
-        if not model_specification["skip_saving_model"]:
-            model_instance._save_model()
-            
+    # ### OPTUNA
+
+    # # Define the objective function for optimization
+    # def objective(trial):
+    #     # Suggest hyperparameters
+    #     grace_period = trial.suggest_int('grace_period', 50, 500)
+    #     max_depth = trial.suggest_int('max_depth', 1, 100)
+    #     split_criterion = trial.suggest_categorical('split_criterion', ['gini', 'info_gain', 'hellinger'])
+    #     delta = trial.suggest_float('delta', 1e-8, 1e-1, log=True)
+    #     tau = trial.suggest_float('tau', 0.01, 0.1)
+    #     leaf_prediction = trial.suggest_categorical('leaf_prediction', ['mc', 'nb', 'nba'])
+    #     nb_threshold = trial.suggest_int('nb_threshold', 0, 100)
+
+    #     # Create the model
+    #     model = tree.HoeffdingTreeClassifier(
+    #         grace_period=grace_period,
+    #         max_depth=max_depth,
+    #         split_criterion=split_criterion,
+    #         delta=delta,
+    #         tau=tau,
+    #         leaf_prediction=leaf_prediction,
+    #         nb_threshold=nb_threshold
+    #     )
+        
+    #     # Use a scaler if necessary
+    #     model = preprocessing.StandardScaler() | model
+
+    #     # Define the evaluation metric
+    #     metric = metrics.F1()
+
+    #     # # Perform cross-validation
+    #     # for x, y in model_selection.iterative_train_test_split(riverdataset):
+    #     #     model.learn_one(x, y)
+    #     #     y_pred = model.predict_one(x)
+    #     #     metric = metric.update(y, y_pred)
+        
+    #     # Evaluate the model
+    #     metric = evaluate.progressive_val_score(riverdataset, model, metric)
+    #     return metric
+
+    # # Create a study
+    # study = optuna.create_study(direction='maximize')
+
+    # # Optimize the objective function
+    # study.optimize(objective, n_trials=50)
+
+    # # Output the best hyperparameters and the best score
+    # print("Best hyperparameters:", study.best_params)
+    # print("Best F1 Score:", study.best_value)
+
+    ############################################### HALFSPACETREE
+
+    ### RIVER OPT
+
+    # # optimizer = optim.AdaBound()
+    # model = (
+    #     preprocessing.StandardScaler() |
+    #     # anomaly.HalfSpaceTrees(optimizer)
+    #     anomaly.HalfSpaceTrees(n_trees=7, height=10, window_size=50, seed=42)
+    # )
+    # metric = metrics.ROCAUC()
+
+
+    # evaluate.progressive_val_score(riverdataset, model, metric, print_every=500)
+    
+
+    ### OPTUNA
+
+    # # Define the objective function for optimization
+    # def objective(trial):
+    #     n_trees = trial.suggest_int('n_trees', 2, 10)
+    #     height = trial.suggest_int('height', 2, 10)
+    #     window_size = trial.suggest_int('window_size', 50, 100)
+        
+    #     model = anomaly.HalfSpaceTrees(seed=42, n_trees=n_trees, height=height, window_size=window_size)
+    #     metric = metrics.ROCAUC()
+        
+    #     # Evaluate the model
+    #     score = evaluate.progressive_val_score(riverdataset, model, metric)
+    #     return score
+
+    # # Perform optimization
+    # study = optuna.create_study(direction='maximize')
+    # study.optimize(objective, n_trials=20)
+
+    # # Best hyperparameters
+    # print(study.best_params)
+
+
+    ############################################### PLOTTINGs
+
+    # best_model = anomaly.HalfSpaceTrees(
+    #     seed=42,
+    #     n_trees=study.best_params['n_trees'],
+    #     height=study.best_params['height'],
+    #     window_size=study.best_params_['window_size']
+    # )
+
+    # # Initialize metrics
+    # confusion_matrix = ConfusionMatrix()
+    # roc_auc = ROCAUC()
+
+    # # Reset the generator to evaluate the model on the dataset
+    # riverdataset = stream.iter(river_generator(encoded_feature_generator))
+
+    # # Evaluate the model and track predictions and true values
+    # for features, target in riverdataset:
+    #     y_pred = best_model.predict_one(features)
+    #     confusion_matrix = confusion_matrix.update(target, y_pred)
+    #     roc_auc = roc_auc.update(target, y_pred)
+
+    # # Print confusion matrix and other metrics
+    # print("Confusion Matrix:")
+    # print(confusion_matrix)
+
+    # # Calculate and print other metrics
+    # print("Accuracy:", confusion_matrix.accuracy)
+    # print("Precision:", confusion_matrix.precision)
+    # print("Recall:", confusion_matrix.recall)
+    # print("F1 Score:", confusion_matrix.f1)
+
+    # # Collect data for ROC curve
+    # y_true = []
+    # y_scores = []
+
+    # # Reset the generator again for ROC curve data collection
+    # riverdataset = stream.iter(river_generator(encoded_feature_generator))
+
+    # for features, target in riverdataset:
+    #     y_true.append(target)
+    #     y_scores.append(best_model.predict_proba_one(features)[1])  # Assuming binary classification
+
+    # # Compute ROC curve
+    # fpr, tpr, thresholds = roc_curve(y_true, y_scores)
+    # roc_auc_score = auc(fpr, tpr)
+
+    # # Plot ROC AUC curve
+    # plt.figure()
+    # plt.plot(fpr, tpr, color='blue', lw=2, label='ROC curve (area = {:.2f})'.format(roc_auc_score))
+    # plt.plot([0, 1], [0, 1], color='red', lw=2, linestyle='--')
+    # plt.xlim([0.0, 1.0])
+    # plt.ylim([0.0, 1.05])
+    # plt.xlabel('False Positive Rate')
+    # plt.ylabel('True Positive Rate')
+    # plt.title('Receiver Operating Characteristic')
+    # plt.legend(loc='lower right')
+    # plt.show()
+
+    
+    # reporter_instance.end_processing()
+
 
 
     ########################

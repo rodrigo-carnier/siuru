@@ -42,12 +42,34 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
         model_storage_base_path=None,
         model_relative_path=None,
         save_interval=500,  # Interval to save model periodically
+        # grace_period=0,     # Default value
+        # delta=1e-5,        # Default value
+        # leaf_prediction="nb",  # Default value
+        # nb_threshold=0,     # Default value
+        # seed=0,             # Default value
+        # tau=0.05,           # Default value
         **kwargs,
     ):
 
-        self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
+        # self.grace_period = grace_period
+        # self.delta = delta
+        # self.leaf_prediction = leaf_prediction
+        # self.nb_threshold = nb_threshold
+        # self.seed = seed
+        # self.tau = tau
 
-        # self.scaler = preprocessing.StandardScaler()
+        
+        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=self.grace_period, delta=self.delta, leaf_prediction=self.leaf_prediction, nb_threshold=self.nb_threshold, seed=self.seed, tau=self.tau)
+        
+        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(
+        #     **model_param  # Unpack model_param dictionary into the classifier
+        # )
+
+        self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
+        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=0, seed=0, tau=0.05)
+        
+
+        self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
@@ -60,6 +82,7 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
+        self.grace_period = 100;
 
 
         super().__init__(
