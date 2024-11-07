@@ -15,7 +15,7 @@ from datetime import datetime
 import pickle
 
 
-class StreamReporter(IReporter):
+class StreamClassifReporter(IReporter):
     """
     Can only be used when PredictionField.GROUND_TRUTH is known!
     """
@@ -24,19 +24,21 @@ class StreamReporter(IReporter):
         super().__init__(**kwargs)
         self.ground_truths = []
         self.predicted_labels = []
-        self.anomaly_scores = []
-        self.anomaly_threshold = []
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
-        self.anomaly_scores.append(features[PredictionField.ANOMALY_SCORE])
-        self.anomaly_threshold.append(features[PredictionField.ANOMALY_THRESHOLD])
 
     def end_processing(self):
 
         log = PipelineLogger.get_logger()
-        
+
+        print(self.predicted_labels)        
+        # Check for None in self.predicted_labels and replace Nones for 0s
+        none_in_predicted_labels = [i for i, value in enumerate(self.predicted_labels) if value is None]
+        for i in none_in_predicted_labels:
+            self.predicted_labels[i] = 0
+
         labels = sorted(set(self.ground_truths + self.predicted_labels))
 
         # Calculate confusion matrix
@@ -118,17 +120,16 @@ class StreamReporter(IReporter):
         with open(text_path, "w") as file:
             
             # Print headers for readability (optional)
-            file.write("Label\tScore\n")
+            file.write("Label\n")
             file.write("-" * 20 + "\n")
             
             # Iterate over the range of the maximum length
             for i in range(len(self.predicted_labels)):
                 # Get elements or default to empty if the vector is shorter
                 elem1 = self.predicted_labels[i]
-                elem2 = self.anomaly_scores[i]
                 
                 # Write elements side by side with a tab separator
-                file.write(f"{elem1}\t{elem2}\n")
+                file.write(f"{elem1}\n")
 
 
         ### PERFORMANCE METRICS
@@ -205,42 +206,6 @@ class StreamReporter(IReporter):
 
 
         ###########################################################################
-        
-        # PRINTING A TIME-SERIES ANOMALY DETECTION
-
-        # Example data
-        timestamps = np.arange(0, len(self.predicted_labels))  # Example: time points from 0 to 99
-        anomaly_scores = np.array(self.anomaly_scores)
-
-        # Plotting the time-series scores
-        plt.figure(figsize=(10, 6))  # Create a figure with a specific size
-
-        plt.plot(timestamps, anomaly_scores, label='Anomaly Scores', color='b', linestyle='-', marker='.', markersize=0.5)
-
-        # Adding labels and title
-        plt.xlabel('Sample')
-        plt.ylabel('Anomaly Score')
-        plt.title('Time-Series Anomaly Scores')
-
-        # Adding a grid for better readability
-        plt.grid(True)
-
-        # Optional: Highlighting thresholds or specific anomalies
-        # Example: Highlight scores above a threshold (e.g., 0.8)
-        # threshold = 0.230
-        # high_anomalies = anomaly_scores > threshold
-        # plt.plot(timestamps[high_anomalies], anomaly_scores[high_anomalies], 'ro', label='High Anomalies')
-        # plt.plot(y=anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
-        anomaly_threshold = np.array(self.anomaly_threshold)
-        plt.plot(timestamps, anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
-
-
-        # Add a legend
-        plt.legend()
-
-        # Save the plot to a file (optional)
-        plt.savefig(imagetime_path)
-
 
         ##### PRINTING CONFUSION MATRIX RESULTS IN STDOUT
 
@@ -285,12 +250,12 @@ class StreamReporter(IReporter):
         ############ ROC AND AUC
 
         # Calculate the ROC curve
-        fpr, tpr, thresholds = roc_curve(self.ground_truths, anomaly_scores)
+        fpr, tpr, thresholds = roc_curve(self.ground_truths, self.predicted_labels)
 
         # Calculate the AUC
         roc_auc = auc(fpr, tpr)
         # Alternatively, you can use roc_auc_score directly on the true labels and predicted scores
-        roc_auc_alternative = roc_auc_score(self.ground_truths, anomaly_scores)
+        roc_auc_alternative = roc_auc_score(self.ground_truths, self.predicted_labels)
 
         # Plot the ROC curve
         plt.figure()
@@ -310,6 +275,4 @@ class StreamReporter(IReporter):
             PredictionField.MODEL_NAME,
             PredictionField.OUTPUT_BINARY,
             PredictionField.GROUND_TRUTH,
-            PredictionField.ANOMALY_SCORE,
-            
         ]

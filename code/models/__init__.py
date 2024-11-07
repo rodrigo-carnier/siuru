@@ -6,6 +6,7 @@ from .batching.unsupervised.KMeans import KMeansModel
 from .batching.unsupervised.IsolationForest import IsolationForestModel
 from .streaming.supervised.HoeffAdapTree import HoeffAdapTreeModel
 from .streaming.supervised.NearNeighbors import NearNeighborsModel
+from .streaming.supervised.AdapRF import AdaptativeRandomForestModel
 from .streaming.unsupervised.HSTree import HSTreeModel
 from .streaming.unsupervised.LocalOutlier import LocalOutlierModel
 from .streaming.unsupervised.PredictiveAD import PredictiveADModel

@@ -2,12 +2,12 @@ import time
 from typing import Any, Dict, Generator, Optional, List, Tuple, Union
 
 # import numpy
-import numpy as np
-np.float = float
-np.int = np.int32
-np.bool = np.bool_
+# import numpy as np
+# np.float = float
+# np.int = np.int32
+# np.bool = np.bool_
 
-from river import forest, tree
+from river import forest
 from river import compose
 from river import datasets
 from river import metrics
@@ -32,7 +32,7 @@ import pickle
 from enum import Enum
 
 
-class HoeffAdapTreeModel(IAnomalyDetectionModel):
+class AdaptativeRandomForestModel(IAnomalyDetectionModel):
     """
     Generic interface for anomaly detection model classes to implement.
     """
@@ -70,10 +70,10 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
 
         # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
 
-        self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=200, delta=1e-5, leaf_prediction='nb', nb_threshold=0, seed=0, tau=0.05, switch_significance=0.05, binary_split=False, min_branch_fraction=0.01)
+        self.model_instance = forest.ARFClassifier(seed=8, leaf_prediction="mc", grace_period=50, n_models=10, tau=0.05)
         
 
-        self.scaler = preprocessing.StandardScaler()
+        # self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
@@ -86,7 +86,7 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
-        self.grace_period = 100;
+        # self.grace_period = 100;
 
 
         super().__init__(
@@ -101,11 +101,11 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
 
     def train(
         self,
-        data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        data: Generator[Tuple[Dict[IFeature, Any], List[float]], None, None],
         **kwargs,
         ):
         
-        log.info("Training method for stream-data supervised model Hoeffding Adaptative Tree Classifier.")
+        log.info("Training method for stream-data supervised model Adaptative Random Forest Classifier.")
 
         data_prep_time = 0
 
@@ -173,14 +173,17 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
             log.error(f"Failed to load model from: {self.store_file}")
 
     def predict(self, data: EncodedSampleGenerator, **kwargs) -> SampleGenerator:
+
         sum_processing_time = 0
         sum_samples = 0
         self.sample_count = 0
         
-        self.anomaly_threshold = 0.2
-        # self.anomaly_threshold = 0.873
+        labels = []
+        encoded_features = []
+        self.sample_count = 0
+        
+        i = 0
 
-        i=0
         for sample, encoded_sample in data:
             i = i+1
             start_time_ref = time.process_time_ns()
@@ -191,20 +194,64 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
                 'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
                 'feature11', 'feature12']
             
+            encoded_sample_dict = [dict(zip(feature_names, arr)) for arr in encoded_sample]
+            print(f"sample dict {encoded_sample_dict}")
 
-            encoded_sample = [dict(zip(feature_names, arr)) for arr in encoded_sample]
-            print(f"sample dict {encoded_sample}")
+            y = sample[PredictionField.GROUND_TRUTH]
 
-            for x in encoded_sample:
-                print(f"x {x}")
-                prediction = self.model_instance.predict_one(x)
+            for encoded_sample in encoded_sample_dict:
+                prediction = self.model_instance.predict_one(encoded_sample)
+                self.model_instance.learn_one(encoded_sample, y) # After scaling, learn
+
+        # for sample, encoded_sample in data:
+        #     i = i+1
+        #     start_time_ref = time.process_time_ns()
+        #     print(f"Enc sample {encoded_sample}")
+
+        #     if isinstance(sample, list):
+        #         # Handle the list with multiple samples used together with
+        #         # xarray DataArray encodings.
+        #         for f in sample:
+        #             labels.append(f[PredictionField.GROUND_TRUTH])
+        #         if not encoded_features:
+        #             encoded_features = [list(encoded_sample)]  # Convert to a list of lists
+        #         else:
+        #             # Instead of concatenating, extend the list directly
+        #             encoded_features.extend(encoded_sample)
+        #     else:
+        #         labels = sample[PredictionField.GROUND_TRUTH]
+        #         encoded_features = list(encoded_sample[0])  # Ensure this is a list
+
+        #     print(f"Enc feat {encoded_features}")
+                
+            
+        #     # print(f"Labels {labels}")
+        #     # print(f"Enc feat {encoded_features}")
+            
+        #     # Necessary to scale samples, but River only works with dictionaries, so transforming
+            
+        #     feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
+        #         'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
+        #         'feature11', 'feature12']
+
+        #     encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
+
+        #     # riverdataset = stream.iter_array(encoded_features, labels, feature_names=['x1', 'x2', 'x3', 'x4'])
+
+        #     for x, y in zip(encoded_features, labels):
+        #         print(x, y)
+        #         # self.scaler.learn_one(x)
+        #         # x = self.scaler.transform_one(x)  # Scale the features
+        #         prediction = self.model_instance.predict_one(x)
+        #         self.model_instance.learn_one(x, y) # After scaling, learn
+
 
                 self.sample_count += 1
                 if self.sample_count % self.save_interval == 0 and not self.skip_saving_model:
                     self._save_model()
 
-            if i<25:
-                print(prediction)
+                if i<25:
+                    print(f"Prediction is {prediction}")
 
             if isinstance(sample, list):
                 for i, s in enumerate(sample):
@@ -222,6 +269,7 @@ class HoeffAdapTreeModel(IAnomalyDetectionModel):
         
         report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
     
+
     def evaluate(self, data: Generator, **kwargs):
 
 

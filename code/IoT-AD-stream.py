@@ -10,6 +10,13 @@ from collections import deque
 from collections import Counter
 
 
+from river import anomaly, tree, linear_model, forest
+from river import preprocessing, stream, datasets
+from river import model_selection, optim, bandit
+from river import metrics, evaluate
+from river import utils
+
+
 import common.global_variables as global_variables
 from common.functions import report_performance, time_now, project_root, git_tag
 from dataloaders import *
@@ -80,6 +87,13 @@ def main(args_config_path, args_influx_token):
 
     # Re-logging the path because file-based logger was not initialized before.
     log.debug(f"Running configuration: {config_path}")
+
+
+
+
+    #######################################################################################################################
+    #######################################################################################################################
+    ### SECTION OF DATA PROCESSING
 
 
 
@@ -277,7 +291,6 @@ def main(args_config_path, args_influx_token):
 
         ###########################
         #### SAVING DATA IN CSV ###
-        ###########################
 
         # 2024-10-08: IMPLEMENT SAVING SCHEME. Problem is: encoded_features is a structure with 2 elements: samples and ecoding.
         # The first is a numpy array of all elements of the sample (including ground_truth), while the second is a list of the encoded features.
@@ -290,126 +303,268 @@ def main(args_config_path, args_influx_token):
         
         ################################
         ### DATA FROM PROCESSED CSV  ###
-        ################################
 
         print("Implement loading processed csv")
 
 
 
-    #############################
-    ### TRAIN MODEL OFFLINE ###
-    #############################
+    #######################################################################################################################
+    #######################################################################################################################
+    ### SECTION OF ML TRAINING / TESTING
 
-    if model_specification["ml_task"] == "train":
-    #if model_specification["train"]:
-    #if you want to perform training and testing in the same run, do the following:
-    # 1) delete model_specification["ml_task"] == "train": (and equivalent line from training code block)
-    # 2) uncomment line below
-    # 3) delete flag "ml_task" from config file
-    # 4) create 2 new boolean flags: "train" and "test"
 
-        if model_specification["new_model"]:
-    
-            if model_specification["dataflow"] == "batch":
+    ######################
+    ### BATCH LEARNING ###
+    ######################
+
+    # ML models based on scikit-learn and data structure based on numpy arrays. (It is different for STREAM LEARNING)
+
+    if model_specification["data_flow"] == "batch":
+
+
+        ###########################
+        ### Train model offline ###
+        ###########################
+
+        if model_specification["ml_task"] == "train":
+
+            if model_specification["new_model"]:
+
             # perform training for the first time
                 # Train the model via batch of data
                 model_instance.train(
                     encoded_feature_generator, path_to_store=model_instance.store_file
                 )
-            
-            if model_specification["dataflow"] == "stream":
-                model_instance.train(
-                    encoded_feature_generator, path_to_store=model_instance.store_file
-                )
-            
-        else:
+                
+            else:
 
-            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
-            # model_instance.load(model_instance.store_file)
-            
-            # Also, if models exists and flag "train" is true, the model will be incrementally improved on top of previous training
-        
-            if model_specification["dataflow"] == "batch":
+                # New model: instantiation handles new or load model by itself. Old: If models exists, always load
+                # model_instance.load(model_instance.store_file)
+
                 log.error("Batch ML does not incrementally improve already existing models!")
                 exit(1)
+            
+
+
+
+        ##########################
+        ### Test model offline ###
+        ##########################
         
-            if model_specification["dataflow"] == "stream":
+        if model_specification["ml_task"] == "test":
+
+            #####################
+            ### Init reporter ###
+            #####################
+
+            reporter_instances: List[IReporter] = []
+
+            # Initialize reporter
+            for output in configuration["OUTPUT"]:
+                reporter_name = output["class"]
+                reporter_class = globals()[reporter_name]
+                reporter_instance = reporter_class(**output["kwargs"])
+                # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
+                # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
+                reporter_instances.append(reporter_instance)
+        
+            
+            ##############################
+            ### Learn / Test Whole-set ###
+            ##############################
+
+            if model_specification["sampling_rate"] == "whole_set":
+
+                if model_specification["new_model"]:
+            
+                    # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+                    for predicted_sample in model_instance.predict(encoded_feature_generator):
+                        for reporter_instance in reporter_instances:
+                            reporter_instance.report(predicted_sample)
+
+        
+                else:
+
+                    # New model: instantiation handles new or load model by itself. Old: If models exists, always load
+                    # model_instance.load(model_instance.store_file)
+                    
+                    # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+                    for predicted_sample in model_instance.predict(encoded_feature_generator):
+                        for reporter_instance in reporter_instances:
+                            reporter_instance.report(predicted_sample)
+        
+
+
+            #####################################
+            ### Learn / Test Sample-by-sample ###
+            #####################################
+
+            elif model_specification["sampling_rate"] == "incremental":
+
+                x = []
+                y = []
+
+                for samples, encoding in encoded_feature_generator:
+                    if isinstance(samples, list):
+                        # Handle the list with multiple samples used together with
+                        # xarray DataArray encodings.
+                        for f in samples:
+                            y.append(f["ground_truth"])
+                        if len(x) == 0:
+                            x = encoding
+                        else:
+                            x = numpy.concatenate((x, encoding), axis=0)
+                    else:
+                        y.append(samples["ground_truth"])
+                        x.append(encoding[0])
+
+                model_instance.evaluate(x, y)
+
+
+
+
+    #######################################################################################################################
+
+
+
+    #######################
+    ### STREAM LEARNING ###
+    #######################
+
+    # ML models based on River and data structure based on dictionaries. (It is different for BATCH LEARNING!)
+
+    elif model_specification["data_flow"] == "stream":
+
+        #############
+        ### Train ###
+        #############
+        
+        if model_specification["ml_task"] == "train":
+
+            if model_specification["new_model"]:
+
+                model_instance.train(
+                    encoded_feature_generator, path_to_store=model_instance.store_file
+                )
+                
+            else:
+
+                # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
+                # model_instance.load(model_instance.store_file)
+                
                 model_instance.train(
                     encoded_feature_generator, path_to_store=model_instance.store_file
                 )
 
-    ####################################################
-    ### TEST MODEL OFFLINE / TRAIN-TEST MODEL ONLINE ###
-    ####################################################
-    
-    if model_specification["ml_task"] == "test":
-    #if model_specification["test"]:
-    #if you want to perform training and testing in the same run, do the following:
-    # 1) delete model_specification["ml_task"] == "test": (and equivalent line from training code block)
-    # 2) uncomment if model_specification["test"]:
-    # 3) delete flag "ml_task" from config file
-    # 4) create 2 new boolean flags: "train" and "test"
-    
 
+        ############
+        ### Test ###
+        ############
+        
+        elif model_specification["ml_task"] == "test":
 
-        #####################
-        ### INIT REPORTER ###
-        #####################
+            #####################
+            ### Init reporter ###
+            #####################
 
-        reporter_instances: List[IReporter] = []
+            if model_specification["sampling_rate"] != "incremental":
+                reporter_instances: List[IReporter] = []
 
-        # Initialize reporter
-        for output in configuration["OUTPUT"]:
-            reporter_name = output["class"]
-            reporter_class = globals()[reporter_name]
-            reporter_instance = reporter_class(**output["kwargs"])
-            # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
-            # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
-            reporter_instances.append(reporter_instance)
-
-        if model_specification["new_model"]:
-    
-            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
-            for predicted_sample in model_instance.predict(encoded_feature_generator):
-                for reporter_instance in reporter_instances:
-                    reporter_instance.report(predicted_sample)
-
-           # TODO: substitute lines below the if above by the commented lines below, to differentiate between batch and stream testing in case you need it.
-            # There will be one of the blocks below for each testing.
-            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
-            #     test()
-            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
-            #     streamtest()
-
- 
-        else:
-
-            # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
-            # model_instance.load(model_instance.store_file)
+                # Initialize reporter
+                for output in configuration["OUTPUT"]:
+                    reporter_name = output["class"]
+                    reporter_class = globals()[reporter_name]
+                    reporter_instance = reporter_class(**output["kwargs"])
+                    # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
+                    # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
+                    reporter_instances.append(reporter_instance)
+        
             
-            # TODO: substitute lines below the else above by the commented lines below, to differentiate between batch and stream testing in case you need it.
-            # There will be one of the blocks below for each testing.
-            # if data_source["loader"]["kwargs"].get("dataflow") == "batch":
-            #     test()
-            # if data_source["loader"]["kwargs"].get("dataflow") == "stream":
-            #     streamtest()
- 
+            ##############################
+            ### Learn / Test Whole-set ###
+            ##############################
 
-            # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
-            for predicted_sample in model_instance.predict(encoded_feature_generator):
-                for reporter_instance in reporter_instances:
-                    reporter_instance.report(predicted_sample)
+            if model_specification["sampling_rate"] == "whole_set":
+
+                if model_specification["new_model"]:
+            
+                    # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+                    for predicted_sample in model_instance.predict(encoded_feature_generator):
+                        for reporter_instance in reporter_instances:
+                            reporter_instance.report(predicted_sample)
 
         
-        # Reporters may require special shutdown steps, for example disconnecting from
-        # remote database or printing summaries of the processing -- call the handle for
-        # each reporter.
+                else:
+
+                    # CORRECTION: instantiation handles new or load model by itself. OLD: If models exists, always load
+                    # model_instance.load(model_instance.store_file)
+                    
+
+                    # Evaluate testing dataset, sample by sample efficiently, using Python generator keyword "yield" instead of "return" (see inside model_instance.predict method)
+                    for predicted_sample in model_instance.predict(encoded_feature_generator):
+                        for reporter_instance in reporter_instances:
+                            reporter_instance.report(predicted_sample)
+                    # if data_source["loader"]["kwargs"].get("data_flow") == "stream":
+                    #     streamtest()
+        
+            #####################################
+            ### Learn / Test Sample-by-sample ###
+            #####################################
+
+            elif model_specification["sampling_rate"] == "incremental":
+
+                x = []
+                y = []
+
+                for samples, encoding in encoded_feature_generator:
+                    if isinstance(samples, list):
+                        # Handle the list with multiple samples used together with
+                        # xarray DataArray encodings.
+                        for f in samples:
+                            y.append(f["ground_truth"])
+                        if len(x) == 0:
+                            x = encoding
+                        else:
+                            x = numpy.concatenate((x, encoding), axis=0)
+                    else:
+                        y.append(samples["ground_truth"])
+                        x.append(encoding[0])
+                
+
+                # # Necessary to scale samples, but River only works with dictionaries, so transforming
+                feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
+                    'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
+                    'feature11', 'feature12']
+                encoded_x = [dict(zip(feature_names, arr)) for arr in x]
+                
+                riverdataset = stream.iter_array(x, y, feature_names=['x1', 'x2', 'x3', 'x4'])
+                cummulative_accuracies = model_instance.evaluate(riverdataset)
+                
+
+
+
+    #######################################################################################################################
+    #######################################################################################################################
+    ### SECTION OF FINALIZATION OF PROCESS
+
+
+
+    ###################################
+    ### SHUTDOWN REPORTERS (REMOTE) ###
+    ###################################
+
+    if model_specification["sampling_rate"] != "incremental":
+
+    # Reporters may require special shutdown steps, for example disconnecting from
+    # remote database or printing summaries of the processing -- call the handle for
+    # each reporter.
+
         for reporter_instance in reporter_instances:
             reporter_instance.end_processing()
 
         if not model_specification["skip_saving_model"]:
             model_instance._save_model()
-            
+
 
 
     ########################

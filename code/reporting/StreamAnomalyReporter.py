@@ -15,37 +15,29 @@ from datetime import datetime
 import pickle
 
 
-class AccuracyReporter(IReporter):
+class StreamAnomalyReporter(IReporter):
+    """
+    Can only be used when PredictionField.GROUND_TRUTH is known!
+    """
+
     def __init__(self, **kwargs):
-        
-        # self.model_param = model_param if model_param is not None else {}
-        # self.grace_period = self.model_param.get("grace_period", 0)  # Default to 0 if not provided
+        super().__init__(**kwargs)
         self.ground_truths = []
         self.predicted_labels = []
-        self.counter = 0
-
-        super().__init__(**kwargs)
-
+        self.anomaly_scores = []
+        self.anomaly_threshold = []
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
-        # self.predicted_labels.append(features[PredictionField.OUTPUT_CLASS])
-        self.counter = self.counter +1
+        self.anomaly_scores.append(features[PredictionField.ANOMALY_SCORE])
+        self.anomaly_threshold.append(features[PredictionField.ANOMALY_THRESHOLD])
 
     def end_processing(self):
+
         log = PipelineLogger.get_logger()
-
-        # print(self.ground_truths)
-        # print(self.predicted_labels)
-        # self.ground_truths = self.ground_truths[self.grace_period:]
-        # self.predicted_labels = self.predicted_labels[self.grace_period:]
+        
         labels = sorted(set(self.ground_truths + self.predicted_labels))
-        # labels = sorted(set([0, 1]))
-
-        # print(self.predicted_labels[101:])
-        # self.ground_truths = self.ground_truths[101:]
-        # self.predicted_labels = self.predicted_labels[101:]
 
         # Calculate confusion matrix
         cnf_matrix = confusion_matrix(self.ground_truths, self.predicted_labels, labels=labels)
@@ -55,14 +47,20 @@ class AccuracyReporter(IReporter):
         # cnf_matrix[1, 1], cnf_matrix[1, 0] = cnf_matrix[1, 0], cnf_matrix[1, 1]
 
 
+        ###########################################################################
+        
+        # LABELS FOR FIGURES
 
         caseclass = 1;
         caseanom = 3;
         labelsName = ["Benign", "Malicious"]
+        # labelsName = ["Benign", "Malicious"]
         # labelsName = ["Benign", "Bruteforce"]
         # labelsName = ["Benign", "MalariaDOS"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Flood", "SlowITE", "Malformed"]
+                # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE"]
+        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE", "Flood"]
         
         def caseclasstype1():
             return "Binary class"
@@ -80,21 +78,24 @@ class AccuracyReporter(IReporter):
         def caseanomtype2():
             return "Anomaly (1): MalariaDOS"
         def caseanomtype3():
-            return "Anomalies (2): Brute + MalDOS"
+            return "Anomaly (1): Flood"
         def caseanomtype4():
+            return "Anomalies (2): Brute + MalDOS"
+        def caseanomtype5():
             return "Anomalies (5): all MQTTset"
         casesan = {
             1: caseanomtype1,
             2: caseanomtype2,
             3: caseanomtype3,
-            4: caseanomtype4
+            4: caseanomtype4,
+            5: caseanomtype5
         }
         
         def switch_caseanom(case):
             return casesan.get(case, lambda: "Invalid case")()
 
 
-###########################################################################
+        ###########################################################################
         
         # OUTPUT FILES
 
@@ -108,7 +109,7 @@ class AccuracyReporter(IReporter):
         image_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.png')
         imagetime_path = os.path.join(output_dir, f'{current_time}_timeseriesanomaly.png')
         image_roc_auc_path = os.path.join(output_dir, f'{current_time}_roc_auc.png')
-        text_path = os.path.join(output_dir, f'{current_time}_features_labels.txt')
+        text_path = os.path.join(output_dir, f'{current_time}_features_scores_labels.txt')
         
         # Create text file with results of confusion matrix
         with open(imagepkl_path, 'wb') as file:
@@ -117,16 +118,17 @@ class AccuracyReporter(IReporter):
         with open(text_path, "w") as file:
             
             # Print headers for readability (optional)
-            file.write("Label\n")
+            file.write("Label\tScore\n")
             file.write("-" * 20 + "\n")
             
             # Iterate over the range of the maximum length
             for i in range(len(self.predicted_labels)):
                 # Get elements or default to empty if the vector is shorter
                 elem1 = self.predicted_labels[i]
+                elem2 = self.anomaly_scores[i]
                 
                 # Write elements side by side with a tab separator
-                file.write(f"{elem1}\n")
+                file.write(f"{elem1}\t{elem2}\n")
 
 
         ### PERFORMANCE METRICS
@@ -208,17 +210,17 @@ class AccuracyReporter(IReporter):
 
         # Example data
         timestamps = np.arange(0, len(self.predicted_labels))  # Example: time points from 0 to 99
-        pred_labels = np.array(self.predicted_labels)
+        anomaly_scores = np.array(self.anomaly_scores)
 
         # Plotting the time-series scores
         plt.figure(figsize=(10, 6))  # Create a figure with a specific size
 
-        plt.plot(timestamps, pred_labels, label='Predictions', color='b', linestyle='-', marker='.', markersize=0.5)
+        plt.plot(timestamps, anomaly_scores, label='Anomaly Scores', color='b', linestyle='-', marker='.', markersize=0.5)
 
         # Adding labels and title
         plt.xlabel('Sample')
-        plt.ylabel('Prediction')
-        plt.title('Time-Series Predictions')
+        plt.ylabel('Anomaly Score')
+        plt.title('Time-Series Anomaly Scores')
 
         # Adding a grid for better readability
         plt.grid(True)
@@ -226,9 +228,12 @@ class AccuracyReporter(IReporter):
         # Optional: Highlighting thresholds or specific anomalies
         # Example: Highlight scores above a threshold (e.g., 0.8)
         # threshold = 0.230
-        # high_anomalies = self.predicted_labels > threshold
-        # plt.plot(timestamps[high_anomalies], self.predicted_labels[high_anomalies], 'ro', label='High Anomalies')
+        # high_anomalies = anomaly_scores > threshold
+        # plt.plot(timestamps[high_anomalies], anomaly_scores[high_anomalies], 'ro', label='High Anomalies')
         # plt.plot(y=anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+        anomaly_threshold = np.array(self.anomaly_threshold)
+        plt.plot(timestamps, anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+
 
         # Add a legend
         plt.legend()
@@ -280,12 +285,12 @@ class AccuracyReporter(IReporter):
         ############ ROC AND AUC
 
         # Calculate the ROC curve
-        fpr, tpr, thresholds = roc_curve(self.ground_truths, self.predicted_labels)
+        fpr, tpr, thresholds = roc_curve(self.ground_truths, anomaly_scores)
 
         # Calculate the AUC
         roc_auc = auc(fpr, tpr)
         # Alternatively, you can use roc_auc_score directly on the true labels and predicted scores
-        roc_auc_alternative = roc_auc_score(self.ground_truths, self.predicted_labels)
+        roc_auc_alternative = roc_auc_score(self.ground_truths, anomaly_scores)
 
         # Plot the ROC curve
         plt.figure()
@@ -297,16 +302,14 @@ class AccuracyReporter(IReporter):
         plt.ylabel('True Positive Rate')
         plt.title('Receiver Operating Characteristic')
         plt.legend(loc="lower right")
-        print(labels)
-
         plt.savefig(image_roc_auc_path)
+           
 
-    @staticmethod
     def input_signature() -> List[IFeature]:
         return [
             PredictionField.MODEL_NAME,
-            PredictionField.OUTPUT_CLASS,
             PredictionField.OUTPUT_BINARY,
             PredictionField.GROUND_TRUTH,
+            PredictionField.ANOMALY_SCORE,
             
         ]

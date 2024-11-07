@@ -6,6 +6,8 @@ import numpy
 import numpy as np
 from joblib import dump, load
 
+from datetime import datetime
+
 from sklearn.ensemble import RandomForestClassifier
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
@@ -70,8 +72,8 @@ class RandomForestModel(IAnomalyDetectionModel):
 
         training_start = time.process_time_ns()
         self.model_instance = RandomForestClassifier()
-        print(encoded_features)
-        print(type(encoded_features))
+        # print(encoded_features)
+        # print(type(encoded_features))
         self.model_instance.fit(encoded_features, labels)
         training_time = time.process_time_ns() - training_start
 
@@ -83,8 +85,10 @@ class RandomForestModel(IAnomalyDetectionModel):
         if not self.skip_saving_model:
             dump(self.model_instance, self.store_file)
 
-    def load(self):
+    def load(self, **kwargs):
         self.model_instance = load(self.store_file)
+        if not self.model_instance:
+            log.error(f"Failed to load model from: {self.store_file}")
 
     def predict(self, data: EncodedSampleGenerator, **kwargs) ->SampleGenerator:
         # Requirements for encoded data:
@@ -115,3 +119,49 @@ class RandomForestModel(IAnomalyDetectionModel):
                 yield sample
 
         report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
+
+
+    def evaluate(self, x: list, y: list, **kwargs) ->SampleGenerator:
+
+        # Perform incremental evaluation on chunks
+        progressive_accuracies = []
+        cumulative_correct = 0  # To track correct predictions cumulatively
+        total_samples = 0  # To track total number of samples seen so far
+        cumulative_accuracies = []  # To store cumulative accuracies
+
+        chunk_size = 1
+        for i in range(0, len(x), chunk_size):
+            X_chunk = x[i:i + chunk_size]
+            y_chunk = y[i:i + chunk_size]
+            
+            # Predict on the current chunk
+            y_pred = self.model_instance.predict(X_chunk)
+            
+            # Calculate the accuracy for this chunk
+                # Update correct predictions and total samples
+            cumulative_correct += sum(y_pred == y_chunk)
+            total_samples += len(y_chunk)
+            
+            # Calculate cumulative accuracy
+            cumulative_accuracy = (cumulative_correct / total_samples) * 100
+            cumulative_accuracies.append(cumulative_accuracy)
+
+        # print(cumulative_accuracies)
+
+        # Plot the cumulative accuracy as a time series
+        plt.figure(figsize=(10, 6))
+        plt.plot(cumulative_accuracies, label='Cumulative Accuracy (%)', color='b', linestyle='-', marker='o')
+        plt.ylim(60, 100)
+
+        # Add labels and title
+        plt.title('Cumulative Accuracy Over Time')
+        plt.xlabel('Data Points Processed')
+        plt.ylabel('Cumulative Accuracy (%)')
+        plt.grid(True)
+        plt.legend()
+
+        # Save the plot as a PNG file in the current folder
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        plt.savefig(f'configurations/zplots/{current_time}_cumulative_accuracy_plot_batch_{self.model_name}.png')
+        plt.ylim(0, 100)
+        plt.savefig(f'configurations/zplots/{current_time}_cumulative_accuracy_plot_batch_{self.model_name}_100.png')

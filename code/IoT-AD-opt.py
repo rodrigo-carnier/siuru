@@ -17,7 +17,7 @@ np.int = np.int32
 np.bool = np.bool_
 
 
-from river import anomaly, tree, linear_model
+from river import anomaly, tree, linear_model, forest
 from river import preprocessing, stream, datasets
 from river import model_selection, optim, bandit
 from river import metrics, evaluate
@@ -25,8 +25,11 @@ from river import utils
 
 # from scipy import integrate
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from joblib import dump, load
+import matplotlib.pyplot as plt
 
-from river.metrics import ConfusionMatrix, ROCAUC
 
 import common.global_variables as global_variables
 from common.functions import report_performance, time_now, project_root, git_tag
@@ -49,6 +52,7 @@ def main(args_config_path, args_influx_token):
 
     pipeline_execution_start = time.process_time_ns()
     log_time_tag = time_now()
+    opt_option = 5
 
     ####################
     ### CONFIG FILES ###
@@ -233,17 +237,27 @@ def main(args_config_path, args_influx_token):
 
 
 
-        #####################
-        ### INIT MODEL(S) ###
-        #####################
 
-        # Initialize model class based on the component specification in the configuration.
-        model_specification = configuration["MODEL"]
-        model_name = model_specification["class"]
-        model_class = globals()[model_name]
-        model_instance: IAnomalyDetectionModel = model_class(
-            full_config_json=json.dumps(configuration, indent=4), **model_specification
-        )
+        if opt_option == 6:
+
+            # Train a RandomForestClassifier
+            
+            model_specification = configuration["MODEL"]
+
+
+        else:
+
+            #####################
+            ### INIT MODEL(S) ###
+            #####################
+
+            # Initialize model class based on the component specification in the configuration.
+            model_specification = configuration["MODEL"]
+            model_name = model_specification["class"]
+            model_class = globals()[model_name]
+            model_instance: IAnomalyDetectionModel = model_class(
+                full_config_json=json.dumps(configuration, indent=4), **model_specification
+            )
 
 
 
@@ -367,7 +381,7 @@ def main(args_config_path, args_influx_token):
 
     
 
-    opt_option = 3
+    
 
 
     if opt_option == 1:
@@ -447,25 +461,30 @@ def main(args_config_path, args_influx_token):
 
     elif opt_option == 3:
 
+        # model = (
+        #     preprocessing.StandardScaler() |
+        #     tree.HoeffdingAdaptiveTreeClassifier(leaf_prediction='nba')
+        # )
+
+        # optimizer = optim.Adam()
+        # optimizer = (optim.SGD)
+        # optimizer = (optim.AdaMax)
+        # optimizer = (optim.Adam)
+        # optimizer = (optim.AdaGrad)
+        # optimizer = (optim.AdaDelta)
+        optimizer = (optim.AdaBound)
+        # optimizer = (optim.AMSGrad)
+
         model = (
             preprocessing.StandardScaler() |
-            tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, leaf_prediction='nba')
+            tree.HoeffdingAdaptiveTreeClassifier(leaf_prediction='nba')
         )
-
         models = utils.expand_param_grid(model,
             {
+                'grace_period': [100, 250, 500, 1000],
                 'max_depth': [1, 2, 3],
                 'tau': [0.01, 0.05, 0.1],
-                'nb_threshold': [0, 1, 2],
-                'optimizer': [
-                    (optim.SGD),
-                    (optim.AdaMax),
-                    (optim.Adam),
-                    (optim.AdaGrad),
-                    (optim.AdaDelta),
-                    (optim.AdaBound),
-                    (optim.AMSGrad),
-                    ]
+                'nb_threshold': [0, 1, 2]
             }
         )
         #         'optimizer': [
@@ -512,6 +531,10 @@ def main(args_config_path, args_influx_token):
         print(f"Tau: {best_classifier.tau}")
         print(f"Naive Bayes Threshold: {best_classifier.nb_threshold}")
         print(f"Split criterion: {best_classifier.split_criterion}")
+        print(f"Switch significance: {best_classifier.switch_significance}")
+        print(f"Delta: {best_classifier.delta}")
+        print(f"Binary split: {best_classifier.binary_split}")
+        print(f"Min branch fraction: {best_classifier.min_branch_fraction}")
 
         # To access the optimizer, assuming it is set as an attribute in the classifier
         if hasattr(best_classifier, 'optimizer'):
@@ -530,6 +553,233 @@ def main(args_config_path, args_influx_token):
         else:
             print("No optimizer found in the classifier.")
         
+    elif opt_option == 4:
+
+
+        # optimizer = optim.Adam()
+        # optimizer = (optim.SGD)
+        # optimizer = (optim.AdaMax)
+        # optimizer = (optim.Adam)
+        # optimizer = (optim.AdaGrad)
+        # optimizer = (optim.AdaDelta)
+        optimizer = (optim.AdaBound)
+        # optimizer = (optim.AMSGrad)
+
+        model = (
+            preprocessing.StandardScaler() |
+            forest.ARFClassifier(leaf_prediction='nba')
+        )
+        models = utils.expand_param_grid(model,
+            {
+                'grace_period': [100, 250, 500, 1000],
+                'n_models': [5, 10, 20],
+                'max_depth': [1, 5, 10],
+                'tau': [0.01, 0.05, 0.1],
+                'nb_threshold': [0, 1, 2]
+            }
+        )
+        #         'optimizer': [
+        #             (optim.SGD, {'lr': [.1, .01, .005]}),
+        #             (optim.Adam, {'beta_1': [.01, .001], 'lr': [.1, .01, .001]}),
+        #             (optim.Adam, {'beta_1': [.1], 'lr': [.001]}),
+        #             ]
+        #     }
+        # )
+
+        print(models[2])
+
+
+        sh = model_selection.BanditClassifier(
+            models,
+            metric=metrics.Accuracy(),
+            policy=bandit.EpsilonGreedy(
+                epsilon=0.1,
+                decay=0.001,
+                burn_in=20,
+                seed=42
+            )
+        )
+
+        evaluate.progressive_val_score(
+            dataset=riverdataset,
+            model=sh,
+            metric=metrics.Accuracy(),
+            print_every=100
+        )
+
+        print("Output Bandit")
+        print(sh.best_model)
+        # sh.best_model gives you the best pipeline (StandardScaler | HoeffdingAdaptiveTreeClassifier)
+        best_pipeline = sh.best_model
+
+        # Access the HoeffdingAdaptiveTreeClassifier inside the pipeline
+        best_classifier = best_pipeline['ARFClassifier']
+
+        # # Now you can print its parameters
+        print(f"Best Classifier Details: {best_classifier}")
+        print(f"Grace Period: {best_classifier.grace_period}")
+        print(f"N_models: {best_classifier.n_models}")
+        print(f"Max Depth: {best_classifier.max_depth}")
+        print(f"Tau: {best_classifier.tau}")
+        print(f"Naive Bayes Threshold: {best_classifier.nb_threshold}")
+        print(f"Split criterion: {best_classifier.split_criterion}")
+        print(f"Delta: {best_classifier.delta}")
+        print(f"Binary split: {best_classifier.binary_split}")
+        print(f"Min branch fraction: {best_classifier.min_branch_fraction}")
+
+        # To access the optimizer, assuming it is set as an attribute in the classifier
+        if hasattr(best_classifier, 'optimizer'):
+            optimizer = best_classifier.optimizer
+            print(f"Optimizer Type: {type(optimizer).__name__}")
+            
+            if isinstance(optimizer, optim.SGD):
+                print(f"Learning Rate (lr): {optimizer.lr}")
+                
+            elif isinstance(optimizer, optim.Adam):
+                print(f"Learning Rate (lr): {optimizer.lr}")
+                print(f"Beta_1: {optimizer.beta_1}")
+                print(f"Beta_2: {optimizer.beta_2}")
+                print(f"Eps: {optimizer.eps}")
+
+        else:
+            print("No optimizer found in the classifier.")
+
+
+    elif opt_option == 5:
+
+        model = (
+            # preprocessing.StandardScaler() |
+            forest.ARFClassifier(seed=8, leaf_prediction="mc", grace_period=50, n_models=10, tau=0.05)
+        )
+
+        steps = evaluate.iter_progressive_val_score(
+            dataset=riverdataset,
+            model=model,
+            metric=metrics.Accuracy(),
+        )
+        cumulative_accuracies = []
+
+        for step in steps:
+            accuracy_value = step['Accuracy'].get() * 100  # Get the accuracy as a percentage
+            cumulative_accuracies.append(accuracy_value)  # Append to the list
+            print(accuracy_value)
+
+        # Plot the cumulative accuracy as a time series
+        plt.figure(figsize=(10, 6))
+        plt.plot(cumulative_accuracies, label='Cumulative Accuracy (%)', color='b', linestyle='-', marker='o')
+        plt.ylim(70, 100)
+
+        # Add labels and title
+        plt.title('Cumulative Accuracy Over Time')
+        plt.xlabel('Data Points Processed')
+        plt.ylabel('Cumulative Accuracy (%)')
+        plt.grid(True)
+        plt.legend()
+
+        # Save the plot as a PNG file in the current folder
+        plt.savefig('configurations/zplots/cumulative_accuracy_plot_river.png')
+
+        # Show the plot
+        plt.show()
+
+        # steps = evaluate.progressive_val_score(
+        #     dataset=riverdataset,
+        #     model=model,
+        #     metric=metrics.Accuracy(),
+        #     print_every=100
+        # )
+
+        # # Calculate cumulative accuracy over the steps
+        # for i, step in enumerate(steps):
+        #     cumulative_accuracy = step['metric'].get()
+        #     cumulative_accuracies.append(cumulative_accuracy * 100)  # Convert to percentage
+
+        # # Plot the cumulative accuracy as a time series
+        # plt.figure(figsize=(10, 6))
+        # plt.plot(cumulative_accuracies, label='Cumulative Accuracy (%)', color='b', linestyle='-', marker='o')
+
+        # # Add labels and title
+        # plt.title('Cumulative Accuracy Over Time')
+        # plt.xlabel('Data Points Processed')
+        # plt.ylabel('Cumulative Accuracy (%)')
+        # plt.grid(True)
+        # plt.legend()
+
+        # # Save the plot as a PNG file in the current folder
+        # plt.savefig('configurations/zplots/cumulative_accuracy_plot_river.png')
+
+
+        # # Show the plot
+        # plt.show()
+
+    elif opt_option == 6:
+
+        # Train a RandomForestClassifier
+        model = RandomForestClassifier(n_estimators=10)
+
+
+
+        # Define the folder path where the model will be saved
+        # folder_path = 'models/packet-single-sub-rf-sup3-edge'
+        folder_path = 'models/flow-single-sub-rf-sup3-edge'
+
+        # Ensure the folder exists, create it if necessary
+        os.makedirs(folder_path, exist_ok=True)
+
+        # Define the full path including the file name where the model will be stored
+        store_file = os.path.join(folder_path, 'rf.pickle')
+
+
+        if configuration["MODEL"]["ml_task"] == "train":
+            model.fit(x, y)  # Fit the model once on all data
+            dump(model, store_file)
+
+        elif configuration["MODEL"]["ml_task"] == "test":
+
+            model = load(store_file)
+            # Now, perform incremental evaluation on chunks
+            progressive_accuracies = []
+            cumulative_correct = 0  # To track correct predictions cumulatively
+            total_samples = 0  # To track total number of samples seen so far
+            cumulative_accuracies = []  # To store cumulative accuracies
+
+            chunk_size = 1
+            for i in range(0, len(x), chunk_size):
+                X_chunk = x[i:i + chunk_size]
+                y_chunk = y[i:i + chunk_size]
+                
+                # Predict on the current chunk
+                y_pred = model.predict(X_chunk)
+                
+                # Calculate the accuracy for this chunk
+                    # Update correct predictions and total samples
+                cumulative_correct += sum(y_pred == y_chunk)
+                total_samples += len(y_chunk)
+                
+                # Calculate cumulative accuracy
+                cumulative_accuracy = (cumulative_correct / total_samples) * 100
+                cumulative_accuracies.append(cumulative_accuracy)
+
+            print(cumulative_accuracies)
+
+            # Plot the cumulative accuracy as a time series
+            plt.figure(figsize=(10, 6))
+            plt.plot(cumulative_accuracies, label='Cumulative Accuracy (%)', color='b', linestyle='-', marker='o')
+            plt.ylim(70, 100)
+
+            # Add labels and title
+            plt.title('Cumulative Accuracy Over Time')
+            plt.xlabel('Data Points Processed')
+            plt.ylabel('Cumulative Accuracy (%)')
+            plt.grid(True)
+            plt.legend()
+
+            # Save the plot as a PNG file in the current folder
+            plt.savefig('configurations/zplots/cumulative_accuracy_plot.png')
+
+            # Show the plot
+            plt.show()
+
 
     # ### OPTUNA
 
@@ -631,7 +881,7 @@ def main(args_config_path, args_influx_token):
 
     # # Initialize metrics
     # confusion_matrix = ConfusionMatrix()
-    # roc_auc = ROCAUC()
+    # roc_auc = metrics.ROCAUC()
 
     # # Reset the generator to evaluate the model on the dataset
     # riverdataset = stream.iter(river_generator(encoded_feature_generator))
