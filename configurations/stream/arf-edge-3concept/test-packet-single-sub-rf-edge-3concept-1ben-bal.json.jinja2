@@ -1,0 +1,196 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+    "DATA_SOURCES": [
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor11.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/pwdattack.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 1,
+                    "use_full_dataset": false,
+                    "n_packets": 501
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor12.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/portscanning.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 501
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor13.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/backdoor.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 501
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "MODEL":
+    {
+        "class": "ARFModel",
+        "dataflow": "stream",
+        "data_format": "raw_pcap",
+        "ml_task": "test",
+        "randomize_samples": true,
+        "new_model": false,
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-rf-sup3-edge",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "encoder":
+        {
+            "class": "DefaultEncoder",
+            "kwargs": {
+                "feature_filter": [
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin"
+                ]
+            }
+        }
+    },
+    "OUTPUT": [
+        {
+            "class": "StreamClassifReporter",
+            "kwargs": {}
+        }
+    ],
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}

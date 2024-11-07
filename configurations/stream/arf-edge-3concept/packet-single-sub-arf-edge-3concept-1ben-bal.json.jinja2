@@ -11,7 +11,7 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 1000
+                    "n_packets": 500
                 }
             },
             "featextractors": [
@@ -31,11 +31,11 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/tcpsynflood.pcap",
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/pwdattack.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 999
+                    "n_packets": 501
                 }
             },
             "featextractors": [
@@ -59,7 +59,7 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
-                    "n_packets": 800
+                    "n_packets": 500
                 }
             },
             "featextractors": [
@@ -83,7 +83,55 @@
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 2,
                     "use_full_dataset": false,
-                    "n_packets": 700
+                    "n_packets": 501
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor13.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/backdoor.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 501
                 }
             },
             "featextractors": [
@@ -102,13 +150,14 @@
     ],
     "MODEL":
     {
-        "class": "HSTreeModel",
+        "class": "ARFModel",
         "dataflow": "stream",
+        "data_format": "raw_pcap",
         "ml_task": "test",
         "randomize_samples": true,
         "new_model": true,
         "skip_saving_model": true,
-        "model_name": "flow-single-sub-hstree-unsup-bal",
+        "model_name": "packet-single-sub-arf-sup3-edge",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -133,7 +182,7 @@
     },
     "OUTPUT": [
         {
-            "class": "StreamReporter",
+            "class": "StreamClassifReporter",
             "kwargs": {}
         }
     ],

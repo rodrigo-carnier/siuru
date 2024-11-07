@@ -7,11 +7,11 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/benign/benign-train.pcap",
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor11.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 100
+                    "n_packets": 500
                 }
             },
             "featextractors": [
@@ -31,11 +31,11 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/malariados/malariados-train.pcap",
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/pwdattack.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 100
+                    "n_packets": 101
                 }
             },
             "featextractors": [
@@ -55,11 +55,83 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/MQTTset-reduced/bruteforce/bruteforce-train.pcapng",
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor12.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-                    "stream_concept_id": 1,
+                    "stream_concept_id": 2,
                     "use_full_dataset": false,
-                    "n_packets": 100
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/portscanning.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 2,
+                    "use_full_dataset": false,
+                    "n_packets": 101
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 1
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor13.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 500
+                }
+            },
+            "featextractors": [
+                {
+                    "class": "CppPacketExtractor",
+                    "kwargs": {}
+                },
+                {
+                    "class": "FileLabelExtractor",
+                    "kwargs": {
+                        "label_value": 0
+                    }
+                }
+            ]
+        },
+        {
+            "loader": {
+                "class": "PcapFileConverter",
+                "kwargs": {
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/backdoor.pcap",
+                    "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+                    "stream_concept_id": 3,
+                    "use_full_dataset": false,
+                    "n_packets": 101
                 }
             },
             "featextractors": [
@@ -78,14 +150,14 @@
     ],
     "MODEL":
     {
-        "class": "HoeffAdapTreeModel",
+        "class": "ARFModel",
         "dataflow": "stream",
         "data_format": "raw_pcap",
-        "ml_task": "train",
+        "ml_task": "test",
         "randomize_samples": true,
         "new_model": true,
-        "skip_saving_model": false,
-        "model_name": "packet-single-ssb-hoeff-sup-mqtt",
+        "skip_saving_model": true,
+        "model_name": "packet-single-sub-arf-sup3-edge",
         "model_storage_base_path": "{{ project_root }}/models",
         "encoder":
         {
@@ -110,7 +182,7 @@
     },
     "OUTPUT": [
         {
-            "class": "AccuracyReporter",
+            "class": "StreamClassifReporter",
             "kwargs": {}
         }
     ],

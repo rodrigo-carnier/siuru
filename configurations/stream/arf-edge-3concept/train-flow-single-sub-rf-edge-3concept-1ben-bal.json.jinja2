@@ -7,11 +7,11 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor11.pcap",
+                    "filepath": "{{ project_root }}/data/edge-iotset/benign/distancesensor5.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 5000
+                    "n_packets": 900
                 }
             },
             "featextractors": [
@@ -37,11 +37,11 @@
             "loader": {
                 "class": "PcapFileConverter",
                 "kwargs": {
-                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/httpflood.pcap",
+                    "filepath": "{{ project_root }}/data/edge-iotset/malicious/pwdattack.pcap",
                     "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
                     "stream_concept_id": 1,
                     "use_full_dataset": false,
-                    "n_packets": 5001
+                    "n_packets": 501
                 }
             },
             "featextractors": [
@@ -66,24 +66,15 @@
     ],
     "MODEL":
     {
-        "class": "HoeffAdapTreeModel",
+        "class": "ARFModel",
         "dataflow": "stream",
         "data_format": "raw_pcap",
-        "ml_task": "test",
-        "randomize_samples": true,
+        "ml_task": "train",
+        "randomize_samples": false,
         "new_model": false,
         "skip_saving_model": true,
-        "model_name": "flow-single-ssb-hoeff-sup-edge",
+        "model_name": "flow-single-sub-rf-sup3-edge2",
         "model_storage_base_path": "{{ project_root }}/models",
-        "model_param":
-        {
-            "grace_period": 0,
-            "delta": 1e-5,
-            "leaf_prediction": "nb",
-            "nb_threshold": 0,
-            "seed": 0,
-            "tau": 0.05
-        },
         "encoder":
         {
             "class": "DefaultEncoder",
@@ -99,7 +90,7 @@
     },
     "OUTPUT": [
         {
-            "class": "AccuracyReporter",
+            "class": "StreamClassifReporter",
             "kwargs": {}
         }
     ],
