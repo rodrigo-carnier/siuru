@@ -82,7 +82,8 @@ class PcapFileConverter(IDataLoader):
         new_feature_stream: List[Generator[Dict[Any, Any], None, None]],
         n_subsets_per_concept: List[int],
         packets_per_subset: List[int], 
-        labels: List[int]
+        labels: List[int],
+        seed: int = None
         ) -> Tuple[Generator[Dict[Any, Any], None, None], List[int]]:
         
         """
@@ -97,6 +98,8 @@ class PcapFileConverter(IDataLoader):
         - packets_per_subset: List of integers specifying the number of packets to sample
         from each subset.
         - labels: List of integers representing labels for each subset.
+        - seed: Optional integer to seed the randomization for reproducibility.
+
 
         Returns:
         - A tuple containing:
@@ -104,6 +107,10 @@ class PcapFileConverter(IDataLoader):
         - A list of integers representing the order of subdataset indices from which
             the samples were taken.
         """
+
+        # Seed the randomization
+        if seed is not None:
+            random.seed(seed)
 
         collected_samples = []
         collected_index = []
@@ -127,8 +134,6 @@ class PcapFileConverter(IDataLoader):
             subset_samples = []
             for stream in new_feature_stream[:n_generators]:
                 subset_samples.extend(stream)
-
-
             
             # Remove processed generators from the list
             new_feature_stream = new_feature_stream[n_generators:]
@@ -154,7 +159,8 @@ class PcapFileConverter(IDataLoader):
         n_subsets_per_concept: List[int],
         packets_per_subset: List[int], 
         labels: List[int],
-        max_flows_per_pick: int
+        max_flows_per_pick: int,
+        seed: int = None
         ) -> Tuple[Generator[Dict[Any, Any], None, None], List[int]]:
 
 
@@ -168,6 +174,10 @@ class PcapFileConverter(IDataLoader):
         - A list of integers representing the order of subdataset indices from which
         the samples were taken.
         """
+
+        # Seed the randomization
+        if seed is not None:
+            random.seed(seed)
 
         collected_samples = []
         collected_index = []

@@ -270,21 +270,34 @@ class AdaptativeRandomForestModel(IAnomalyDetectionModel):
         report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
     
 
-    def evaluate(self, data: Generator, **kwargs):
+    def evaluate(self, data: Generator, **kwargs) -> Tuple[list[int], list[float]]:
 
 
-        steps = evaluate.iter_progressive_val_score(
-                    dataset=data,
-                    model=self.model_instance,
-                    metric=metrics.Accuracy(),
-                )
+        metric = metrics.Accuracy()
 
+        y_pred = []
         cumulative_accuracies = []
 
-        for step in steps:
-            accuracy_value = step['Accuracy'].get() * 100  # Get the accuracy as a percentage
-            cumulative_accuracies.append(accuracy_value)  # Append to the list
-            # print(accuracy_value)
+        for x, y in data:
+
+            y_p = self.model_instance.predict_one(x)
+            y_pred.append(y_p)
+            metric.update(y, y_p)
+            cumulative_accuracies.append(metric.get() * 100)
+            self.model_instance.learn_one(x, y)
+
+        # steps = evaluate.iter_progressive_val_score(
+        #             dataset=data,
+        #             model=self.model_instance,
+        #             metric=metrics.Accuracy(),
+        #         )
+
+        # cumulative_accuracies = []
+
+        # for step in steps:
+        #     accuracy_value = step['Accuracy'].get() * 100  # Get the accuracy as a percentage
+        #     cumulative_accuracies.append(accuracy_value)  # Append to the list
+        #     # print(accuracy_value)
         
         # Plot the cumulative accuracy as a time series
         plt.figure(figsize=(10, 6))
@@ -300,8 +313,8 @@ class AdaptativeRandomForestModel(IAnomalyDetectionModel):
 
         # Save the plot as a PNG file in the current folder
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plt.savefig(f'configurations/zplots/{current_time}_cumulative_accuracy_plot_stream_{self.model_name}.png')
+        plt.savefig(f'configurations/zplots/{current_time}_{self.model_name}_cumulative_accuracy_plot_batch.png')
         plt.ylim(0, 100)
-        plt.savefig(f'configurations/zplots/{current_time}_cumulative_accuracy_plot_stream_{self.model_name}_100.png')
+        plt.savefig(f'configurations/zplots/{current_time}_{self.model_name}_cumulative_accuracy_plot_batch_100.png')
 
-        return cumulative_accuracies
+        return y_pred, cumulative_accuracies

@@ -24,10 +24,18 @@ class StreamClassifReporter(IReporter):
         super().__init__(**kwargs)
         self.ground_truths = []
         self.predicted_labels = []
+        self.model_name = kwargs.get('model_name', 'noname')
+
+    def set_model_name(self, name:str):
+        self.model_name = name
 
     def report(self, features: Dict[IFeature, Any]):
         self.ground_truths.append(features[PredictionField.GROUND_TRUTH])
         self.predicted_labels.append(features[PredictionField.OUTPUT_BINARY])
+
+    def report_eval(self, y: int, y_pred: int):
+        self.ground_truths.append(y)
+        self.predicted_labels.append(y_pred)
 
     def end_processing(self):
 
@@ -107,29 +115,30 @@ class StreamClassifReporter(IReporter):
         output_dir = 'configurations/zplots'
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        imagepkl_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.pkl')
-        image_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.png')
-        imagetime_path = os.path.join(output_dir, f'{current_time}_timeseriesanomaly.png')
-        image_roc_auc_path = os.path.join(output_dir, f'{current_time}_roc_auc.png')
-        text_path = os.path.join(output_dir, f'{current_time}_features_scores_labels.txt')
+        # imagepkl_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_confusion_matrix.pkl')
+        image_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_confusion_matrix.png')
+        imagetime_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_timeseriesanomaly.png')
+        image_roc_auc_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_roc_auc.png')
+        text_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_features_scores_labels.txt')
         
-        # Create text file with results of confusion matrix
-        with open(imagepkl_path, 'wb') as file:
-            pickle.dump(cnf_matrix, file)
+        # # Create text file with results of confusion matrix
+        # with open(imagepkl_path, 'wb') as file:
+        #     pickle.dump(cnf_matrix, file)
 
         with open(text_path, "w") as file:
             
             # Print headers for readability (optional)
-            file.write("Label\n")
-            file.write("-" * 20 + "\n")
+            file.write("Label, Prediction\n")
             
             # Iterate over the range of the maximum length
             for i in range(len(self.predicted_labels)):
                 # Get elements or default to empty if the vector is shorter
-                elem1 = self.predicted_labels[i]
+                elem1 = self.ground_truths[i]
+                elem2 = self.predicted_labels[i]
+                
                 
                 # Write elements side by side with a tab separator
-                file.write(f"{elem1}\n")
+                file.write(f"{elem1}, {elem2}\n")
 
 
         ### PERFORMANCE METRICS

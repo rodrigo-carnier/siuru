@@ -8,7 +8,7 @@ from typing import List
 from jinja2 import Template
 from collections import deque
 from collections import Counter
-
+from datetime import datetime
 
 from river import anomaly, tree, linear_model, forest
 from river import preprocessing, stream, datasets
@@ -38,6 +38,9 @@ def main(args_config_path, args_influx_token):
 
     pipeline_execution_start = time.process_time_ns()
     log_time_tag = time_now()
+
+    ### TODO 2024-12-05: find the best place to parameterize seed_randomization (in the config file) ###
+    seed_randomization = 42
 
     ####################
     ### CONFIG FILES ###
@@ -200,18 +203,19 @@ def main(args_config_path, args_influx_token):
 
         print(f"### TESTING LABELS {shuffling_labels} and samples per subset {samples_per_subset}")
 
+        sample_order = None
+
         if configuration["MODEL"].get("interleave_samples", False):
             # Randomize and sample packets
             log.info(f"Interleaving order of samples (probably flow) from different datasets into a single random stream.")
             log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-            feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick)
-
+            feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick, seed_randomization)
 
         elif configuration["MODEL"].get("randomize_samples", False):
             # Randomize and sample packets
-            log.info(f"Randomizing order of samples (probably packets) from different datasets into a single random stream.")
+            log.info(f"Randomizing order of samples from different datasets into a single random stream.")
             log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-            feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels)
+            feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, seed_randomization)
         
         else:
             def chain_generators(streams):
@@ -221,6 +225,23 @@ def main(args_config_path, args_influx_token):
             feature_stream = chain_generators(feature_streams)
 
         print(samples_per_subset, sample_order)
+
+        # Printing into files
+
+
+        output_dir = 'configurations/zplots'
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        sample_subsets_path = os.path.join(output_dir, f'{current_time}_{configuration["MODEL"]["model_name"]}_sample_subsets.txt')
+        sample_order_path = os.path.join(output_dir, f'{current_time}_{configuration["MODEL"]["model_name"]}_sample_order.txt')
+        
+        with open(sample_subsets_path, "w") as file:
+            file.write("Randomizing order of samples from different datasets into a single random stream.\n\n")
+            file.write(f"Number of subsets before each concept drift: {n_subsets_per_concept}.\n")
+            file.write(f"No. of packets per subset: {samples_per_subset}.\n")
+            file.write(f"Order of subsets, before sample randomization concept by concept: {shuffling_labels}.\n")
+
+        with open(sample_order_path, "w") as file:
+            file.write(", ".join(map(str, sample_order)))
 
 
         # Create two copies of the iterator using tee
@@ -417,8 +438,32 @@ def main(args_config_path, args_influx_token):
                     else:
                         y.append(samples["ground_truth"])
                         x.append(encoding[0])
+                        
 
-                model_instance.evaluate(x, y)
+                y_pred, cumulative_accuracies = model_instance.evaluate(x, y)
+
+                for reporter_instance in reporter_instances:
+                    reporter_instance.set_model_name(configuration["MODEL"]["model_name"])
+                for i in range(0, len(y)):
+                    for reporter_instance in reporter_instances:
+                        reporter_instance.report_eval(y[i], y_pred[i])
+
+
+                ###################################
+                ### SHUTDOWN REPORTERS (REMOTE) ###
+                ###################################
+
+                # if model_specification["sampling_rate"] != "incremental":
+
+                # Reporters may require special shutdown steps, for example disconnecting from
+                # remote database or printing summaries of the processing -- call the handle for
+                # each reporter.
+
+                for reporter_instance in reporter_instances:
+                    reporter_instance.end_processing()
+
+                if not model_specification["skip_saving_model"]:
+                    model_instance._save_model()
 
 
 
@@ -467,18 +512,18 @@ def main(args_config_path, args_influx_token):
             ### Init reporter ###
             #####################
 
-            if model_specification["sampling_rate"] != "incremental":
-                reporter_instances: List[IReporter] = []
+            # if model_specification["sampling_rate"] != "incremental":
+            reporter_instances: List[IReporter] = []
 
-                # Initialize reporter
-                for output in configuration["OUTPUT"]:
-                    reporter_name = output["class"]
-                    reporter_class = globals()[reporter_name]
-                    reporter_instance = reporter_class(**output["kwargs"])
-                    # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
-                    # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
-                    reporter_instances.append(reporter_instance)
-        
+            # Initialize reporter
+            for output in configuration["OUTPUT"]:
+                reporter_name = output["class"]
+                reporter_class = globals()[reporter_name]
+                reporter_instance = reporter_class(**output["kwargs"])
+                # model_param = configuration["MODEL"].pop("model_param", {})  # Extract model_param from combined_kwargs
+                # reporter_instance = reporter_class(model_param=model_param, **output["kwargs"])
+                reporter_instances.append(reporter_instance)
+    
             
             ##############################
             ### Learn / Test Whole-set ###
@@ -538,32 +583,29 @@ def main(args_config_path, args_influx_token):
                 encoded_x = [dict(zip(feature_names, arr)) for arr in x]
                 
                 riverdataset = stream.iter_array(x, y, feature_names=['x1', 'x2', 'x3', 'x4'])
-                cummulative_accuracies = model_instance.evaluate(riverdataset)
-                
+                y_pred, cummulative_accuracies = model_instance.evaluate(riverdataset)
 
+                for reporter_instance in reporter_instances:
+                    reporter_instance.set_model_name(configuration["MODEL"]["model_name"])
+                for i in range(0, len(y)):
+                    for reporter_instance in reporter_instances:
+                        reporter_instance.report_eval(y[i], y_pred[i])
 
+                ###################################
+                ### SHUTDOWN REPORTERS (REMOTE) ###
+                ###################################
 
-    #######################################################################################################################
-    #######################################################################################################################
-    ### SECTION OF FINALIZATION OF PROCESS
+                # if model_specification["sampling_rate"] != "incremental":
 
+                # Reporters may require special shutdown steps, for example disconnecting from
+                # remote database or printing summaries of the processing -- call the handle for
+                # each reporter.
 
+                for reporter_instance in reporter_instances:
+                    reporter_instance.end_processing()
 
-    ###################################
-    ### SHUTDOWN REPORTERS (REMOTE) ###
-    ###################################
-
-    if model_specification["sampling_rate"] != "incremental":
-
-    # Reporters may require special shutdown steps, for example disconnecting from
-    # remote database or printing summaries of the processing -- call the handle for
-    # each reporter.
-
-        for reporter_instance in reporter_instances:
-            reporter_instance.end_processing()
-
-        if not model_specification["skip_saving_model"]:
-            model_instance._save_model()
+                if not model_specification["skip_saving_model"]:
+                    model_instance._save_model()
 
 
 
@@ -615,6 +657,22 @@ def main(args_config_path, args_influx_token):
              f"  {round(from_processing_bandwidth, 2)} megabits/second "
              f"Ethernet traffic bandwidth from processing start\n"
     )
+
+    bandwith_path = os.path.join(output_dir, f'{current_time}_{configuration["MODEL"]["model_name"]}_computation_costs.txt')
+
+    with open(bandwith_path, "w") as file:
+        file.write("---\nData volume and bandwidth:\n"
+             f"  {global_variables.global_pipeline_packet_count} IP packets\n"
+             f"  {global_variables.global_sum_ip_packet_sizes} bytes IP traffic\n"
+             f"  {total_ethernet_bytes} bytes Ethernet traffic\n"
+             f"  {round(from_processing_bandwidth, 2)} megabits/second "
+             f"Ethernet traffic bandwidth from processing start\n"
+             f"  {round(from_init_bandwidth, 2)} megabits/second "
+             f"Ethernet traffic bandwidth from initialization start\n"
+             f"  {round(total_pipeline_bandwidth, 2)} megabits/second "
+             f"Ethernet traffic bandwidth for full pipeline\n"
+
+        )
 
 
 
