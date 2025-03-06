@@ -41,7 +41,7 @@ class StreamClassifReporter(IReporter):
 
         log = PipelineLogger.get_logger()
 
-        print(self.predicted_labels)        
+        # print(self.predicted_labels)        
         # Check for None in self.predicted_labels and replace Nones for 0s
         none_in_predicted_labels = [i for i, value in enumerate(self.predicted_labels) if value is None]
         for i in none_in_predicted_labels:

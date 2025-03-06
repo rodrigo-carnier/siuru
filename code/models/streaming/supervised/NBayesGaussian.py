@@ -1,11 +1,10 @@
 import time
 from typing import Any, Dict, Generator, Optional, List, Tuple, Union
 
-# import numpy
-import numpy as np
-np.float = float
-np.int = np.int32
-np.bool = np.bool_
+# import numpy as np
+# np.float = float
+# np.int = np.int32
+# np.bool = np.bool_
 
 from river import naive_bayes
 from river import compose
@@ -14,8 +13,9 @@ from river import metrics
 from river import preprocessing
 from river import stream
 from river import evaluate
-from datetime import datetime
+from river.compose import Pipeline
 
+from datetime import datetime
 from joblib import dump, load
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
@@ -45,28 +45,24 @@ class GaussianNaiveBayesModel(IAnomalyDetectionModel):
         model_storage_base_path=None,
         model_relative_path=None,
         save_interval=500,  # Interval to save model periodically
-        # grace_period=0,     # Default value
-        # delta=1e-5,        # Default value
-        # leaf_prediction="nb",  # Default value
-        # nb_threshold=0,     # Default value
-        # seed=0,             # Default value
-        # tau=0.05,           # Default value
         **kwargs,
     ):
 
         self.model_instance = naive_bayes.GaussianNB()
         
-
         self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
 
+        self.model_instance = Pipeline(
+            self.scaler,
+            self.model_instance
+        )
         
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
-        self.grace_period = 100;
 
 
         super().__init__(
@@ -81,7 +77,8 @@ class GaussianNaiveBayesModel(IAnomalyDetectionModel):
 
     def train(
         self,
-        data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        # data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        data: Generator[Tuple[Dict[IFeature, Any], List[float]], None, None],
         **kwargs,
         ):
         

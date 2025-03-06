@@ -1,11 +1,10 @@
 import time
 from typing import Any, Dict, Generator, Optional, List, Tuple, Union
 
-# import numpy
-import numpy as np
-np.float = float
-np.int = np.int32
-np.bool = np.bool_
+# import numpy as np
+# np.float = float
+# np.int = np.int32
+# np.bool = np.bool_
 
 from river import naive_bayes
 from river import compose
@@ -14,8 +13,9 @@ from river import metrics
 from river import preprocessing
 from river import stream
 from river import evaluate
-from datetime import datetime
+from river.compose import Pipeline
 
+from datetime import datetime
 from joblib import dump, load
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
@@ -46,23 +46,24 @@ class ComplementNaiveBayesModel(IAnomalyDetectionModel):
         model_relative_path=None,
         save_interval=500,  # Interval to save model periodically
         smoothing = 1,
-        
         **kwargs,
     ):
 
         self.model_instance = naive_bayes.ComplementNB(smoothing)
         
-
         self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
 
-        
+        self.model_instance = Pipeline(
+            self.scaler,
+            self.model_instance
+        )
+
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
-        self.grace_period = 100;
 
 
         super().__init__(
@@ -77,7 +78,8 @@ class ComplementNaiveBayesModel(IAnomalyDetectionModel):
 
     def train(
         self,
-        data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        # data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        data: Generator[Tuple[Dict[IFeature, Any], List[float]], None, None],
         **kwargs,
         ):
         

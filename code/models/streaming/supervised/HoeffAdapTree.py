@@ -1,11 +1,10 @@
 import time
 from typing import Any, Dict, Generator, Optional, List, Tuple, Union
 
-# import numpy
-import numpy as np
-np.float = float
-np.int = np.int32
-np.bool = np.bool_
+# import numpy as np
+# np.float = float
+# np.int = np.int32
+# np.bool = np.bool_
 
 from river import forest, tree
 from river import compose
@@ -14,8 +13,9 @@ from river import metrics
 from river import preprocessing
 from river import stream
 from river import evaluate
-from datetime import datetime
+from river.compose import Pipeline
 
+from datetime import datetime
 from joblib import dump, load
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
@@ -53,40 +53,24 @@ class HoeffdingAdaptativeTreeModel(IAnomalyDetectionModel):
         # tau=0.05,           # Default value
         **kwargs,
     ):
-
-        # self.grace_period = grace_period
-        # self.delta = delta
-        # self.leaf_prediction = leaf_prediction
-        # self.nb_threshold = nb_threshold
-        # self.seed = seed
-        # self.tau = tau
-
         
-        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=self.grace_period, delta=self.delta, leaf_prediction=self.leaf_prediction, nb_threshold=self.nb_threshold, seed=self.seed, tau=self.tau)
-        
-        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(
-        #     **model_param  # Unpack model_param dictionary into the classifier
-        # )
-
-        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
-
         self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=200, delta=1e-5, leaf_prediction='nb', nb_threshold=0, seed=0, tau=0.05, switch_significance=0.05, binary_split=False, min_branch_fraction=0.01)
-        
+        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=self.grace_period, delta=self.delta, leaf_prediction=self.leaf_prediction, nb_threshold=self.nb_threshold, seed=self.seed, tau=self.tau)        
+        # self.model_instance = tree.HoeffdingAdaptiveTreeClassifier(grace_period=100, delta=1e-5, leaf_prediction='nb', nb_threshold=10, seed=0)
 
         self.scaler = preprocessing.StandardScaler()
         # self.scaler = preprocessing.MinMaxScaler()
         # self.scaler = preprocessing.AdaptativeStandardScaler(fading_factor=.3)
         # self.scaler = preprocessing.RobustScaler()
 
+        self.model_instance = Pipeline(
+            self.scaler,
+            self.model_instance
+        )
         
-        # self.anomaly_threshold = None
-        # self.trainingScores = None
-        # self.score_window_size = 25  # Number of scores to store
-        # self.threshold_coef = 1.5
         self.last_scores = []
         self.save_interval = save_interval
         self.sample_count = 0
-        self.grace_period = 100;
 
 
         super().__init__(
@@ -101,7 +85,8 @@ class HoeffdingAdaptativeTreeModel(IAnomalyDetectionModel):
 
     def train(
         self,
-        data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        # data: Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None],
+        data: Generator[Tuple[Dict[IFeature, Any], List[float]], None, None],
         **kwargs,
         ):
         
