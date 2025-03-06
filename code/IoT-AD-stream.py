@@ -581,8 +581,7 @@ def main(args_config_path, args_influx_token):
                     'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
                     'feature11', 'feature12']
                 encoded_x = [dict(zip(feature_names, arr)) for arr in x]
-                print(encoded_x)
-                
+                                
                 riverdataset = stream.iter_array(x, y, feature_names=['x1', 'x2', 'x3', 'x4'])
                 y_pred, cummulative_accuracies = model_instance.evaluate(riverdataset)
 
