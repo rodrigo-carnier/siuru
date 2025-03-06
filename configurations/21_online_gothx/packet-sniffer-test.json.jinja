@@ -1,0 +1,63 @@
+{
+    "DESCRIPTION": [
+        "Configuration file mock-up for packet sniffer (not implemented yet)."
+    ],
+    "DATA_SOURCES": [
+        {
+            "type": "interface",
+            "loader": {
+                "class": "PacketSniffer",
+                "kwargs": {
+                    "tcpdump_options": [
+                        "-c", "10000000", "-G", "60", "-w", "/pcap/packets-%F-%T.pcap",
+                        "\"dst port ${DESTINATION_PORT}\"", "-i", "any", "-Z", "root"
+                    ],
+                    "preprocessor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction"
+                }
+            },
+            "preprocessors": [
+                {
+                    "class": "CppPacketProcessor",
+                    "kwargs": {}
+                }
+            ]
+        }
+    ],
+    "MODEL":
+        {
+            "class": "MLPAutoEncoder",
+            "train_new_model": false,
+            "model_name": "packet-sniffer-based-rf",
+            "model_storage_base_path": "{{ project_root }}/models",
+            "encoder":
+            {
+                "class": "DefaultEncoder",
+                "kwargs": {
+                    "feature_filter": [
+                        "ip_data_size",
+                        "tcp_cwr",
+                        "tcp_ece",
+                        "tcp_urg",
+                        "tcp_ack",
+                        "tcp_psh",
+                        "tcp_rst",
+                        "tcp_syn",
+                        "tcp_fin"
+                    ]
+                }
+            }
+        },
+    "OUTPUT": [
+        {
+            "class": "InfluxDBReporter",
+            "kwargs": {
+                "measurement_name": "packet-sniffer-rf",
+                "influx_url": "http://localhost:8086",
+                "influx_org": "default",
+                "influx_bucket": "default",
+                "influx_token": "{{ influx_token }}"
+            }
+        }
+    ],
+    "VERSION": "{{ git_tag() }}"
+}
