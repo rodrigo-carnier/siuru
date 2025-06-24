@@ -1,0 +1,65 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+    "MODEL":
+    {
+        "class": "RandomForestModelXAI",
+        "new_model": false,
+        "skip_saving_model": true,
+        "evaluate_model": false,
+        "model_name": "all-multi-rf-mqttreduced",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "save_data": true,
+        "encoder":
+        {
+            "class": "MultiSampleEncoder",
+            "kwargs": {
+               "feature_filter": [
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin",
+                    "host_rcv_pkt_count",
+                    "host_sum_rcv_pkt_size",
+                    "host_avg_rcv_pkt_size",
+                    "host_sent_pkt_count",
+                    "host_sum_sent_pkt_size",
+                    "host_avg_sent_pkt_size",
+                    "host_inter_arrival_last",
+                    "host_inter_arrival_avg",
+                    "host_conn_timedelta",
+                    "window_flow_pkt_count",
+                    "window_flow_sum_pkt_size",
+                    "window_flow_avg_pkt_size",
+                    "window_flow_inter_arrival_avg"
+               ]
+            }
+        }
+    },
+    "XAI": {
+        "train_data_path": "{{ project_root }}/models/all-multi-rf-mqttreduced/all-multi-rf-mqttreduced_trained-data.pickle",
+        "test_data_path": "{{ project_root }}/models/all-multi-rf-mqttreduced/all-multi-rf-mqttreduced_test-data.pickle",
+        "algorithms": [
+            {
+                "type": "trustee",
+                "path": "{{ project_root }}/models/all-multi-rf-mqttreduced"
+            }
+        ]
+    },
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}
