@@ -1,3 +1,4 @@
+from .CppPacketProcessor import CppPacketProcessor
 from .CppPacketExtractor import CppPacketExtractor
 from .FileLabelExtractor import FileLabelExtractor
 from .HostFeatureExtractor import HostFeatureExtractor
