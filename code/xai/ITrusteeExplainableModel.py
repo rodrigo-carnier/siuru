@@ -19,7 +19,7 @@ class ITrusteeExplainableModel(ABC):
         return self
 
     def get_prediction_method_name_for_trustee(self):
-        return "predict_one"
+        return "predict"
 
     def explain_with_trustee(
             self,
