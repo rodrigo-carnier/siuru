@@ -4,6 +4,8 @@
 from .IDataLoader import IDataLoader
 from .PcapFileLoader import PcapFileLoader
 from .PcapFileConverter import PcapFileConverter
+from .PcapFileCICFlowMeter import PcapFileCICFlowMeter
+
 from .PacketSniffer import PacketSniffer
 from .PacketSnifferPcap import PacketSnifferPcap
 from .PacketSnifferLoop import PacketSnifferLoop
