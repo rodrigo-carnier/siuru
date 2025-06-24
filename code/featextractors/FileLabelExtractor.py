@@ -35,7 +35,8 @@ class FileLabelExtractor(IFeatExtractor):
         source_file: Optional[str] = None,
         label_file: Optional[str] = None,
         label_value: Optional[Any] = None,
-        label_name: Optional[Any] = None
+        label_name: Optional[Any] = None,
+        label_fig: Optional[str] = None
     ):
         if label_file:
             # TODO Allow loading files with labels if some dataset requires it.
@@ -44,11 +45,16 @@ class FileLabelExtractor(IFeatExtractor):
             self.value = FileLabelProcessor.DEFAULT_LABELS[source_file]
         else:
             self.value = label_value
-        log.info(f"Label for data: {self.value}")
+        log.info(f"Label of data: {self.value}")
 
         if label_name:
             self.label_name = label_name
-            log.info(f"Label name for data: {self.label_name}")
+            log.info(f"Label name of data: {self.label_name}")
+
+        if label_fig:
+            self.label_fig = label_fig
+            log.info(f"Label for figure axis: {self.label_fig}")
+
 
 
     def extract(self, samples: SampleGenerator) -> SampleGenerator:

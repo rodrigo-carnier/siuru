@@ -7,6 +7,14 @@ numpy
 packaging
 xarray
 
+shap
+lime
+tensorflow
+trustee
+apted
+omnixai
+
+
 # Scapy + optional dependencies
 --pre scapy[basic]
 matplotlib

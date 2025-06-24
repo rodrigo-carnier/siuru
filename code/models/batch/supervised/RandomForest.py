@@ -101,9 +101,9 @@ class RandomForestModel(IAnomalyDetectionModel):
         # Source: https://github.com/scikit-learn/scikit-learn/blob/72a604975102b2d93082385d7a5a7033886cc825/sklearn/ensemble/_forest.py
         sum_processing_time = 0
         sum_samples = 0
-        for sample, encoded_sample in data:
+        for sample, encoding in data:
             start_time_ref = time.process_time_ns()
-            prediction = self.model_instance.predict(encoded_sample)
+            prediction = self.model_instance.predict(encoding)
             if isinstance(sample, list):
                 for i, sample in enumerate(sample):
                     sample[PredictionField.MODEL_NAME] = self.model_name

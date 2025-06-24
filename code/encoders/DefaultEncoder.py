@@ -3,6 +3,7 @@ import time
 from typing import Any, Dict, Generator, Tuple, Optional, List
 
 import numpy as np
+import xarray
 
 from common.functions import report_performance
 from encoders.IDataEncoder import IDataEncoder
@@ -36,10 +37,11 @@ class DefaultEncoder(IDataEncoder):
 
     def encode(
         self, samples: SampleGenerator, **kwargs
-    ) -> Generator[Tuple[Dict[IFeature, Any], np.ndarray], None, None]:
+    ) -> Generator[Tuple[Dict[IFeature, Any], xarray.DataArray], None, None]:
         """
-        :return: (1, n)-dimensional Numpy array, with n being the number of features in
-         the feature_filter (or in the first sample, if no filter was provided).
+        Encode single samples into (1, n)-shaped xarray.DataArrays with labeled feature coordinates.
+        
+        :return: Generator yielding tuples of (sample dictionary, xarray.DataArray).
         """
         sum_processing_time = 0
         packet_count = 0
@@ -52,10 +54,18 @@ class DefaultEncoder(IDataEncoder):
                 self.feature_filter = list(sample.keys())
                 log.info(f"Applied feature filter: {[f.value for f in self.feature_filter]}")
 
-            encoding = np.fromiter(
-                [sample[f] for f in self.feature_filter],
-                dtype=np.float32,
-            ).reshape(1, -1)
+            missing_features = [f for f in self.feature_filter if f not in sample]
+            if missing_features:
+                log.warning(f"Sample missing features: {[f.value for f in missing_features]}")
+
+            values = [[sample[f] for f in self.feature_filter]]
+            encoding = xarray.DataArray(
+                values,
+                dims=["samples", "features"],
+                coords={"features": self.feature_filter},
+                name="encoding"
+            )
+
             sum_processing_time += time.process_time_ns() - start_time_ref
             packet_count += 1
 

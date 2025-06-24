@@ -88,6 +88,7 @@ class MultiSampleEncoder(IDataEncoder):
                     array_to_encode,
                     dims=["samples", "features"],
                     coords={"features": self.feature_filter},
+                    name="encoding"
                 )
 
                 self.created_array_count += 1
@@ -113,6 +114,7 @@ class MultiSampleEncoder(IDataEncoder):
                 array_to_encode,
                 dims=["samples", "features"],
                 coords={"features": self.feature_filter},
+                name="encoding"
             )
             self.created_array_count += 1
             sum_processing_time += time.process_time_ns() - start_time

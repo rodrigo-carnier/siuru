@@ -1,7 +1,9 @@
 from typing import Dict, Any, List
 
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, \
-    recall_score, ConfusionMatrixDisplay, roc_curve, auc, roc_auc_score
+    recall_score, ConfusionMatrixDisplay, classification_report
+from sklearn.preprocessing import LabelBinarizer
+import pandas as pd
 
 from common.features import IFeature, PredictionField
 from common.pipeline_logger import PipelineLogger
@@ -37,11 +39,10 @@ class StreamClassifReporter(IReporter):
         self.ground_truths.append(y)
         self.predicted_labels.append(y_pred)
 
-    def end_processing(self):
+    def end_processing(self, n_subsets_per_concept: List[int], samples_per_subset: List[int], label_map=None):
 
         log = PipelineLogger.get_logger()
 
-        # print(self.predicted_labels)        
         # Check for None in self.predicted_labels and replace Nones for 0s
         none_in_predicted_labels = [i for i, value in enumerate(self.predicted_labels) if value is None]
         for i in none_in_predicted_labels:
@@ -49,65 +50,31 @@ class StreamClassifReporter(IReporter):
 
         labels = sorted(set(self.ground_truths + self.predicted_labels))
 
+        labelsName = [str(lbl) for lbl in labels]
+        # if label_map is None:
+        #     labelsName = [str(lbl) for lbl in labels]
+        # else:
+        #     labelsName = [label_map[k] for k in labels]
+
         # Calculate confusion matrix
         cnf_matrix = confusion_matrix(self.ground_truths, self.predicted_labels, labels=labels)
-        # # Swap (1, 1) with (2, 2)
-        # cnf_matrix[0, 0], cnf_matrix[0, 1] = cnf_matrix[0, 1], cnf_matrix[0, 0]
-        # # Swap (1, 2) with (2, 1)
-        # cnf_matrix[1, 1], cnf_matrix[1, 0] = cnf_matrix[1, 0], cnf_matrix[1, 1]
 
 
-        ###########################################################################
-        
-        # LABELS FOR FIGURES
-
-        caseclass = 1;
-        caseanom = 3;
-        labelsName = ["Benign", "Malicious"]
-        # labelsName = ["Benign", "Malicious"]
-        # labelsName = ["Benign", "Bruteforce"]
-        # labelsName = ["Benign", "MalariaDOS"]
-                # labelsName = ["Benign", "Bruteforce", "MalariaDOS"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE"]
-        # labelsName = ["Benign", "Bruteforce", "MalariaDOS", "Malformed", "SlowITE", "Flood"]
-        
-        def caseclasstype1():
-            return "Binary class"
-        def caseclasstype2():
-            return "Multiclass"
-        casescl = {
-            1: caseclasstype1,
-            2: caseclasstype2
-        }
-        def switch_caseclass(case):
-            return casescl.get(case, lambda: "Invalid case")()
-
-        def caseanomtype1():
-            return "Anomaly (1): Bruteforce"
-        def caseanomtype2():
-            return "Anomaly (1): MalariaDOS"
-        def caseanomtype3():
-            return "Anomaly (1): Flood"
-        def caseanomtype4():
-            return "Anomalies (2): Brute + MalDOS"
-        def caseanomtype5():
-            return "Anomalies (5): all MQTTset"
-        casesan = {
-            1: caseanomtype1,
-            2: caseanomtype2,
-            3: caseanomtype3,
-            4: caseanomtype4,
-            5: caseanomtype5
-        }
-        
-        def switch_caseanom(case):
-            return casesan.get(case, lambda: "Invalid case")()
-
+        ### Calculating performance metrics
+        # # Binary
+        # TN, FP, FN, TP = cnf_matrix.ravel()
+        # accuracy = (TP+TN)/(TP+TN+FP+FN)
+        # precision = (TP)/(TP+FP)
+        # recall = (TP)/(TP+FN)
+        # f1 = 2*(precision*recall)/(precision+recall)
+        # # Multiclass
+        accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
+        precision = precision_score(self.ground_truths, self.predicted_labels, average='macro', zero_division=0)
+        recall = recall_score(self.ground_truths, self.predicted_labels, average='macro', zero_division=0)
+        f1 = f1_score(self.ground_truths, self.predicted_labels, average='macro', zero_division=0)
 
         ###########################################################################
-        
-        # OUTPUT FILES
+        # Creating prefix of output files
 
         # Generate the file name with current date and time
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -116,16 +83,17 @@ class StreamClassifReporter(IReporter):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         # imagepkl_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_confusion_matrix.pkl')
-        image_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_confusion_matrix.png')
+        conf_image_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_confusion_matrix.png')
+        conf_text_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_multiclass_confusion_matrix.txt')
         imagetime_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_timeseriesanomaly.png')
         image_roc_auc_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_roc_auc.png')
-        text_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_features_scores_labels.txt')
+        text_scores_path = os.path.join(output_dir, f'{current_time}_{self.model_name}_features_scores_labels.txt')
         
-        # # Create text file with results of confusion matrix
-        # with open(imagepkl_path, 'wb') as file:
-        #     pickle.dump(cnf_matrix, file)
 
-        with open(text_path, "w") as file:
+        ###########################################################################
+        ### Storing vectors of true values and predictions as columns in file
+
+        with open(text_scores_path, "w") as file:
             
             # Print headers for readability (optional)
             file.write("Label, Prediction\n")
@@ -136,82 +104,257 @@ class StreamClassifReporter(IReporter):
                 elem1 = self.ground_truths[i]
                 elem2 = self.predicted_labels[i]
                 
-                
                 # Write elements side by side with a tab separator
                 file.write(f"{elem1}, {elem2}\n")
 
-
-        ### PERFORMANCE METRICS
-        TN, FP, FN, TP = cnf_matrix.ravel()
-        accuracy = (TP+TN)/(TP+TN+FP+FN)
-        precision = (TP)/(TP+FP)
-        recall = (TP)/(TP+FN)
-        f1 = 2*(precision*recall)/(precision+recall)
-        # accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
-        # precision = precision_score(self.ground_truths, self.predicted_labels, average='macro')
-        # recall = recall_score(self.ground_truths, self.predicted_labels, average='macro')
-        # f1 = f1_score(self.ground_truths, self.predicted_labels, average='macro')
-
-        
         ###########################################################################
-        # FIGURE OF CONFUSION MATRIX WITH PERFORMANCE METRICS
-        # plt.figure(figsize=(8, 8))  # Increase the height to make room for the text
-        # # plt.figure(figsize=(8, 5))
-        # sns.set(font_scale=2.5)
-        # sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName)
-        # plt.xlabel('Predicted Labels')
-        # plt.ylabel('True Labels')
-        # plt.tight_layout()
-        # plt.subplots_adjust(top=0.93)  # Set to 1 to remove the top margin
-        # plt.subplots_adjust(bottom=0.25)  # Adjust bottom margin to make room for x-axis label
-        
-        #         # plt.title(f'Confusion Matrix:',switch_caseclass(caseclass), switch_caseanom(caseanom))
-        # # title = f'{switch_caseclass(caseclass)}. {switch_caseanom(caseanom)}.'
-        # # plt.title(title)
-        # # Save the plot to a file
-        
-        # metrics_text = (
-        #     f"Accuracy: {accuracy:.2f}\n"
-        #     f"Precision: {precision:.2f}\n"
-        #     f"Recall: {recall:.2f}\n"
-        #     f"F1 Score: {f1:.2f}"
-        # )
-        # plt.figtext(0.5, 0.01, metrics_text, ha='center', va='top', fontsize=18, wrap=True)
-        # # plt.text(0.5, -0.2, metrics_text, ha='center', va='top', transform=plt.gca().transAxes, fontsize=18)
-        
-        # plt.savefig(image_path)
-        # plt.close()  # Close the figure to free up memory
+        ### Printing confusion matrix in figure
 
+        # Bigger figure width, moderate height (adjust as needed)
+        fig = plt.figure(figsize=(12, 10))
 
-        ###########################################################################
+        # Single axes for heatmap filling most of the figure
+        ax = fig.add_subplot(111)
 
-        ##### CREATE A FIGURE WITH GRIDSPEC
-        fig = plt.figure(constrained_layout=True, figsize=(8, 8))
-        gs = fig.add_gridspec(2, 1, height_ratios=[4, 1])  # 2 rows, 1 column
-
-        ##### CONFUSION MATRIX PLOT
-        ax1 = fig.add_subplot(gs[0])
         sns.set(font_scale=2.5)
-        sns.heatmap(cnf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=labelsName, yticklabels=labelsName, ax=ax1)
-        ax1.set_xlabel('Predicted Labels', fontsize=20)
-        ax1.set_ylabel('True Labels', fontsize=20)
-        ax1.tick_params(axis='x', labelsize=20)
-        ax1.tick_params(axis='y', labelsize=20)
-
-        ##### PERFORMANCE METRICS TEXT
-        ax2 = fig.add_subplot(gs[1])
-        metrics_text = (
-        f"Accuracy: {accuracy * 100:.2f}%\n"
-        f"Precision: {precision * 100:.2f}%\n"
-        f"Recall:      {recall * 100:.2f}%\n"
-        f"F1 Score:  {f1 * 100:.2f}%"
+        sns.heatmap(
+            cnf_matrix,
+            annot=True,
+            fmt='d',
+            cmap='Blues',
+            xticklabels=labelsName,
+            yticklabels=labelsName,
+            ax=ax
         )
-        ax2.text(0, 0, metrics_text, ha='left', va='center', fontsize=24)
-        ax2.axis('off')  # Hide the axis
 
-        # Save the plot to a file
-        plt.savefig(image_path)
-        plt.close()  # Close the figure to free up memory
+        ax.set_xlabel('Predicted Labels', fontsize=20)
+        ax.set_ylabel('True Labels', fontsize=20)
+        ax.tick_params(axis='x', labelsize=20)
+        ax.tick_params(axis='y', labelsize=20)
+
+        # Remove default top and bottom margins as much as possible:
+        plt.tight_layout()
+        plt.subplots_adjust(top=1, bottom=0.35, right=1, left=0.07)  # Adjust bottom for text, top to reduce margin
+
+        # Prepare the metrics text and label legend string
+        metrics_text = (
+            f"Accuracy: {accuracy * 100:.2f}%\n"
+            f"Precision: {precision * 100:.2f}%\n"
+            f"Recall:      {recall * 100:.2f}%\n"
+            f"F1 Score: {f1 * 100:.2f}%"
+        )
+
+        label_legend = '\n'.join([f"{k}: {v}" for k, v in label_map.items()])
+
+        # Add metrics and labels text *below* the heatmap using figtext with manual positioning
+        plt.figtext(0.1, 0.05, metrics_text, ha='left', fontsize=28)
+        plt.figtext(0.7, 0.05, label_legend, ha='left', fontsize=25)
+
+        plt.savefig(conf_image_path)
+        plt.close()
+
+
+        
+        ###################################################################################
+        ### Printing confusion matrix in text file
+
+        # Compute global classification report with target names
+        report_dict = classification_report(
+            self.ground_truths, 
+            self.predicted_labels, 
+            output_dict=True,
+            target_names=[label_map[i] for i in sorted(label_map.keys())]
+        )
+        report_str = classification_report(
+            self.ground_truths, 
+            self.predicted_labels, 
+            digits=4,
+            target_names=[label_map[i] for i in sorted(label_map.keys())]
+        )
+
+        df_global = pd.DataFrame(report_dict).transpose()
+
+        # Compute overall global accuracy
+        global_accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
+
+        # Compute phase-wise accuracy (for all samples combined)
+
+        # Store per-phase metrics in a list
+        phase_reports = []
+
+        index = 0
+        subset_idx = 0
+
+        for concept_idx, n_subsets in enumerate(n_subsets_per_concept):
+            total_samples = sum(samples_per_subset[subset_idx:subset_idx + n_subsets])
+            gt_window = self.ground_truths[index:index + total_samples]
+            pred_window = self.predicted_labels[index:index + total_samples]
+
+            # Determine the unique non-zero label in this phase
+            unique_labels = set(gt_window)
+            phase_label = next(l for l in unique_labels if l != 0)
+
+            # Binarize: non-zero label = 1, benign (0) = 0
+            bin_gt = [1 if x == phase_label else 0 for x in gt_window]
+            bin_pred = [1 if x == phase_label else 0 for x in pred_window]
+
+            # Compute classification report and accuracy for binary classification
+            report_dict_phase = classification_report(bin_gt, bin_pred, output_dict=True)
+            report_str_phase = classification_report(bin_gt, bin_pred, digits=4)
+            df_phase = pd.DataFrame(report_dict_phase).transpose()
+            phase_accuracy = accuracy_score(bin_gt, bin_pred)
+
+            # Store phase report with label name
+            phase_reports.append({
+                "phase": concept_idx + 1,
+                "label": phase_label,
+                "label_name": label_map.get(phase_label, str(phase_label)),
+                "accuracy": phase_accuracy,
+                "report_dict": report_dict_phase,
+                "report_str": report_str_phase,
+                "report_df": df_phase
+            })
+
+            index += total_samples
+            subset_idx += n_subsets
+
+
+        # ---- PRINT TO FILE ----
+        with open(conf_text_path, "w") as f:
+            # ---- Global classification report ----
+            f.write("Global Per-class Classification Metrics\n")
+            f.write("========================================\n\n")
+            f.write(report_str)
+            f.write("\n\n")
+
+            # ---- Per-phase binary reports ----
+            f.write("Phase-wise Binary Classification Metrics\n")
+            f.write("========================================\n\n")
+
+            for report in phase_reports:
+                f.write(f"Phase {report['phase']} (Label {report['label']} - {report['label_name']} vs Benign)\n")
+                f.write("----------------------------------------\n")
+
+                if "1" in report["report_df"].index:
+                    row = report["report_df"].loc["1"]
+                    f.write(f"Precision: {row['precision']:.4f}\n")
+                    f.write(f"Recall:    {row['recall']:.4f}\n")
+                    f.write(f"F1-score:  {row['f1-score']:.4f}\n")
+                    f.write(f"Support:   {int(row['support'])}\n")
+                    f.write(f"Accuracy:  {report['accuracy']:.4f}\n\n")
+                else:
+                    f.write("Warning: No positive class ('1') found in this phase's predictions.\n\n")
+
+            # ---- Phase Table: Summary of metrics per phase ----
+            f.write("Phase Summary Table (Text)\n")
+            f.write("==========================\n\n")
+            f.write(f"{'Phase':>5} {'Label':>6} {'Label Name':>12} {'Accuracy':>9} {'Precision':>10} {'Recall':>7} {'F1':>6} {'Support':>8}\n")
+
+            for report in phase_reports:
+                df = report["report_df"]
+                if "1" in df.index:
+                    row = df.loc["1"]
+                    f.write(f"{report['phase']:>5} {report['label']:>6} {report['label_name']:>12} {report['accuracy']:9.4f} "
+                            f"{row['precision']:10.4f} {row['recall']:7.4f} {row['f1-score']:6.4f} {int(row['support']):8d}\n")
+                else:
+                    f.write(f"{report['phase']:>5} {report['label']:>6} {report['label_name']:>12} {'N/A':>9} {'N/A':>10} {'N/A':>7} {'N/A':>6} {'N/A':>8}\n")
+
+            # ---- Global Classification Metrics (LaTeX) ----
+            f.write("\n\n")
+            f.write("Global Per-class Classification Metrics (LaTeX)\n")
+            f.write("===============================================\n\n")
+            f.write("\\begin{tabular}{lcccc}\n")
+            f.write("\\toprule\n")
+            f.write("Class & Precision & Recall & F1-score & Support \\\\\n")
+            f.write("\\midrule\n")
+
+            # Map label indices to names for LaTeX output
+            for label, row in df_global.iterrows():
+                if label != 'accuracy':  # Skip 'accuracy' row (it's scalar)
+                    class_name = label_map.get(label, str(label))
+                    f.write(f"{class_name} & {row['precision']:.4f} & {row['recall']:.4f} "
+                            f"& {row['f1-score']:.4f} & {int(row['support'])} \\\\\n")
+
+            f.write("\\bottomrule\n")
+            f.write("\\end{tabular}\n")
+
+            # ---- Phase Summary Table (LaTeX) ----
+            f.write("\n\n")
+            f.write("Phase Summary Table (LaTeX)\n")
+            f.write("===========================\n\n")
+            f.write("\\begin{tabular}{ccccccc}\n")
+            f.write("\\toprule\n")
+            f.write("Phase & Label & Label Name & Accuracy & Precision & Recall & F1-score & Support \\\\\n")
+            f.write("\\midrule\n")
+
+            for report in phase_reports:
+                df = report["report_df"]
+                if "1" in df.index:
+                    row = df.loc["1"]
+                    f.write(f"{report['phase']} & {report['label']} & {report['label_name']} & {report['accuracy']:.4f} & "
+                            f"{row['precision']:.4f} & {row['recall']:.4f} & "
+                            f"{row['f1-score']:.4f} & {int(row['support'])} \\\\\n")
+                else:
+                    f.write(f"{report['phase']} & {report['label']} & {report['label_name']} & N/A & N/A & N/A & N/A & N/A \\\\\n")
+
+            f.write("\\bottomrule\n")
+            f.write("\\end{tabular}\n")
+
+
+        # Extract phase summary as a DataFrame
+        summary_rows = []
+        for report in phase_reports:
+            df = report["report_df"]
+            if "1" in df.index:
+                row = df.loc["1"]
+                summary_rows.append({
+                    "Phase": report["phase"],
+                    "Label": report["label"],
+                    "Label Name": report["label_name"],
+                    "Accuracy": report["accuracy"],
+                    "Precision": row["precision"],
+                    "Recall": row["recall"],
+                    "F1-score": row["f1-score"],
+                    "Support": int(row["support"]),
+                })
+
+        df_phase_summary = pd.DataFrame(summary_rows)
+
+        # Format global metrics table (df_global is from classification_report)
+        df_global_fmt = df_global.drop("accuracy", errors="ignore").copy()
+        df_global_fmt["Support"] = df_global_fmt["support"].astype(int)
+        df_global_fmt = df_global_fmt[["precision", "recall", "f1-score", "Support"]].rename(
+            columns={"precision": "Precision", "recall": "Recall", "f1-score": "F1-score"}
+        )
+
+        # Plot side-by-side tables as an image
+        fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+        fig.suptitle("Classification Metrics Summary", fontsize=16)
+
+        # Global Table
+        axes[0].axis('off')
+        global_table = axes[0].table(cellText=np.round(df_global_fmt.values, 4),
+                                    rowLabels=[label_map.get(label, str(label)) for label in df_global_fmt.index],
+                                    colLabels=df_global_fmt.columns,
+                                    loc='center')
+        global_table.auto_set_font_size(False)
+        global_table.set_fontsize(10)
+        axes[0].set_title("Global Per-Class Metrics", fontsize=14)
+
+        # Phase Summary Table
+        axes[1].axis('off')
+        phase_table = axes[1].table(cellText=np.round(df_phase_summary.drop(columns="Label Name").values, 4),
+                                    colLabels=[col for col in df_phase_summary.columns if col != "Label Name"],
+                                    loc='center')
+        phase_table.auto_set_font_size(False)
+        phase_table.set_fontsize(10)
+        axes[1].set_title("Per-Phase Binary Metrics", fontsize=14)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        image_path = conf_text_path.replace(".txt", "_metrics_tables.png")
+        plt.savefig(image_path, dpi=300)
+        plt.close()
+
 
 
         ###########################################################################
@@ -223,61 +366,15 @@ class StreamClassifReporter(IReporter):
                  f"Labels: {labels}\n"
                  f"(i-th row, j-th column: samples with true label i and predicted label j)\n\n"
                  f"Accuracy:"
-                 f"{accuracy_score(self.ground_truths, self.predicted_labels)}\n"
+                 f"{accuracy}\n"
                  f"Precision:"
-                 f"{precision_score(self.ground_truths, self.predicted_labels)}\n"
+                 f"{precision}\n"
                  f"Recall:"
-                 f"{recall_score(self.ground_truths, self.predicted_labels)}\n"
+                 f"{recall}\n"
                  f"F1 score: "
-                 f"{f1_score(self.ground_truths, self.predicted_labels)}\n---"
+                 f"{f1}\n---"
                  )
 
-        
-        # # True labels
-        # self.ground_truths = np.array([0] * 2699 + [1] * 2700)  # Combining TN, FP for 0s and FN, TP for 1s
-
-        # # Predicted labels
-        # self.predicted_labels = np.array([0] * 2465 + [1] * 234 + [0] * 859 + [1] * 1841)  # Corresponding predicted labels
-
-        # ### PERFORMANCE METRICS
-        # accuracy = accuracy_score(self.ground_truths, self.predicted_labels)
-        # precision = precision_score(self.ground_truths, self.predicted_labels, average='macro')
-        # recall = recall_score(self.ground_truths, self.predicted_labels, average='macro')
-        # f1 = f1_score(self.ground_truths, self.predicted_labels, average='macro')
-
-        # log.info(f"Accuracy:"
-        #          f"{accuracy_score(self.ground_truths, self.predicted_labels)}\n"
-        #          f"Precision:"
-        #          f"{precision_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
-        #          f"Recall:"
-        #          f"{recall_score(self.ground_truths, self.predicted_labels, average='macro')}\n"
-        #          f"F1 score: "
-        #          f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
-        #          )
-
-
-        ############ ROC AND AUC
-
-        # Calculate the ROC curve
-        fpr, tpr, thresholds = roc_curve(self.ground_truths, self.predicted_labels)
-
-        # Calculate the AUC
-        roc_auc = auc(fpr, tpr)
-        # Alternatively, you can use roc_auc_score directly on the true labels and predicted scores
-        roc_auc_alternative = roc_auc_score(self.ground_truths, self.predicted_labels)
-
-        # Plot the ROC curve
-        plt.figure()
-        plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver Operating Characteristic')
-        plt.legend(loc="lower right")
-        plt.savefig(image_roc_auc_path)
-           
 
     def input_signature() -> List[IFeature]:
         return [

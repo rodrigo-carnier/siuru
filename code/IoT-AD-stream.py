@@ -100,6 +100,7 @@ def main(args_config_path, args_influx_token):
 
 
 
+
     ##################
     ### DATA INPUT ###
     ##################
@@ -209,13 +210,15 @@ def main(args_config_path, args_influx_token):
             # Randomize and sample packets
             log.info(f"Interleaving order of samples (probably flow) from different datasets into a single random stream.")
             log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-            feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick, seed_randomization)
+            # feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick, seed_randomization)
+            feature_stream, sample_order = loader.interleave_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, max_flows_per_pick)
 
         elif configuration["MODEL"].get("randomize_samples", False):
             # Randomize and sample packets
             log.info(f"Randomizing order of samples from different datasets into a single random stream.")
             log.info(f"Number of subsets before each concept drift: {n_subsets_per_concept}. No. of packets per subset: {samples_per_subset}. Labels of all subsets, used for order randomization: {shuffling_labels}.")
-            feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, seed_randomization)
+            # feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels, seed_randomization)
+            feature_stream, sample_order = loader.randomize_samples_per_concept(feature_streams, n_subsets_per_concept, samples_per_subset, shuffling_labels)
         
         else:
             def chain_generators(streams):
@@ -328,6 +331,15 @@ def main(args_config_path, args_influx_token):
         print("Implement loading processed csv")
 
 
+    label_map = {}
+    for source in configuration.get("DATA_SOURCES", []):
+        for extractor in source.get("featextractors", []):
+            if extractor.get("class") == "FileLabelExtractor":
+                kwargs = extractor.get("kwargs", {})
+                val = kwargs.get("label_value")
+                fig = kwargs.get("label_name")
+                if val is not None and fig is not None:
+                    label_map[val] = fig
 
     #######################################################################################################################
     #######################################################################################################################
@@ -460,7 +472,7 @@ def main(args_config_path, args_influx_token):
                 # each reporter.
 
                 for reporter_instance in reporter_instances:
-                    reporter_instance.end_processing()
+                    reporter_instance.end_processing(n_subsets_per_concept, samples_per_subset, label_map)
 
                 if not model_specification["skip_saving_model"]:
                     model_instance._save_model()
@@ -576,13 +588,15 @@ def main(args_config_path, args_influx_token):
                         x.append(encoding[0])
                 
 
-                # # Necessary to scale samples, but River only works with dictionaries, so transforming
-                feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
-                    'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
-                    'feature11', 'feature12']
-                encoded_x = [dict(zip(feature_names, arr)) for arr in x]
+                # # # Necessary to scale samples, but River only works with dictionaries, so transforming
+                # feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
+                #     'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
+                #     'feature11', 'feature12']
+                # encoded_x = [dict(zip(feature_names, arr)) for arr in x]
                                 
-                riverdataset = stream.iter_array(x, y, feature_names=['x1', 'x2', 'x3', 'x4'])
+                feature_names = [f'x{i+1}' for i in range(configuration["MODEL"]["encoder"]["number_features"])]
+                riverdataset = stream.iter_array(x, y, feature_names=feature_names)
+
                 y_pred, cummulative_accuracies = model_instance.evaluate(riverdataset)
 
                 for reporter_instance in reporter_instances:
@@ -602,7 +616,7 @@ def main(args_config_path, args_influx_token):
                 # each reporter.
 
                 for reporter_instance in reporter_instances:
-                    reporter_instance.end_processing()
+                    reporter_instance.end_processing(n_subsets_per_concept, samples_per_subset, label_map)
 
                 if not model_specification["skip_saving_model"]:
                     model_instance._save_model()
