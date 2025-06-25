@@ -16,6 +16,7 @@ from common.functions import report_performance
 from models.trustee.IAnomalyDetectionModelXAI import IAnomalyDetectionModelXAI
 from utils import recurse_tree_with_classes, tree_to_bracket_notation
 from utils.my_trustee.report.trust import TrustReport as MyTrustReport
+from utils.stream_trustee.report.trust import TrustReport as StreamTrustReport
 from xai.ITrusteeExplainableModel import ITrusteeExplainableModel
 
 log = logging.getLogger()

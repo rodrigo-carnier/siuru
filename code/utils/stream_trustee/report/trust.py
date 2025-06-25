@@ -50,7 +50,7 @@ class TrustReport:
         max_iter=10,
         num_pruning_iter=10,
         train_size=0.7,
-        predict_method_name="predict",
+        predict_method_name="predict_one",
         trustee_num_iter=50,
         trustee_num_stability_iter=10,
         trustee_sample_size=0.5,
