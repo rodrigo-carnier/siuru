@@ -310,7 +310,29 @@ def main(args_config_path, args_influx_token):
                     ),
                     'wb'
             ) as xai_file:
-                pickle.dump(model_instance.get_test_data(), xai_file)
+                rodrigotest = model_instance.get_test_data()
+                # DEBUG PRINTS
+                print("=== DEBUG: Dumping rodrigotest ===")
+                if isinstance(rodrigotest, dict):
+                    X = rodrigotest.get('X')
+                    y = rodrigotest.get('y')
+                    print(" - X type:", type(X))
+                    try:
+                        print(" - X shape:", np.array(X).shape)
+                        if len(X) > 0:
+                            print(" - X[0] shape:", np.array(X[0]).shape)
+                    except Exception as e:
+                        print(" - Error checking X shape:", e)
+
+                    print(" - y type:", type(y))
+                    try:
+                        print(" - y shape:", np.array(y).shape)
+                        print(" - y length:", len(y))
+                    except Exception as e:
+                        print(" - Error checking y shape:", e)
+                else:
+                    print(" - rodrigotest is not a dict:", type(rodrigotest))
+                pickle.dump(rodrigotest, xai_file)
 
     # XAI starts
     if "XAI" in configuration:
@@ -341,6 +363,8 @@ def main(args_config_path, args_influx_token):
                 break
 
             trained_data = parse_data_for_xai(encoded_feature_generator)
+            print("DEBUG trained_data['X'] shape:", np.array(trained_data['X']).shape)
+            print("DEBUG trained_data['y'] shape:", np.array(trained_data['y']).shape)
 
 
         else:
@@ -362,8 +386,10 @@ def main(args_config_path, args_influx_token):
         test_data_raw_sources = full_xai_config.get("test_data_raw_sources", [])
 
         if len(test_data_raw_sources) > 0:
+            #RMC
+            print("######### AAAAAAHHHHH HUNG WHAT IS THIS BUG")
             feature_stream = itertools.chain([])
-            for data_source in train_data_raw_sources:
+            for data_source in test_data_raw_sources:
                 feature_stream = initialize_data_source(data_source, feature_stream)
             encoded_feature_generator = encoder_instance.encode(feature_stream)
 
@@ -372,6 +398,8 @@ def main(args_config_path, args_influx_token):
                 extracted_features = np.array(encoding.features)
                 break
             test_data = parse_data_for_xai(encoded_feature_generator)
+            print("DEBUG test_data['X'] shape:", np.array(test_data['X']).shape)
+            print("DEBUG test_data['y'] shape:", np.array(test_data['y']).shape)
         else:
             if not test_data_path:
                 test_data_path = os.path.join(os.path.dirname(model_instance.store_file),
@@ -379,7 +407,19 @@ def main(args_config_path, args_influx_token):
             # File with test data is opened
             if os.path.exists(test_data_path):
                 with open(test_data_path, 'rb') as xai_file:
+                    print("@@@@ Im loading")
                     test_data = pickle.load(xai_file)
+                    print("=== DEBUG: Just loaded test_data from pickle ===")
+                    print(" - type(test_data):", type(test_data))
+                    X = test_data.get('X')
+                    y = test_data.get('y')
+                    print(" - X type:", type(X))
+                    print(" - X shape:", np.array(X).shape)
+                    if len(np.array(X).shape) > 1:
+                        print(" - X[0] shape:", np.array(X[0]).shape)
+                    print(" - y type:", type(y))
+                    print(" - y shape:", np.array(y).shape)
+                    print(" - y length:", len(y))
             else:
                 test_data = {'X': [], 'y': []}
 
@@ -411,6 +451,7 @@ def main(args_config_path, args_influx_token):
                 log.info("No XAI Algorithm specified")
                 continue
 
+            print(f"##### Testing if this exists: explain_with_{xai_algo}")
             if not callable(getattr(model_instance, f"explain_with_{xai_algo}", None)):
                 raise TypeError(
                     f"The specified XAI algorithm is not supported by model {model_name}!"
@@ -422,10 +463,10 @@ def main(args_config_path, args_influx_token):
             xai_algo_return_feature_importance = ('rf', 'lime', 'shap')
 
             
-            print(trained_data)
-            print(test_data)
-            print(type(trained_data))
-            print(type(test_data))
+            # print(trained_data)
+            # print(test_data)
+            # print(type(trained_data))
+            # print(type(test_data))
 
             # # Defensive check and conversion
             # if not isinstance(trained_data['X'], np.ndarray):
@@ -439,6 +480,20 @@ def main(args_config_path, args_influx_token):
             #         raise TypeError(f"X_train must be a NumPy array or a list of dicts. Got {type(trained_data['X'])}. Conversion failed: {e}")
 
             model_instance.predict_method_name = "predict_one"
+
+
+            # Debug / check shapes and types before calling explain_with_*
+            print("X_train shape:", np.array(trained_data['X']).shape)
+            print("y_train shape:", np.array(trained_data['y']).shape)
+            print("X_test shape:", np.array(test_data['X']).shape)
+            print("y_test shape:", np.array(test_data['y']).shape)
+            print("Unique values in y_train:", np.unique(trained_data['y']))
+            print("Unique values in y_test:", np.unique(test_data['y']))
+
+            # Optional: sanity check that X_test and y_test have consistent first dimension size
+            assert np.array(test_data['X']).shape[0] == np.array(test_data['y']).shape[0], "X_test and y_test size mismatch!"
+
+
             if xai_algo not in xai_algo_return_feature_importance:
                 getattr(model_instance, f"explain_with_{xai_algo}")(
                     X_train=np.array(trained_data['X']),

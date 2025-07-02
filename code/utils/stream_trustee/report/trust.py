@@ -17,7 +17,7 @@ from sklearn.metrics import classification_report, f1_score, r2_score
 
 from prettytable import PrettyTable
 
-from utils.my_trustee import ClassificationTrustee, RegressionTrustee
+from utils.stream_trustee import ClassificationTrustee, RegressionTrustee
 from trustee.utils.tree import get_dt_info
 from trustee.utils.dataset import convert_to_df, convert_to_series
 
@@ -473,7 +473,17 @@ class TrustReport:
         sum_samples = 0
         sum_samples_perc = 0
         sum_class_samples_perc = {}
+        counterbranchclasswrong = 0
         for branch in self.max_dt_top_branches:
+            # RMC
+            print(f"branch keys: {branch.keys()}")
+            print(f"branch 'class': {branch.get('class', 'No class key')}")
+            print(f"branch 'samples': {branch.get('samples')}")
+            print("@@@ DEBUGGING branch class: branch['class']:", branch["class"], type(branch["class"]))
+            if branch.get("class") not in [0, 1]:
+                counterbranchclasswrong = counterbranchclasswrong+1
+                print(f"Fixing branch class from {branch['class']} to 0. Counting {counterbranchclasswrong}")
+                branch["class"] = 0
             samples, samples_perc, class_samples_perc = (
                 branch["samples"],
                 (branch["samples"] / self.max_dt.tree_.n_node_samples[0]) * 100,
@@ -869,7 +879,13 @@ class TrustReport:
         if self.verbose:
             log("Done!")
 
-        y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
+        # RMC: changed line below for one compatible with River
+        # y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
+        if self.predict_method_name == "predict_one":
+            y_pred = pd.Series([blackbox_copy.predict_one(row.to_dict()) for _, row in X_test.iterrows()])
+        else:
+            y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
+
 
         if self.verbose:
             log("Blackbox model score report with training data:")
@@ -881,6 +897,7 @@ class TrustReport:
         )
 
         stability_iter = trustee_num_stability_iter if trustee_num_stability_iter else self.trustee_num_stability_iter
+        print("StreamTrustReport._fit_and_explain() - calling trustee.fit()")
         trustee.fit(
             X_train,
             self.y_train,
@@ -904,6 +921,12 @@ class TrustReport:
             log(f"Model explanation training (agreement, fidelity): ({agreement}, {reward})")
             log(f"Top-k Prunned explanation size: {min_dt.tree_.node_count}")
 
+        print("X_test shape:", X_test.shape)
+        print("self.use_features:", self.use_features)
+        print("max feature index:", max(self.use_features))
+        print("X_test type:", type(X_test))
+        print("X_test.head():", X_test.head())
+
         dt_y_pred = dt.predict(X_test.iloc[:, self.use_features].values)
         min_dt_y_pred = min_dt.predict(X_test.iloc[:, self.use_features].values)
 
@@ -924,6 +947,9 @@ class TrustReport:
 
     def _collect(self):
         """Collects data to build the make report"""
+
+        print("StreamTrustReport._collect() - entering")
+
         self._collect_blackbox()
         self._collect_trustee()
 
@@ -958,6 +984,9 @@ class TrustReport:
         self._progress()
 
     def _collect_trustee(self):
+        print("StreamTrustReport._collect_trustee() - entering")
+
+
         """Uses provided dataset to train a Decision Tree and fetch first decision tree info"""
         log = self.logger.log if self.logger else print
         if self.verbose:
@@ -1053,6 +1082,11 @@ class TrustReport:
             log("Done!")
 
     def _collect_top_k_prunning(self):
+
+        print("DEBUG: self.X_test.shape =", self.X_test.shape)
+        print("DEBUG: self.use_features =", self.use_features)
+        print("DEBUG: max feature index =", max(self.use_features))
+
         """Uses trained trustee explainer to prune the decision tree with different top_k branches"""
         log = self.logger.log if self.logger else print
         if self.verbose:
@@ -1064,6 +1098,7 @@ class TrustReport:
                 log(f"Iteration {top_k}/{self.num_pruning_iter}")
 
             pruned_dt = self.trustee.prune(top_k=top_k)
+
             pruned_dt_y_pred = pruned_dt.predict(self.X_test.iloc[:, self.use_features].values)
 
             self.top_k_prune_iter.append(

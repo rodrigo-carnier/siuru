@@ -214,7 +214,19 @@ class Trustee(abc.ABC):
         self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(X, y, train_size=train_size)
 
         features = self._X_train
-        targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
+
+        print("Trustee.fit() - starting")
+        print("Predict method:", predict_method_name)
+        print("X_train type:", type(self._X_train))
+        print("X_train[0]:", self._X_train[0] if len(self._X_train) > 0 else "empty")
+
+        if predict_method_name == "predict_one":
+            targets = pd.Series([self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()])
+        else:
+            targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
+            
+        print("Predict done.")
+
 
         if hasattr(targets, "shape") and len(targets.shape) >= 2:
             targets = targets.ravel()

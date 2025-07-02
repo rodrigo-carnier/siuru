@@ -474,6 +474,8 @@ class TrustReport:
         sum_samples_perc = 0
         sum_class_samples_perc = {}
         for branch in self.max_dt_top_branches:
+            # RMC
+            print("@@@ DEBUGGING branch class: branch['class']:", branch["class"], type(branch["class"]))
             samples, samples_perc, class_samples_perc = (
                 branch["samples"],
                 (branch["samples"] / self.max_dt.tree_.n_node_samples[0]) * 100,
@@ -881,6 +883,7 @@ class TrustReport:
         )
 
         stability_iter = trustee_num_stability_iter if trustee_num_stability_iter else self.trustee_num_stability_iter
+        print("StreamTrustReport._fit_and_explain() - calling trustee.fit()")
         trustee.fit(
             X_train,
             self.y_train,
@@ -904,6 +907,12 @@ class TrustReport:
             log(f"Model explanation training (agreement, fidelity): ({agreement}, {reward})")
             log(f"Top-k Prunned explanation size: {min_dt.tree_.node_count}")
 
+        print("X_test shape:", X_test.shape)
+        print("self.use_features:", self.use_features)
+        print("max feature index:", max(self.use_features))
+        print("X_test type:", type(X_test))
+        print("X_test.head():", X_test.head())
+
         dt_y_pred = dt.predict(X_test.iloc[:, self.use_features].values)
         min_dt_y_pred = min_dt.predict(X_test.iloc[:, self.use_features].values)
 
@@ -923,13 +932,16 @@ class TrustReport:
         return trustee, y_pred, dt, dt_y_pred, min_dt, min_dt_y_pred
 
     def _collect(self):
+        
+        print("StreamTrustReport._collect() - entering")
+        
         """Collects data to build the make report"""
         self._collect_blackbox()
         self._collect_trustee()
 
         if self.analyze_stability:
             self._collect_stability_analysis()
-
+        
         if self.analyze_branches:
             self._collect_branch_analysis()
 
@@ -958,6 +970,9 @@ class TrustReport:
         self._progress()
 
     def _collect_trustee(self):
+
+        print("StreamTrustReport._collect_trustee() - entering")
+
         """Uses provided dataset to train a Decision Tree and fetch first decision tree info"""
         log = self.logger.log if self.logger else print
         if self.verbose:

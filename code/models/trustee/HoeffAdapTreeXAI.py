@@ -1,10 +1,10 @@
 import time
 from typing import Any, Dict, Generator, Optional, List, Tuple, Union
 
-# import numpy as np
-# np.float = float
-# np.int = np.int32
-# np.bool = np.bool_
+import numpy as np
+np.float = float
+np.int = np.int32
+np.bool = np.bool_
 
 from river import forest, tree
 from river import compose
@@ -167,7 +167,6 @@ class HoeffdingAdaptativeTreeModelXAI(IAnomalyDetectionModelXAI, ITrusteeExplain
         for sample, encoding in data:
             if len(feature_names) == 0:
                 feature_names = list(encoding.features.values)
-                print(feature_names)
 
             start_time_ref = time.process_time_ns()
             if isinstance(sample, list):
@@ -188,7 +187,11 @@ class HoeffdingAdaptativeTreeModelXAI(IAnomalyDetectionModelXAI, ITrusteeExplain
                 sum_samples += 1
                 yield sample
 
-        self.data_set = feature_sample
+        self.data_set = np.array(feature_array)
+        print("Feature array type:", type(self.data_set))
+        print("Feature array[0] shape:", feature_array[0].shape)
+        print("self.data_set shape:", self.data_set.shape)
+        print("self.data_set dtype:", self.data_set.dtype)
         self.test_data['X'] = self.data_set
         self.test_data['y'] = labels
         self.test_data['y_predict'] = predicted_labels
