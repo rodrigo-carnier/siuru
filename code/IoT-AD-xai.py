@@ -216,7 +216,7 @@ def main(args_config_path, args_influx_token):
     # Extract model_param separately
     model_param = model_specification.pop("model_param", {})
 
-    model_instance: IAnomalyDetectionModel = model_class(
+    model_instance: IAnomalyDetectionModelXAI = model_class(
         full_config_json=json.dumps(configuration, indent=4),
         **model_specification
         # **model_param  # Unpack model_param here
@@ -407,7 +407,6 @@ def main(args_config_path, args_influx_token):
             # File with test data is opened
             if os.path.exists(test_data_path):
                 with open(test_data_path, 'rb') as xai_file:
-                    print("@@@@ Im loading")
                     test_data = pickle.load(xai_file)
                     print("=== DEBUG: Just loaded test_data from pickle ===")
                     print(" - type(test_data):", type(test_data))
@@ -420,13 +419,14 @@ def main(args_config_path, args_influx_token):
                     print(" - y type:", type(y))
                     print(" - y shape:", np.array(y).shape)
                     print(" - y length:", len(y))
+                    print(f" - y={y}")
             else:
                 test_data = {'X': [], 'y': []}
 
         # Formatting the features for XAI models
         # extracted_features = [feature.split('.')[-1] for feature in model_instance.get_labels_name()]
 
-        # Get labels
+        # Get anomaly labels (names)
         if os.path.exists(os.path.join(os.path.dirname(model_instance.store_file), "multiclass-labels.json")):
             with open(os.path.join(os.path.dirname(model_instance.store_file), "multiclass-labels.json"),
                       'rb') as xai_file:
@@ -451,7 +451,6 @@ def main(args_config_path, args_influx_token):
                 log.info("No XAI Algorithm specified")
                 continue
 
-            print(f"##### Testing if this exists: explain_with_{xai_algo}")
             if not callable(getattr(model_instance, f"explain_with_{xai_algo}", None)):
                 raise TypeError(
                     f"The specified XAI algorithm is not supported by model {model_name}!"
@@ -479,10 +478,15 @@ def main(args_config_path, args_influx_token):
             #     except Exception as e:
             #         raise TypeError(f"X_train must be a NumPy array or a list of dicts. Got {type(trained_data['X'])}. Conversion failed: {e}")
 
-            model_instance.predict_method_name = "predict_one"
+            model_instance.predict_method_name = "predict"
 
 
             # Debug / check shapes and types before calling explain_with_*
+            print("@@@ Available methods in model_instance:")
+            print([m for m in dir(model_instance) if callable(getattr(model_instance, m))])
+
+            print("@@@ Testing caller")
+            print(getattr(model_instance, model_instance.predict_method_name)(trained_data))
             print("X_train shape:", np.array(trained_data['X']).shape)
             print("y_train shape:", np.array(trained_data['y']).shape)
             print("X_test shape:", np.array(test_data['X']).shape)
@@ -527,43 +531,6 @@ def main(args_config_path, args_influx_token):
 
             log.info(f"XAI - {xai_algo} finished after {xai_time_stop - xai_time_start} ns")
 
-            # # SHAP
-            # if xai_config.get("type", "").lower() == "shap":
-            #     log.info(f"XAI - Model SHAP starts....")
-            #     shpa_instance.explainer(model_instance, trained_data, extracted_features, class_names).savefig(
-            #         os.path.join(save_path, f"{log_time_tag}-SHAP.png"))
-            #     log.info(f"XAI - Model SHAP finished....")
-            #     log.info(f"Results in {save_path}/{log_time_tag}-SHAP.png")
-            # # LIME
-            # elif xai_config.get("type", "").lower() == "lime":
-            #     log.info(f"XAI - Model LIME starts....")
-            #     lime_instance.explainer(trained_data, extracted_features, class_names)
-            #
-            #     log.info("****************** LIME: list of weighted features ***********************")
-            #     for i, data in enumerate(model_instance.get_test_data()):
-            #         array_values = data.values
-            #         # If array_values has more than one row, take a single row for LIME
-            #         if array_values.ndim == 2 and array_values.shape[0] > 1:
-            #             test_row = array_values[0]
-            #         else:
-            #             test_row = array_values
-            #         # Make sure test_row is a row
-            #         test_row = np.squeeze(test_row)
-            #
-            #         def predict_fn(data):
-            #             return model_instance.predict_proba(data)
-            #
-            #         lime_data = lime_instance.explainIntance(test_row, predict_fn, extracted_features).as_html()
-            #         log.info(lime_instance.explainIntance(test_row, predict_fn, extracted_features).as_list())
-            #
-            #     with open(os.path.join(save_path, f"{log_time_tag}-LIME.html"), 'w') as f:
-            #         f.write(lime_data)
-            #
-            #     log.info(f"XAI - Model LIME finished....")
-            #     log.info(f"Results in {save_path}/{log_time_tag}-LIME.png")
-            #
-            # else:
-            #     log.error("XAI type not supported")
 
     pipeline_stopping_time = time.process_time_ns()
     full_pipeline_time = pipeline_stopping_time - pipeline_execution_start

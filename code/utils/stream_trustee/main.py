@@ -1,3 +1,4 @@
+
 """
 Trustee
 ====================================
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
+from collections import Counter
 
 import apted
 from apted.helpers import Tree
@@ -204,6 +206,52 @@ class Trustee(abc.ABC):
         if len(X) != len(y):
             raise ValueError("Features (X) and target (y) values should have the same length.")
 
+
+
+        print(self.expert)
+        print(type(self.expert))
+        first_entry = {f"f{i}": val for i, val in enumerate(X[0])}
+
+        print(f"Result 0: y={y[0]}, pred={self.expert.predict_one(first_entry)}")
+        
+        # RMC Previous version of adaptation of Trustee to River
+        if predict_method_name == "predict_one":
+            y_pred = [self.expert.predict_one(row.to_dict()) for _, row in X.iterrows()]
+            # y_pred = [
+            #     self.expert.predict_one({self.feature_names[i]: value for i, value in enumerate(row)})
+            #     for row in X
+            # ]
+        else:
+            y_pred = getattr(self.expert, predict_method_name)(X)
+
+        print(f"Results: y={y}, pred={y_pred}")
+
+
+        # # 🔍 Sanity check on target values
+        # # Convert raw predictions to binary targets
+        # targets = [1 if pred == 1 else 0 for pred in y_pred]
+
+        print("Predict done.")
+
+        print("Sanity check: initial `targets` values and types")
+        counts = Counter(targets)
+        for label, count in counts.items():
+            print(f"Value: {label}, Count: {count}")
+
+        targets_array = np.array(targets)
+        print("targets dtype:", targets_array.dtype)
+        print("targets unique values:", np.unique(targets_array))
+
+
+
+
+
+
+
+
+
+
+
         # convert data to np array to facilitate processing
         X = convert_to_df(X)
         y = convert_to_series(y)
@@ -218,17 +266,49 @@ class Trustee(abc.ABC):
         print("Trustee.fit() - starting")
         print("Predict method:", predict_method_name)
         print("X_train type:", type(self._X_train))
-        print("X_train[0]:", self._X_train[0] if len(self._X_train) > 0 else "empty")
+        print("X_train[0]:", self._X_train.iloc[0] if len(self._X_train) > 0 else "empty")
 
         # RMC: changed line below for one compatible with River
-        # targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
         if predict_method_name == "predict_one":
-            targets = pd.Series([self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()])
+            #raw_preds = [self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()]
+            raw_preds = []
+            for i, row in self._X_train.iterrows():
+                input_dict = row.to_dict()
+                if i < 5:
+                    print(f"Input to predict_one at row {i}: {input_dict}")
+                pred = self.expert.predict_one(input_dict)
+                if i < 5:
+                    print(f"Prediction from predict_one at row {i}: {pred}")
+                raw_preds.append(pred)
+
         else:
-            targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
-        
+            raw_preds = getattr(self.expert, predict_method_name)(self._X_train)
+
+        # # RMC Previous version of adaptation of Trustee to River
+        # if self.predict_method_name == "predict_one":
+        #     y_pred = pd.Series([blackbox_copy.predict_one(row.to_dict()) for _, row in X_test.iterrows()])
+        # else:
+        #     y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
+
+
+        # # ===== INSERT DEBUG PRINTS HERE =====
+        # print("Debug: first 10 training rows and expert predictions:")
+        # for i in range(min(10, len(self._X_train))):
+        #     print(f"Row {i}: {self._X_train.iloc[i].to_dict()}")
+        #     print(f"Expert prediction: {raw_preds[i]}")
+
+        # Force binary labels: anything other than 1 becomes 0
+        targets = pd.Series([1 if pred == 1 else 0 for pred in raw_preds])
+
         print("Predict done.")
 
+        # 🔍 Sanity check on target values
+        print("Sanity check: initial `targets` values and types")
+        print(targets.value_counts(dropna=False))
+        print("targets dtype:", targets.dtype)
+        print("targets unique values:", targets.unique())
+        
+        # print("Unique labels in initial targets:", targets.unique())
 
         if hasattr(targets, "shape") and len(targets.shape) >= 2:
             targets = targets.ravel()
@@ -281,15 +361,20 @@ class Trustee(abc.ABC):
                     self.log(f"Student model score: {self._score(y_iter_test, student_pred)}")
 
                 # Step 3: Use expert model predictions to aggregate original dataset
-                
-                # RMC: changed line below for one compatible with River
-                # expert_pred = pd.Series(getattr(self.expert, predict_method_name)(X_iter_test))
                 if predict_method_name == "predict_one":
-                    expert_pred = pd.Series([self.expert.predict_one(row.to_dict()) for _, row in X_iter_test.iterrows()])
+                    # RMC: SANITIZE AGAIN
+                    expert_pred_list = []
+                    for k, (_, row) in enumerate(X_iter_test.iterrows()):
+                        pred = self.expert.predict_one(row.to_dict())
+                        if pred not in [0, 1]:
+                            print(f"[DEBUG] Forcing expert prediction {pred} → 0 at inner-loop index {k}")
+                            pred = 0
+                        expert_pred_list.append(pred)
+                    expert_pred = pd.Series(expert_pred_list)
                 else:
                     expert_pred = pd.Series(getattr(self.expert, predict_method_name)(X_iter_test))
 
-
+                # print("Unique labels in expert_pred:", expert_pred.unique())
 
                 if hasattr(expert_pred, "shape") and len(expert_pred.shape) >= 2:
                     expert_pred = expert_pred.ravel()
@@ -299,24 +384,20 @@ class Trustee(abc.ABC):
                     targets = pd.concat([targets, expert_pred])
 
                 if optimization == "accuracy":
-                    # Step 4: Calculate reward based on Decision Tree Classifier accuracy
                     reward = self._score(y_iter_test, student_pred)
                 else:
-                    # Step 4: Calculate reward based on Decision Tree Classifier fidelity to the Expert model
                     reward = self._score(expert_pred, student_pred)
 
                 if verbose:
                     self.log(f"Student model {i}-{j} fidelity: {reward}")
 
-                # Save student to list of iterations dt
                 self._students_by_iter[i].append((deepcopy(student), reward))
 
-            # Save student with highest fidelity to list of top students by iteration
             self._top_students.append(max(self._students_by_iter[i], key=lambda item: item[1]))
 
-        # Get best overall student based on mean agreement
         self._best_student = self.explain(top_k=top_k)[0]
-        # self._best_students.append(self.explain(top_k=top_k)[0])
+
+
 
     @_check_if_trained
     def explain(self, top_k=10):
