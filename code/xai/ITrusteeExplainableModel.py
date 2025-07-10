@@ -1,3 +1,8 @@
+from typing import List, Generator, Tuple, Dict, Any
+import xarray
+import numpy as np
+import pandas as pd
+
 import logging
 from abc import ABC
 
@@ -103,6 +108,37 @@ class ITrusteeExplainableModel(ABC):
             prediction_method_name="predict",
             **kwargs
     ):
+
+
+
+        print(f"@@@ Here is the blackbox type in ITrusteeExplainableModel: {type(self.get_model_for_trustee())}")
+        print(type(self))
+        print(X_train)
+        print(type(X_train))
+
+        print("@@@ Methods called in 4: ITrusteeExplainableModel")
+        print([m for m in dir(self.model_instance) if callable(getattr(self.model_instance, m))])
+
+        prediction = self.model_instance.predict(X_train)      # make prediction
+        print("Prediction ITrusteeExplainableModel:", prediction)
+
+        print("@@@ Finished ITrusteeExplainableMOdel Prediction")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if class_names is None:
             class_names = ['benign', 'anomalous']
 
@@ -167,6 +203,51 @@ class ITrusteeExplainableModel(ABC):
             prediction_method_name="predict_one",
             **kwargs
     ):
+
+
+        print(f"@@@ Here is the blackbox type in ITrusteeExplainableModel: {type(self.get_model_for_trustee())}")
+        print(type(self))
+        print(X_train)
+        print(type(X_train))
+
+        # Convert
+        river_data = self.array_to_river_dicts(X_train, feature_names)
+
+        counts = [0, 0]
+
+        print("@@@ Methods called in 4-A self: ITrusteeExplainableModel")
+        print([m for m in dir(self) if callable(getattr(self, m))])
+        print("@@@ Methods called in 4-B self.model_instance: ITrusteeExplainableModel")
+        print([m for m in dir(self.model_instance) if callable(getattr(self.model_instance, m))])
+        print("@@@ Methods called in 4-C many: ITrusteeExplainableModel")
+        print(type(self))
+        print(type(self.scaler))
+        print(type(self.model_instance))
+
+        # Loop through samples
+        for sample in river_data:
+            prediction = self.model_instance.predict_one(sample)      # make prediction
+            # scaled = self.scaler.transform_one(sample)
+            # prediction = self.model_instance.predict_one(scaled)      # make prediction
+            print("Prediction ITrusteeExplainableMOdel:", prediction)
+            # increment safely
+            if prediction == 0:
+                counts[0] += 1
+            elif prediction == 1:
+                counts[1] += 1
+            else:
+                # if you ever get something unexpected, you can decide to:
+                #   * force it into one of the bins
+                #   * ignore it
+                #   * log an error, etc.
+                print(f"⚠️  unexpected label {prediction!r}, ignoring")
+
+        print("@@@ Finished ITrusteeExplainableMOdel Prediction")
+        print(counts)
+
+
+
+
         if class_names is None:
             class_names = ['benign', 'anomalous']
 
@@ -212,3 +293,46 @@ class ITrusteeExplainableModel(ABC):
 
             dump(trust_report.max_dt, f"{save_path}/dt.pickle")
             dump(trust_report.min_dt, f"{save_path}/pruned_dt.pickle")
+
+
+
+    def dataframe_to_river_dicts(self, df: pd.DataFrame, feature_names: list[str]) -> list[dict]:
+        """
+        Converts a pandas DataFrame to a list of dictionaries with specified feature names.
+        Each dictionary represents one sample and can be used in River.
+        """
+        return [dict(zip(feature_names, row)) for row in df.values]
+
+    def array_to_river_dicts(self,
+        X: np.ndarray, 
+        feature_names: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Converts a 2D NumPy array X of shape (n_samples, n_features)
+        into a list of dicts [{feat_name: value, …}, …] for River.
+        
+        Parameters
+        ----------
+        X : np.ndarray
+            Your data array, shape (n_samples, n_features).
+        feature_names : List[str]
+            List of length n_features giving the name for each column.
+        
+        Returns
+        -------
+        List[Dict[str, Any]]
+            One dict per row in X, mapping feature_names[i] -> X[row, i].
+        """
+        X = np.asarray(X)
+        if X.ndim != 2:
+            raise ValueError(f"Expected 2D array, got shape {X.shape}")
+        n_samples, n_features = X.shape
+        if len(feature_names) != n_features:
+            raise ValueError(
+                f"Number of feature_names ({len(feature_names)}) "
+                f"does not match number of columns in X ({n_features})"
+            )
+        return [
+            dict(zip(feature_names, X[i]))
+            for i in range(n_samples)
+        ]

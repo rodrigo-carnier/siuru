@@ -3,6 +3,9 @@ Trust Report
 ====================================
 The module that implements Trust Reports
 """
+from typing import List, Generator, Tuple, Dict, Any
+import xarray
+
 import os
 import copy
 import pickle
@@ -37,6 +40,48 @@ from .plot import (
 
 class TrustReport:
     """Class to generate Trust Report."""
+
+
+    def dataframe_to_river_dicts(self, df: pd.DataFrame, feature_names: list[str]) -> list[dict]:
+        """
+        Converts a pandas DataFrame to a list of dictionaries with specified feature names.
+        Each dictionary represents one sample and can be used in River.
+        """
+        return [dict(zip(feature_names, row)) for row in df.values]
+
+    def array_to_river_dicts(self,
+        X: np.ndarray, 
+        feature_names: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Converts a 2D NumPy array X of shape (n_samples, n_features)
+        into a list of dicts [{feat_name: value, …}, …] for River.
+        
+        Parameters
+        ----------
+        X : np.ndarray
+            Your data array, shape (n_samples, n_features).
+        feature_names : List[str]
+            List of length n_features giving the name for each column.
+        
+        Returns
+        -------
+        List[Dict[str, Any]]
+            One dict per row in X, mapping feature_names[i] -> X[row, i].
+        """
+        X = np.asarray(X)
+        if X.ndim != 2:
+            raise ValueError(f"Expected 2D array, got shape {X.shape}")
+        n_samples, n_features = X.shape
+        if len(feature_names) != n_features:
+            raise ValueError(
+                f"Number of feature_names ({len(feature_names)}) "
+                f"does not match number of columns in X ({n_features})"
+            )
+        return [
+            dict(zip(feature_names, X[i]))
+            for i in range(n_samples)
+        ]
 
     def __init__(
         self,
@@ -209,6 +254,42 @@ class TrustReport:
         self.feature_names = feature_names
         self.is_classify = is_classify
         self.use_features = use_features if use_features is not None else np.arange(0, X_train.shape[1])
+
+
+        print(f"@@@ Here is the blackbox type in TrustReport: {type(blackbox)}")
+        print(X_train)
+        print(type(X_train))
+        print(feature_names)
+
+        # Convert
+        river_data = self.array_to_river_dicts(X_train, feature_names)
+
+        counts = [0, 0]
+
+        print("@@@ Methods called in 5: trust.py")
+        print([m for m in dir(self.blackbox) if callable(getattr(self.blackbox, m))])
+
+        # Loop through samples
+        for sample in river_data:
+            prediction = getattr(self.blackbox, predict_method_name)(sample)      # make prediction
+            # print("Prediction TrustReport:", prediction)
+            # increment safely
+            if prediction == 0:
+                counts[0] += 1
+            elif prediction == 1:
+                counts[1] += 1
+            else:
+                # if you ever get something unexpected, you can decide to:
+                #   * force it into one of the bins
+                #   * ignore it
+                #   * log an error, etc.
+                print(f"⚠️  unexpected label {prediction!r}, ignoring")
+
+        print("@@@ Finished TrustReport Prediction")
+        print(counts)
+
+
+
 
         self.step = 0
         """
@@ -884,6 +965,8 @@ class TrustReport:
         if self.predict_method_name == "predict_one":
             y_pred = pd.Series([blackbox_copy.predict_one(row.to_dict()) for _, row in X_test.iterrows()])
         else:
+            print("@@@ Methods called in 3: trust.py")
+            print([m for m in dir(blackbox_copy) if callable(getattr(blackbox_copy, m))])
             y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
 
 
@@ -911,6 +994,7 @@ class TrustReport:
             ccp_alpha=trustee_ccp_alpha if trustee_ccp_alpha else self.trustee_ccp_alpha,
             verbose=self.verbose,
             use_features=self.use_features,
+            feature_names=self.feature_names
         )
 
         if self.verbose:

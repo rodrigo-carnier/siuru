@@ -4,6 +4,9 @@ Trustee
 ====================================
 The core module of the Trustee project
 """
+from typing import List, Generator, Tuple, Dict, Any
+import xarray
+
 import abc
 import functools
 import numpy as np
@@ -23,6 +26,36 @@ from trustee.utils.tree import get_dt_info, top_k_prune
 from trustee.utils.dataset import convert_to_df, convert_to_series
 from .utils import tree_representation
 
+def dataframe_to_river_dicts(df: pd.DataFrame, feature_names: list[str]) -> list[dict]:
+    """
+    Converts a pandas DataFrame to a list of dictionaries with specified feature names.
+    Each dictionary represents one sample and can be used in River.
+    """
+    return [dict(zip(feature_names, row)) for row in df.values]
+
+def reconstruct_encoded_generator(
+    test_data: Dict[str, Any]
+) -> Generator[Tuple[Dict[str, Any], xarray.DataArray], None, None]:
+    """
+    Convert test_data dict back to an EncodedSampleGenerator.
+    """
+
+    X = test_data["X"]
+    y = test_data["y"]
+    feature_names = test_data["feature_names"]
+
+    for i in range(len(X)):
+        # Simulate the Sample (dict containing at least ground truth)
+        sample = {PredictionField.GROUND_TRUTH: y[i]}
+
+        # Simulate the encoded xarray.DataArray with 2D shape
+        encoded = xarray.DataArray(
+            [X[i]],  # Make it 2D
+            dims=["samples", "features"],
+            coords={"features": feature_names}
+        )
+
+        yield (sample, encoded)
 
 def _check_if_trained(func):
     """
@@ -131,6 +164,7 @@ class Trustee(abc.ABC):
             optimization="fidelity",  # for comparative purposes only
             aggregate=True,  # for comparative purposes only
             verbose=False,
+            feature_names: List[str] = ...
     ):
         """
         Trains Decision Tree Regressor to imitate Expert model.
@@ -207,49 +241,22 @@ class Trustee(abc.ABC):
             raise ValueError("Features (X) and target (y) values should have the same length.")
 
 
+        print(X)
+        print(type(X))
 
-        print(self.expert)
-        print(type(self.expert))
-        first_entry = {f"f{i}": val for i, val in enumerate(X[0])}
+        # Your feature names
 
-        print(f"Result 0: y={y[0]}, pred={self.expert.predict_one(first_entry)}")
-        
-        # RMC Previous version of adaptation of Trustee to River
-        if predict_method_name == "predict_one":
-            y_pred = [self.expert.predict_one(row.to_dict()) for _, row in X.iterrows()]
-            # y_pred = [
-            #     self.expert.predict_one({self.feature_names[i]: value for i, value in enumerate(row)})
-            #     for row in X
-            # ]
-        else:
-            y_pred = getattr(self.expert, predict_method_name)(X)
+        # # Convert
+        # river_data = dataframe_to_river_dicts(X, feature_names)
 
-        print(f"Results: y={y}, pred={y_pred}")
+        # # Loop through samples
+        # for sample in river_data:
+        #     prediction = getattr(self.expert, predict_method_name)(sample)      # make prediction
+        #     print("Prediction:", prediction)
 
-
-        # # 🔍 Sanity check on target values
-        # # Convert raw predictions to binary targets
-        # targets = [1 if pred == 1 else 0 for pred in y_pred]
-
-        print("Predict done.")
-
-        print("Sanity check: initial `targets` values and types")
-        counts = Counter(targets)
-        for label, count in counts.items():
-            print(f"Value: {label}, Count: {count}")
-
-        targets_array = np.array(targets)
-        print("targets dtype:", targets_array.dtype)
-        print("targets unique values:", np.unique(targets_array))
-
-
-
-
-
-
-
-
-
+        # reconstructed = reconstruct_encoded_generator(X)
+        # for predicted_sample in getattr(self.expert, predict_method_name)(reconstructed):
+        #     print(predicted_sample)
 
 
         # convert data to np array to facilitate processing
@@ -263,44 +270,65 @@ class Trustee(abc.ABC):
 
         features = self._X_train
 
-        print("Trustee.fit() - starting")
+        print("StreamTrustee.fit() - starting")
         print("Predict method:", predict_method_name)
         print("X_train type:", type(self._X_train))
         print("X_train[0]:", self._X_train.iloc[0] if len(self._X_train) > 0 else "empty")
 
-        # RMC: changed line below for one compatible with River
-        if predict_method_name == "predict_one":
-            #raw_preds = [self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()]
-            raw_preds = []
-            for i, row in self._X_train.iterrows():
-                input_dict = row.to_dict()
-                if i < 5:
-                    print(f"Input to predict_one at row {i}: {input_dict}")
-                pred = self.expert.predict_one(input_dict)
-                if i < 5:
-                    print(f"Prediction from predict_one at row {i}: {pred}")
-                raw_preds.append(pred)
+        # # RMC: changed line below for one compatible with River
+        # if predict_method_name == "predict_one":
+        #     #raw_preds = [self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()]
+        #     raw_preds = []
+        #     for i, row in self._X_train.iterrows():
+        #         input_dict = row.to_dict()
+        #         if i < 5:
+        #             print(f"Input to predict_one at row {i}: {input_dict}")
+        #         pred = self.expert.predict_one(input_dict)
+        #         if i < 5:
+        #             print(f"Prediction from predict_one at row {i}: {pred}")
+        #         raw_preds.append(pred)
 
-        else:
-            raw_preds = getattr(self.expert, predict_method_name)(self._X_train)
-
-        # # RMC Previous version of adaptation of Trustee to River
-        # if self.predict_method_name == "predict_one":
-        #     y_pred = pd.Series([blackbox_copy.predict_one(row.to_dict()) for _, row in X_test.iterrows()])
         # else:
-        #     y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
+        #     raw_preds = getattr(self.expert, predict_method_name)(self._X_train)
+
+        # # # RMC Previous version of adaptation of Trustee to River
+        # # if self.predict_method_name == "predict_one":
+        # #     y_pred = pd.Series([blackbox_copy.predict_one(row.to_dict()) for _, row in X_test.iterrows()])
+        # # else:
+        # #     y_pred = getattr(blackbox_copy, self.predict_method_name)(X_test)
 
 
-        # # ===== INSERT DEBUG PRINTS HERE =====
-        # print("Debug: first 10 training rows and expert predictions:")
-        # for i in range(min(10, len(self._X_train))):
-        #     print(f"Row {i}: {self._X_train.iloc[i].to_dict()}")
-        #     print(f"Expert prediction: {raw_preds[i]}")
+        # # # ===== INSERT DEBUG PRINTS HERE =====
+        # # print("Debug: first 10 training rows and expert predictions:")
+        # # for i in range(min(10, len(self._X_train))):
+        # #     print(f"Row {i}: {self._X_train.iloc[i].to_dict()}")
+        # #     print(f"Expert prediction: {raw_preds[i]}")
 
-        # Force binary labels: anything other than 1 becomes 0
-        targets = pd.Series([1 if pred == 1 else 0 for pred in raw_preds])
+        # # Force binary labels: anything other than 1 becomes 0
+        # targets = pd.Series([1 if pred == 1 else 0 for pred in raw_preds])
 
-        print("Predict done.")
+
+
+        if predict_method_name == "predict_one":
+            print("@@@ Methods called in 2: main.py")
+            print([m for m in dir(self.expert) if callable(getattr(self.expert, m))])
+            print("Structure of X_train")
+            print(self._X_train)
+            print(type(self._X_train))
+            print(self.expert)
+            print(type(self.expert))
+            # targets = pd.Series([self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()])
+            targets = pd.Series([
+                self.expert.predict_one(dict(zip(feature_names, row)))
+                for row in self._X_train.values
+            ])
+        else:
+            # Debug / check shapes and types before calling explain_with_*
+            print("@@@ Methods called in 2: main.py")
+            print([m for m in dir(self.expert) if callable(getattr(self.expert, m))])
+            targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
+
+        print("Predict done in main.")
 
         # 🔍 Sanity check on target values
         print("Sanity check: initial `targets` values and types")
@@ -362,10 +390,11 @@ class Trustee(abc.ABC):
 
                 # Step 3: Use expert model predictions to aggregate original dataset
                 if predict_method_name == "predict_one":
-                    # RMC: SANITIZE AGAIN
                     expert_pred_list = []
                     for k, (_, row) in enumerate(X_iter_test.iterrows()):
-                        pred = self.expert.predict_one(row.to_dict())
+                        # Build dict using mandatory feature_names list
+                        sample = dict(zip(feature_names, row.values))
+                        pred = self.expert.predict_one(sample)
                         if pred not in [0, 1]:
                             print(f"[DEBUG] Forcing expert prediction {pred} → 0 at inner-loop index {k}")
                             pred = 0

@@ -225,7 +225,13 @@ class Trustee(abc.ABC):
         else:
             targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
             
-        print("Predict done.")
+        print("Predict done in main.")
+
+        # 🔍 Sanity check on target values
+        print("Sanity check: initial `targets` values and types")
+        print(targets.value_counts(dropna=False))
+        print("targets dtype:", targets.dtype)
+        print("targets unique values:", targets.unique())
 
 
         if hasattr(targets, "shape") and len(targets.shape) >= 2:

@@ -25,6 +25,30 @@ from reporting import *
 log = PipelineLogger.get_logger()
 
 
+def reconstruct_encoded_generator(
+    test_data: Dict[str, Any]
+) -> Generator[Tuple[Dict[str, Any], xarray.DataArray], None, None]:
+    """
+    Convert test_data dict back to an EncodedSampleGenerator.
+    """
+
+    X = test_data["X"]
+    y = test_data["y"]
+    feature_names = test_data["feature_names"]
+
+    for i in range(len(X)):
+        # Simulate the Sample (dict containing at least ground truth)
+        sample = {PredictionField.GROUND_TRUTH: y[i]}
+
+        # Simulate the encoded xarray.DataArray with 2D shape
+        encoded = xarray.DataArray(
+            [X[i]],  # Make it 2D
+            dims=["samples", "features"],
+            coords={"features": feature_names}
+        )
+
+        yield (sample, encoded)
+
 def collect_encoded_features(
     encoded_stream: Generator[Tuple[Dict[IFeature, Any], xarray.DataArray], None, None],
 ) -> np.ndarray:
@@ -216,6 +240,7 @@ def main(args_config_path, args_influx_token):
     # Extract model_param separately
     model_param = model_specification.pop("model_param", {})
 
+    # Create or load the ML black box model (class has inherited the loading)
     model_instance: IAnomalyDetectionModelXAI = model_class(
         full_config_json=json.dumps(configuration, indent=4),
         **model_specification
@@ -333,6 +358,8 @@ def main(args_config_path, args_influx_token):
                 else:
                     print(" - rodrigotest is not a dict:", type(rodrigotest))
                 pickle.dump(rodrigotest, xai_file)
+                # pickle.dump(model_instance.get_test_data(), xai_file)
+
 
     # XAI starts
     if "XAI" in configuration:
@@ -376,6 +403,8 @@ def main(args_config_path, args_influx_token):
             if os.path.exists(train_data_path):
                 with open(train_data_path, 'rb') as xai_file:
                     trained_data = pickle.load(xai_file)
+                    print("=== DEBUG: Just loaded train_data from pickle ===")
+
             else:
                 trained_data = {'X': [], 'y': [], 'feature_names': []}
 
@@ -478,15 +507,21 @@ def main(args_config_path, args_influx_token):
             #     except Exception as e:
             #         raise TypeError(f"X_train must be a NumPy array or a list of dicts. Got {type(trained_data['X'])}. Conversion failed: {e}")
 
-            model_instance.predict_method_name = "predict"
+            # model_instance.predict_method_name = "predict_one"
 
 
             # Debug / check shapes and types before calling explain_with_*
-            print("@@@ Available methods in model_instance:")
+            print("# Features names")
+            print(test_data['feature_names'])
+
+            print("@@@ Methods called in 1: IoT-AD.py")
             print([m for m in dir(model_instance) if callable(getattr(model_instance, m))])
 
-            print("@@@ Testing caller")
-            print(getattr(model_instance, model_instance.predict_method_name)(trained_data))
+            # print("@@@ AAAAHHHHHHHHHHHHHH Testing caller")
+            # print(trained_data['X'])
+            # print(type(trained_data['X']))
+            # for pred in model_instance.predict(trained_data):
+            #     print(pred)
             print("X_train shape:", np.array(trained_data['X']).shape)
             print("y_train shape:", np.array(trained_data['y']).shape)
             print("X_test shape:", np.array(test_data['X']).shape)
@@ -494,7 +529,14 @@ def main(args_config_path, args_influx_token):
             print("Unique values in y_train:", np.unique(trained_data['y']))
             print("Unique values in y_test:", np.unique(test_data['y']))
 
-            # Optional: sanity check that X_test and y_test have consistent first dimension size
+            # # RMC debuggin why river does not predict correctly in trustee: testing model_instance inside XAI run before passing to main.
+            # # RMC ML black box model is WORKING for River
+            # reconstructed = reconstruct_encoded_generator(test_data)
+            # for predicted_sample in model_instance.predict(reconstructed):
+            #     print(predicted_sample)
+
+
+            # RMC Optional: sanity check that X_test and y_test have consistent first dimension size
             assert np.array(test_data['X']).shape[0] == np.array(test_data['y']).shape[0], "X_test and y_test size mismatch!"
 
 
@@ -507,7 +549,7 @@ def main(args_config_path, args_influx_token):
                     class_names=class_names,
                     feature_names=extracted_features,
                     save_path=save_path,
-                    # prediction_method_name="predict_one"
+                    # prediction_method_name="predict"
                     **xai_config
                 )
             else:
