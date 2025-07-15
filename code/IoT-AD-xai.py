@@ -241,7 +241,7 @@ def main(args_config_path, args_influx_token):
     model_param = model_specification.pop("model_param", {})
 
     # Create or load the ML black box model (class has inherited the loading)
-    model_instance: IAnomalyDetectionModelXAI = model_class(
+    model_instance: IAnomalyDetectionModel = model_class(
         full_config_json=json.dumps(configuration, indent=4),
         **model_specification
         # **model_param  # Unpack model_param here
@@ -335,30 +335,30 @@ def main(args_config_path, args_influx_token):
                     ),
                     'wb'
             ) as xai_file:
-                rodrigotest = model_instance.get_test_data()
-                # DEBUG PRINTS
-                print("=== DEBUG: Dumping rodrigotest ===")
-                if isinstance(rodrigotest, dict):
-                    X = rodrigotest.get('X')
-                    y = rodrigotest.get('y')
-                    print(" - X type:", type(X))
-                    try:
-                        print(" - X shape:", np.array(X).shape)
-                        if len(X) > 0:
-                            print(" - X[0] shape:", np.array(X[0]).shape)
-                    except Exception as e:
-                        print(" - Error checking X shape:", e)
+                # rodrigotest = model_instance.get_test_data()
+                # # DEBUG PRINTS
+                # print("=== DEBUG: Dumping rodrigotest ===")
+                # if isinstance(rodrigotest, dict):
+                #     X = rodrigotest.get('X')
+                #     y = rodrigotest.get('y')
+                #     print(" - X type:", type(X))
+                #     try:
+                #         print(" - X shape:", np.array(X).shape)
+                #         if len(X) > 0:
+                #             print(" - X[0] shape:", np.array(X[0]).shape)
+                #     except Exception as e:
+                #         print(" - Error checking X shape:", e)
 
-                    print(" - y type:", type(y))
-                    try:
-                        print(" - y shape:", np.array(y).shape)
-                        print(" - y length:", len(y))
-                    except Exception as e:
-                        print(" - Error checking y shape:", e)
-                else:
-                    print(" - rodrigotest is not a dict:", type(rodrigotest))
-                pickle.dump(rodrigotest, xai_file)
-                # pickle.dump(model_instance.get_test_data(), xai_file)
+                #     print(" - y type:", type(y))
+                #     try:
+                #         print(" - y shape:", np.array(y).shape)
+                #         print(" - y length:", len(y))
+                #     except Exception as e:
+                #         print(" - Error checking y shape:", e)
+                # else:
+                #     print(" - rodrigotest is not a dict:", type(rodrigotest))
+                # pickle.dump(rodrigotest, xai_file)
+                pickle.dump(model_instance.get_test_data(), xai_file)
 
 
     # XAI starts

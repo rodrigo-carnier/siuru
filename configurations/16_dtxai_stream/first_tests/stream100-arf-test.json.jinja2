@@ -1,0 +1,3464 @@
+{
+    "DESCRIPTION": [
+        ""
+    ],
+"DATA_SOURCES": [
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_01_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_01_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_02_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_02_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_03_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_03_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_04_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_04_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_05_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_05_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_06_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_06_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_07_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_07_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_08_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_08_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_09_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_09_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_10_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_10_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_11_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_11_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_12_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_12_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_13_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_13_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_14_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_14_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_15_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_15_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_16_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_16_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_17_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_17_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_18_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_18_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_19_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_19_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_20_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_20_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_21_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_21_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_22_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_22_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_23_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_23_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_24_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_24_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_25_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_25_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_26_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_26_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_27_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_27_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_28_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_28_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_29_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_29_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_30_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_30_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_31_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_31_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_32_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_32_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_33_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_33_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_34_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_34_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_35_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_35_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_36_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_36_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_37_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_37_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_38_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_38_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_39_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_39_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_40_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_40_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_41_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_41_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_42_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_42_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_43_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_43_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_44_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_44_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_45_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_45_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_46_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_46_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_47_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_47_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_48_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_48_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_49_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_49_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/benign-5mb_100_50_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 0
+		        }
+		    }
+		]
+	    },
+	    {
+		"loader": {
+		    "class": "PcapFileConverter",
+		    "kwargs": {
+		        "filepath": "{{ project_root }}/data/MQTTset/capture_malariaDoS_100_50_test.pcap",
+		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
+		        "stream_concept_id": 1,
+		        "use_full_dataset": false,
+		        "n_packets": 100
+		    }
+		},
+		"featextractors": [
+		    {
+		        "class": "CppPacketExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "HostFeatureExtractor",
+		        "kwargs": {}
+		    },
+		    {
+		        "class": "WindowFlowFeatureExtractor",
+		        "kwargs": {
+		            "window_size_ms": 1
+		        }
+		    },
+		    {
+		        "class": "FileLabelExtractor",
+		        "kwargs": {
+		            "label_value": 1
+		        }
+		    }
+		]
+	    }
+    ],
+    "MODEL":
+    {
+        "class": "HoeffdingAdaptativeTreeModelXAI",
+        "new_model": false,
+        "skip_saving_model": true,
+        "evaluate_model": true,
+        "model_name": "stream100-10-arf-xai-mqttreduced",
+        "model_storage_base_path": "{{ project_root }}/models",
+        "save_data": true,
+        "encoder":
+        {
+            "class": "DefaultEncoder",
+            "number_features": 25,
+            "kwargs": {
+               "feature_filter": [
+                    "ip_header_size",
+                    "ip_data_size",
+                    "tcp_header_size",
+                    "tcp_size",
+                    "tcp_cwr",
+                    "tcp_ece",
+                    "tcp_urg",
+                    "tcp_ack",
+                    "tcp_psh",
+                    "tcp_rst",
+                    "tcp_syn",
+                    "tcp_fin",
+                    "host_rcv_pkt_count",
+                    "host_sum_rcv_pkt_size",
+                    "host_avg_rcv_pkt_size",
+                    "host_sent_pkt_count",
+                    "host_sum_sent_pkt_size",
+                    "host_avg_sent_pkt_size",
+                    "host_inter_arrival_last",
+                    "host_inter_arrival_avg",
+                    "host_conn_timedelta",
+                    "window_flow_pkt_count",
+                    "window_flow_sum_pkt_size",
+                    "window_flow_avg_pkt_size",
+                    "window_flow_inter_arrival_avg"
+               ]
+            }
+        }
+    },
+    "OUTPUT": [
+        {
+            "class": "AccuracyReporter",
+            "kwargs": {}
+        }
+    ],
+    "LOG": [
+        {
+            "level": "DEBUG",
+            "path": "{{ project_root }}/logs/{{ config_file_name }}/{{ timestamp }}-test-log.txt"
+        }
+    ],
+    "VERSION": "{{ git_tag }}"
+}
