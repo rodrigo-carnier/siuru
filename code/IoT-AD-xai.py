@@ -241,7 +241,7 @@ def main(args_config_path, args_influx_token):
     model_param = model_specification.pop("model_param", {})
 
     # Create or load the ML black box model (class has inherited the loading)
-    model_instance: IAnomalyDetectionModel = model_class(
+    model_instance: IAnomalyDetectionModelXAI = model_class(
         full_config_json=json.dumps(configuration, indent=4),
         **model_specification
         # **model_param  # Unpack model_param here
