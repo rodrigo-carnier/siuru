@@ -107,7 +107,6 @@ class AccuracyReporter(IReporter):
         imagepkl_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.pkl')
         image_path = os.path.join(output_dir, f'{current_time}_confusion_matrix.png')
         imagetime_path = os.path.join(output_dir, f'{current_time}_timeseriesanomaly.png')
-        image_roc_auc_path = os.path.join(output_dir, f'{current_time}_roc_auc.png')
         text_path = os.path.join(output_dir, f'{current_time}_features_labels.txt')
         
         # Create text file with results of confusion matrix
@@ -276,30 +275,6 @@ class AccuracyReporter(IReporter):
         #          f"{f1_score(self.ground_truths, self.predicted_labels, average='macro')}\n---"
         #          )
 
-
-        ############ ROC AND AUC
-
-        # Calculate the ROC curve
-        fpr, tpr, thresholds = roc_curve(self.ground_truths, self.predicted_labels)
-
-        # Calculate the AUC
-        roc_auc = auc(fpr, tpr)
-        # Alternatively, you can use roc_auc_score directly on the true labels and predicted scores
-        roc_auc_alternative = roc_auc_score(self.ground_truths, self.predicted_labels)
-
-        # Plot the ROC curve
-        plt.figure()
-        plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Receiver Operating Characteristic')
-        plt.legend(loc="lower right")
-        print(labels)
-
-        plt.savefig(image_roc_auc_path)
 
     @staticmethod
     def input_signature() -> List[IFeature]:

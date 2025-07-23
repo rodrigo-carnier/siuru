@@ -32,7 +32,9 @@
 		    {
 		        "class": "FileLabelExtractor",
 		        "kwargs": {
-		            "label_value": 0
+		            "label_value": 0,
+		            "label_name": "benign",
+		            "label_fig": "ben"
 		        }
 		    }
 		]
@@ -66,7 +68,9 @@
 		    {
 		        "class": "FileLabelExtractor",
 		        "kwargs": {
-		            "label_value": 1
+		            "label_value": 1,
+		            "label_name": "bruteforce",
+		            "label_fig": "brut"
 		        }
 		    }
 		]
@@ -100,7 +104,9 @@
 		    {
 		        "class": "FileLabelExtractor",
 		        "kwargs": {
-		            "label_value": 0
+		            "label_value": 0,
+		            "label_name": "benign",
+		            "label_fig": "ben"
 		        }
 		    }
 		]
@@ -134,7 +140,9 @@
 		    {
 		        "class": "FileLabelExtractor",
 		        "kwargs": {
-		            "label_value": 1
+		            "label_value": 1,
+		            "label_name": "bruteforce",
+		            "label_fig": "brut"
 		        }
 		    }
 		]
@@ -145,7 +153,7 @@
         "class": "AdaptativeRandomForestModelXAI",
         "new_model": false,
         "skip_saving_model": true,
-        "evaluate_model": true,
+        "ml_task": "test",
         "model_name": "bruteforce5000-arf-xai",
         "model_storage_base_path": "{{ project_root }}/models",
         "save_data": true,
@@ -186,7 +194,7 @@
     },
     "OUTPUT": [
         {
-            "class": "AccuracyReporter",
+            "class": "StreamClassifReporter",
             "kwargs": {}
         }
     ],

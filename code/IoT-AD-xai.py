@@ -259,7 +259,7 @@ def main(args_config_path, args_influx_token):
     )
     log.info("Encoding features.")
 
-    if model_specification["new_model"]:
+    if model_specification["ml_task"] == "train":
         # INITIALIZE DATA LOADERS CLASSES CORRESPONDING TO EACH COMPONENT UNDER DATA_SOURCES IN CONFIGURATION. Feature
         # stream is a Python generator object: https://wiki.python.org/moin/Generators It allows to process the samples
         # memory-efficiently, avoiding the need to store all data in memory at the same time.
@@ -291,7 +291,7 @@ def main(args_config_path, args_influx_token):
             ) as xai_file:
                 pickle.dump(model_instance.get_training_data(), xai_file)
 
-    elif model_specification["evaluate_model"] is None or model_specification["evaluate_model"]:
+    elif model_specification["ml_task"] == "test":
         # INITIALIZE DATA LOADERS CLASSES CORRESPONDING TO EACH COMPONENT UNDER DATA_SOURCES IN CONFIGURATION. Feature
         # stream is a Python generator object: https://wiki.python.org/moin/Generators It allows to process the samples
         # memory-efficiently, avoiding the need to store all data in memory at the same time.
@@ -323,8 +323,27 @@ def main(args_config_path, args_influx_token):
         # Reporters may require special shutdown steps, for example disconnecting from
         # remote database or printing summaries of the processing -- call the handle for
         # each reporter.
+
+        label_map_dict = {}
+
+        for source in configuration.get("DATA_SOURCES", []):
+            for extractor in source.get("featextractors", []):
+                if extractor.get("class") == "FileLabelExtractor":
+                    kwargs = extractor.get("kwargs", {})
+                    val = kwargs.get("label_value")
+                    name = kwargs.get("label_name")
+                    if val is not None and name is not None:
+                        label_map_dict[val] = name
+
+        print(f"This is label_map_dict\n{label_map_dict}")
+
+        # Now create a sorted list of label names according to sorted keys
+        sorted_labels = sorted(label_map_dict.keys())
+        label_map = [label_map_dict[k] for k in sorted_labels]
+        
+
         for reporter_instance in reporter_instances:
-            reporter_instance.end_processing()
+            reporter_instance.end_processing([4], [5000, 5000, 5000, 5000], label_map)
 
         if model_specification["save_data"]:
             dataset_suffix_name = model_specification["dataset_name"] if "dataset_name" in model_specification else "_test-data"
@@ -362,7 +381,7 @@ def main(args_config_path, args_influx_token):
 
 
     # XAI starts
-    if "XAI" in configuration:
+    elif model_specification["ml_task"] == "xai":
 
         matplotlib.rcParams['font.family'] = 'DejaVu Serif'  # Or another installed serif font
         matplotlib.rcParams['font.serif'] = ['DejaVu Serif']
@@ -573,6 +592,8 @@ def main(args_config_path, args_influx_token):
 
             log.info(f"XAI - {xai_algo} finished after {xai_time_stop - xai_time_start} ns")
 
+    else:
+        raise ValueError(f'Choose train, test or xai for ml_task parameter. Given value: {model_specification["ml_task"]}')
 
     pipeline_stopping_time = time.process_time_ns()
     full_pipeline_time = pipeline_stopping_time - pipeline_execution_start

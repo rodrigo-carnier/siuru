@@ -7,11 +7,11 @@
 		"loader": {
 		    "class": "PcapFileConverter",
 		    "kwargs": {
-		        "filepath": "{{ project_root }}/data/MQTTset/benign_5000_01_train.pcap",
+		        "filepath": "{{ project_root }}/data/MQTTset/benign_1000_01_train.pcap",
 		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
 		        "stream_concept_id": 1,
 		        "use_full_dataset": false,
-		        "n_packets": 5000
+		        "n_packets": 1000
 		    }
 		},
 		"featextractors": [
@@ -41,79 +41,11 @@
 		"loader": {
 		    "class": "PcapFileConverter",
 		    "kwargs": {
-		        "filepath": "{{ project_root }}/data/MQTTset/bruteforce_5000_01_train.pcap",
+		        "filepath": "{{ project_root }}/data/MQTTset/bruteforce_1000_01_train.pcap",
 		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
 		        "stream_concept_id": 1,
 		        "use_full_dataset": false,
-		        "n_packets": 5000
-		    }
-		},
-		"featextractors": [
-		    {
-		        "class": "CppPacketExtractor",
-		        "kwargs": {}
-		    },
-		    {
-		        "class": "HostFeatureExtractor",
-		        "kwargs": {}
-		    },
-		    {
-		        "class": "WindowFlowFeatureExtractor",
-		        "kwargs": {
-		            "window_size_ms": 1
-		        }
-		    },
-		    {
-		        "class": "FileLabelExtractor",
-		        "kwargs": {
-		            "label_value": 1
-		        }
-		    }
-		]
-	    },
-	    {
-		"loader": {
-		    "class": "PcapFileConverter",
-		    "kwargs": {
-		        "filepath": "{{ project_root }}/data/MQTTset/benign_5000_02_train.pcap",
-		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-		        "stream_concept_id": 1,
-		        "use_full_dataset": false,
-		        "n_packets": 5000
-		    }
-		},
-		"featextractors": [
-		    {
-		        "class": "CppPacketExtractor",
-		        "kwargs": {}
-		    },
-		    {
-		        "class": "HostFeatureExtractor",
-		        "kwargs": {}
-		    },
-		    {
-		        "class": "WindowFlowFeatureExtractor",
-		        "kwargs": {
-		            "window_size_ms": 1
-		        }
-		    },
-		    {
-		        "class": "FileLabelExtractor",
-		        "kwargs": {
-		            "label_value": 0
-		        }
-		    }
-		]
-	    },
-	    {
-		"loader": {
-		    "class": "PcapFileConverter",
-		    "kwargs": {
-		        "filepath": "{{ project_root }}/data/MQTTset/bruteforce_5000_02_train.pcap",
-		        "packet_processor_path": "{{ project_root }}/code/cpp-extract-features/cmake-build/pcap-feature-extraction",
-		        "stream_concept_id": 1,
-		        "use_full_dataset": false,
-		        "n_packets": 5000
+		        "n_packets": 1000
 		    }
 		},
 		"featextractors": [
@@ -146,7 +78,7 @@
         "new_model": true,
         "skip_saving_model": false,
         "ml_task": "train",
-        "model_name": "bruteforce5000-arf-xai",
+        "model_name": "bruteforce1000-arf-xai",
         "model_storage_base_path": "{{ project_root }}/models",
         "save_data": true,
         "encoder":

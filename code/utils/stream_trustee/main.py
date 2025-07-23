@@ -271,9 +271,9 @@ class Trustee(abc.ABC):
         features = self._X_train
 
         print("StreamTrustee.fit() - starting")
-        print("Predict method:", predict_method_name)
-        print("X_train type:", type(self._X_train))
-        print("X_train[0]:", self._X_train.iloc[0] if len(self._X_train) > 0 else "empty")
+        # print("Predict method:", predict_method_name)
+        # print("X_train type:", type(self._X_train))
+        # print("X_train[0]:", self._X_train.iloc[0] if len(self._X_train) > 0 else "empty")
 
         # # RMC: changed line below for one compatible with River
         # if predict_method_name == "predict_one":
@@ -310,25 +310,15 @@ class Trustee(abc.ABC):
 
 
         if predict_method_name == "predict_one":
-            print("@@@ Methods called in 2: main.py")
-            print([m for m in dir(self.expert) if callable(getattr(self.expert, m))])
-            print("Structure of X_train")
-            print(self._X_train)
-            print(type(self._X_train))
-            print(self.expert)
-            print(type(self.expert))
             # targets = pd.Series([self.expert.predict_one(row.to_dict()) for _, row in self._X_train.iterrows()])
             targets = pd.Series([
                 self.expert.predict_one(dict(zip(feature_names, row)))
                 for row in self._X_train.values
             ])
         else:
-            # Debug / check shapes and types before calling explain_with_*
-            print("@@@ Methods called in 2: main.py")
-            print([m for m in dir(self.expert) if callable(getattr(self.expert, m))])
             targets = convert_to_series(getattr(self.expert, predict_method_name)(self._X_train))
 
-        print("Predict done in main.")
+        print("Predict done.")
 
         # 🔍 Sanity check on target values
         print("Sanity check: initial `targets` values and types")

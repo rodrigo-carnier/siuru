@@ -256,38 +256,31 @@ class TrustReport:
         self.use_features = use_features if use_features is not None else np.arange(0, X_train.shape[1])
 
 
-        print(f"@@@ Here is the blackbox type in TrustReport: {type(blackbox)}")
-        print(X_train)
-        print(type(X_train))
-        print(feature_names)
+        # print(f"@@@ Here is the blackbox type in TrustReport: {type(blackbox)}")
+        # print(X_train)
+        # print(type(X_train))
+        # print(feature_names)
 
-        # Convert
-        river_data = self.array_to_river_dicts(X_train, feature_names)
+        # # Convert
+        # river_data = self.array_to_river_dicts(X_train, feature_names)
 
-        counts = [0, 0]
+        # counts = [0, 0]
 
-        print("@@@ Methods called in 5: trust.py")
-        print([m for m in dir(self.blackbox) if callable(getattr(self.blackbox, m))])
-
-        # Loop through samples
-        for sample in river_data:
-            prediction = getattr(self.blackbox, predict_method_name)(sample)      # make prediction
-            # print("Prediction TrustReport:", prediction)
-            # increment safely
-            if prediction == 0:
-                counts[0] += 1
-            elif prediction == 1:
-                counts[1] += 1
-            else:
-                # if you ever get something unexpected, you can decide to:
-                #   * force it into one of the bins
-                #   * ignore it
-                #   * log an error, etc.
-                print(f"⚠️  unexpected label {prediction!r}, ignoring")
-
-        print("@@@ Finished TrustReport Prediction")
-        print(counts)
-
+        # # Loop through samples
+        # for sample in river_data:
+        #     prediction = getattr(self.blackbox, predict_method_name)(sample)      # make prediction
+        #     # print("Prediction TrustReport:", prediction)
+        #     # increment safely
+        #     if prediction == 0:
+        #         counts[0] += 1
+        #     elif prediction == 1:
+        #         counts[1] += 1
+        #     else:
+        #         # if you ever get something unexpected, you can decide to:
+        #         #   * force it into one of the bins
+        #         #   * ignore it
+        #         #   * log an error, etc.
+        #         print(f"⚠️  unexpected label {prediction!r}, ignoring")
 
 
 
@@ -1005,11 +998,11 @@ class TrustReport:
             log(f"Model explanation training (agreement, fidelity): ({agreement}, {reward})")
             log(f"Top-k Prunned explanation size: {min_dt.tree_.node_count}")
 
-        print("X_test shape:", X_test.shape)
-        print("self.use_features:", self.use_features)
-        print("max feature index:", max(self.use_features))
-        print("X_test type:", type(X_test))
-        print("X_test.head():", X_test.head())
+        # print("X_test shape:", X_test.shape)
+        # print("self.use_features:", self.use_features)
+        # print("max feature index:", max(self.use_features))
+        # print("X_test type:", type(X_test))
+        # print("X_test.head():", X_test.head())
 
         dt_y_pred = dt.predict(X_test.iloc[:, self.use_features].values)
         min_dt_y_pred = min_dt.predict(X_test.iloc[:, self.use_features].values)
@@ -1167,9 +1160,9 @@ class TrustReport:
 
     def _collect_top_k_prunning(self):
 
-        print("DEBUG: self.X_test.shape =", self.X_test.shape)
-        print("DEBUG: self.use_features =", self.use_features)
-        print("DEBUG: max feature index =", max(self.use_features))
+        # print("DEBUG: self.X_test.shape =", self.X_test.shape)
+        # print("DEBUG: self.use_features =", self.use_features)
+        # print("DEBUG: max feature index =", max(self.use_features))
 
         """Uses trained trustee explainer to prune the decision tree with different top_k branches"""
         log = self.logger.log if self.logger else print

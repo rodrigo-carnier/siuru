@@ -1,3 +1,89 @@
 
 stream100-arf		10 blocks of 100 samples, malariaDOS
 stream5000-arf		5 blocks of 5000 samples, bruteforce
+
+
+# 1st successful test: bruteforce1000-xai
+
+a) only training and testing:
+all positives after a-train and b-train
+100% performance after c-train
+
+b) choosing block trainings: skip b-train and try a, c and d
+
+1000a-train
+1000-test
+1000-xai
+1000c-train
+1000-test
+1000-xai
+1000d-train
+1000-test
+1000-xai
+
+# next steps:
+
+a) 
+- first do incremental predict_one + learn_one just like in IoT-AD-stream and plot cumulative performance 
+- choose size of block training based on landmarks in performance improvement
+- remake training files and redo step b) above
+
+b) 
+- implement randomization of packets and try performing the selection of training in a more smooth way through a single training file and a parameter of training size, instead of by blocks and diffent file for each like above
+
+
+
+---------
+
+21/07/2025 MON
+
+Using 
+bruteforce1000-arf-test.json.jinja2
+
+X 0) Check if StreamClassif can work with IoT-AD-xai
+X 1) Make cumulative accuracy code in accuracyreporter
+2) Make training code that saves model after every sample training
+3) Look for notable points in learning curve
+4) Test and XAI (question: should I save the training dataset as well?)
+5) Repeat with more and more complex studies
+	a. 1 anomaly bin classif
+	b. 2 anomalies bin classif, learn and test both at same time
+	b. 2 anomalies bin classif, learn and test one at a time
+	c. 4 anomalies bin classif, learn and test one at a time
+	d. 8 anomalies bin classif, learn and test two at a time
+	
+	b. 2 anomalies multi classif, learn and test both at same time
+	b. 2 anomalies multi classif, learn and test one at a time
+	c. 4 anomalies multi classif, learn and test one at a time
+	d. 8 anomalies multi classif, learn and test two at a time
+	
+	
+---------------
+
+23/07/2025 WED
+
+Testing sequence to implement:
+1) Only training. Save a different model after every training sample (in 9,999 samples, name them as model00000, model00001...)
+2) Test the completely trained model and plot performance 
+
+
+
+
+1) APPLY IOT-AD-STREAM WITH INCREMENTAL LEARNING+TESTING (ONLY TRAINING DATASET), SAVE MODEL AFTER EACH SAMPLE, CHOOSE 10 MODELS FROM CUMULATIVE ACC, APPLY HUNG'S BATCH TEST+XAI
+- tailor config file to iot-ad-stream (without randomization!)
+- implement saving a new model after each sample (a new folder for each model pickle, use model0000 as name parameter)
+- choose 10 models
+- apply Hung's batch test by making manual config files
+- later, make automatic generation of config files (with automatic saving of folders)
+
+
+2) APPLY IOT-AD-XAI WITH INCREMENTAL LEARNING (TRAINING DATASET), SAVE A NEW MODEL AFER EACH SAMPLE, MAKE BATCH TESTING OF EACH MODEL (WITH TEST DATASET)
+
+3) APPLY IOT-AD-XAI WITH INCREMENTAL LEARNING (TRAINING DATASET), SAVE A NEW MODEL AFER EACH SAMPLE, MAKE INCREMENTAL TESTING (WITH TEST DATASET. HOW? SAMPLE BY SAMPLE? MINIBLOCKS?). unclear how to do this well.
+
+
+
+- train and test in iot-ad-stream incrementaly with same dataset (in blocks), and plot cumulative accuracy. save model after every sample training.
+- choose 10 model cases and test them with testing dataset
+- 
+

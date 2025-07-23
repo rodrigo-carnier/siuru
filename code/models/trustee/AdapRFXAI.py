@@ -172,8 +172,8 @@ class AdaptativeRandomForestModelXAI(IAnomalyDetectionModelXAI, ITrusteeExplaina
                 feature_dict = dict(zip(feature_names, feature_sample))
                 label = sample[PredictionField.GROUND_TRUTH]
                 prediction = self.model_instance.predict_one(feature_dict)
-                self.model_instance.learn_one(feature_dict, label) # After scaling, learn
-                print(prediction)
+                # self.model_instance.learn_one(feature_dict, label) # After scaling, learn
+
                 feature_array.append(feature_sample)
                 labels.append(label)
                 predicted_labels.append(prediction)
