@@ -12,6 +12,7 @@ from reporting.IReporter import IReporter
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 import seaborn as sns
 from datetime import datetime
 
@@ -38,6 +39,52 @@ class StreamClassifReporter(IReporter):
         self.ground_truths.append(y)
         self.predicted_labels.append(y_pred)
 
+
+    def _plot_pred_time_series(self):
+
+        # Example data
+        timestamps = np.arange(0, len(self.predicted_labels))  # Example: time points from 0 to 99
+        pred_labels = np.array(self.predicted_labels)
+        ground_truths = np.array(self.ground_truths)
+
+        # Plotting the time-series scores
+        plt.figure(figsize=(10, 6))  # Create a figure with a specific size
+
+        plt.plot(timestamps, pred_labels, label='Predictions', color='b', linestyle='-', marker='.', markersize=0.5)
+        plt.plot(timestamps, ground_truths, label='Ground truths', color='r', linestyle='-', marker='.', markersize=0.5)
+        # plt.ylim(-10, 110)
+
+        # Adding labels and title
+        plt.xlabel('Sample')
+        plt.ylabel('Prediction')
+        plt.title('Time-Series Predictions')
+
+        # Adding a grid for better readability
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.gca().xaxis.set_major_locator(MultipleLocator(10))
+        plt.gca().yaxis.set_major_locator(MultipleLocator(25))
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Optional: Highlighting thresholds or specific anomalies
+        # Example: Highlight scores above a threshold (e.g., 0.8)
+        # threshold = 0.230
+        # high_anomalies = self.predicted_labels > threshold
+        # plt.plot(timestamps[high_anomalies], self.predicted_labels[high_anomalies], 'ro', label='High Anomalies')
+        # plt.plot(y=anomaly_threshold, color='r', linestyle='--', linewidth=1, label='Threshold')
+
+        # Add a legend
+        plt.legend()
+
+        # Save the plot to a file
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = 'configurations/zplots'
+        os.makedirs(output_dir, exist_ok=True)
+        plt.savefig(os.path.join(output_dir, f"{current_time}_{self.model_name}_pred_timeseries.png"))
+        plt.close()
+
+
     def _plot_cumulative_accuracy(self):
         """
         Computes and plots cumulative accuracy over time based on internal predictions and ground truths.
@@ -62,6 +109,10 @@ class StreamClassifReporter(IReporter):
         plt.xlabel('Data Points Processed', fontsize=24)
         plt.ylabel('Cumulative Accuracy (%)', fontsize=24)
         plt.title('Cumulative Accuracy Over Time')
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.gca().xaxis.set_major_locator(MultipleLocator(10))
+        plt.gca().yaxis.set_major_locator(MultipleLocator(25))
         plt.grid(True)
         plt.tight_layout()
 
@@ -72,7 +123,7 @@ class StreamClassifReporter(IReporter):
         plt.savefig(os.path.join(output_dir, f"{current_time}_{self.model_name}_cumulative_accuracy.png"))
         plt.close()
             
-    def _plot_cumulative_accuracy_window(self, n_samples: int = 200):
+    def _plot_cumulative_accuracy_window(self, n_samples: int = 5):
         """
         Computes and plots sliding window accuracy over time based on internal predictions and ground truths.
 
@@ -102,6 +153,10 @@ class StreamClassifReporter(IReporter):
         plt.xlabel('Data Points Processed', fontsize=24)
         plt.ylabel('Window Accuracy (%)', fontsize=24)
         plt.title(f'Cumulative Accuracy (Window={n_samples})')
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.gca().xaxis.set_major_locator(MultipleLocator(10))
+        plt.gca().yaxis.set_major_locator(MultipleLocator(25))
         plt.grid(True)
         plt.tight_layout()
 
@@ -300,6 +355,7 @@ class StreamClassifReporter(IReporter):
         phase_reports = self._compute_phase_reports(n_subsets_per_concept, samples_per_subset, labels, label_map, get_label_name)
         self._write_phase_report(report_str, phase_reports, df_global, get_label_name)
         self._plot_metrics_tables(phase_reports, df_global, get_label_name)
+        self._plot_pred_time_series()
         self._plot_cumulative_accuracy()
         self._plot_cumulative_accuracy_window()
         self._log_summary(cnf_matrix, labels, metrics_scores)

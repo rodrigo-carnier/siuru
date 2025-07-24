@@ -10,6 +10,7 @@ import numpy as np
 from jinja2 import Template
 import xarray
 import matplotlib
+from collections import defaultdict
 
 
 import common.global_variables as global_variables
@@ -24,6 +25,34 @@ from reporting import *
 
 log = PipelineLogger.get_logger()
 
+
+
+def get_subset_stats(config: Dict) -> Tuple[List[int], List[int]]:
+    """
+    Given a config dictionary, returns:
+    - n_subsets_per_concept: number of subsets per stream_concept_id
+    - samples_per_subset: list of n_packets values for each subset
+    
+    Parameters:
+        config (Dict): Parsed JSON configuration (as a Python dictionary).
+    
+    Returns:
+        Tuple[List[int], List[int]]: (n_subsets_per_concept, samples_per_subset)
+    """
+    concept_counts = defaultdict(int)
+    samples_per_subset = []
+
+    for source in config.get("DATA_SOURCES", []):
+        loader_kwargs = source.get("loader", {}).get("kwargs", {})
+        concept_id = loader_kwargs.get("stream_concept_id")
+        n_packets = loader_kwargs.get("n_packets")
+
+        if concept_id is not None and n_packets is not None:
+            concept_counts[concept_id] += 1
+            samples_per_subset.append(n_packets)
+
+    n_subsets_per_concept = [concept_counts[cid] for cid in sorted(concept_counts)]
+    return n_subsets_per_concept, samples_per_subset
 
 def reconstruct_encoded_generator(
     test_data: Dict[str, Any]
@@ -259,6 +288,13 @@ def main(args_config_path, args_influx_token):
     )
     log.info("Encoding features.")
 
+
+
+    ######################
+    ### TRAINING PHASE ###
+    ######################
+
+
     if model_specification["ml_task"] == "train":
         # INITIALIZE DATA LOADERS CLASSES CORRESPONDING TO EACH COMPONENT UNDER DATA_SOURCES IN CONFIGURATION. Feature
         # stream is a Python generator object: https://wiki.python.org/moin/Generators It allows to process the samples
@@ -290,6 +326,86 @@ def main(args_config_path, args_influx_token):
                     'wb'
             ) as xai_file:
                 pickle.dump(model_instance.get_training_data(), xai_file)
+
+
+
+    ################################
+    ### TRAINING + TESTING PHASE ###
+    ################################
+
+
+    if model_specification["ml_task"] == "train_test":
+        # INITIALIZE DATA LOADERS CLASSES CORRESPONDING TO EACH COMPONENT UNDER DATA_SOURCES IN CONFIGURATION. Feature
+        # stream is a Python generator object: https://wiki.python.org/moin/Generators It allows to process the samples
+        # memory-efficiently, avoiding the need to store all data in memory at the same time.
+        feature_stream = itertools.chain([])
+
+        for data_source in configuration["DATA_SOURCES"]:
+            feature_stream = initialize_data_source(data_source, feature_stream)
+        # This moment is important for performance measurement
+        # because encoding is the first step where features are actually processed.
+        # Until here, the generator data has not been consumed, so no data processing needed to take place).
+        encoding_start = time.process_time_ns()
+
+        encoded_feature_generator = encoder_instance.encode(feature_stream)
+        _, encoded_feature_generator = sanity_check(encoded_feature_generator)
+
+        # Prediction time!
+        reporter_instances: List[IReporter] = []
+
+        for output in configuration["OUTPUT"]:
+            reporter_name = output["class"]
+            reporter_class = globals()[reporter_name]
+            reporter_instance = reporter_class(**output["kwargs"])
+            reporter_instances.append(reporter_instance)
+
+        for predicted_sample in model_instance.train_test(encoded_feature_generator):
+            for reporter_instance in reporter_instances:
+                reporter_instance.report(predicted_sample)
+
+        # Reporters may require special shutdown steps, for example disconnecting from
+        # remote database or printing summaries of the processing -- call the handle for
+        # each reporter.
+
+        label_map_dict = {}
+
+        for source in configuration.get("DATA_SOURCES", []):
+            for extractor in source.get("featextractors", []):
+                if extractor.get("class") == "FileLabelExtractor":
+                    kwargs = extractor.get("kwargs", {})
+                    val = kwargs.get("label_value")
+                    name = kwargs.get("label_name")
+                    if val is not None and name is not None:
+                        label_map_dict[val] = name
+
+        print(f"This is label_map_dict\n{label_map_dict}")
+
+        # Now create a sorted list of label names according to sorted keys
+        sorted_labels = sorted(label_map_dict.keys())
+        label_map = [label_map_dict[k] for k in sorted_labels]
+        n_subsets, samples_per_subset = get_subset_stats(configuration)
+
+        for reporter_instance in reporter_instances:
+            reporter_instance.end_processing(n_subsets, samples_per_subset, label_map)
+
+
+        if model_specification["save_data"]:
+            dataset_suffix_name = model_specification["dataset_name"] if "dataset_name" in model_specification else "_trained-data"
+            with open(
+                    os.path.join(
+                        os.path.dirname(model_instance.store_file),
+                        model_instance.model_name + dataset_suffix_name + ".pickle"
+                    ),
+                    'wb'
+            ) as xai_file:
+                pickle.dump(model_instance.get_training_data(), xai_file)
+
+
+
+    #####################
+    ### TESTING PHASE ###
+    #####################
+
 
     elif model_specification["ml_task"] == "test":
         # INITIALIZE DATA LOADERS CLASSES CORRESPONDING TO EACH COMPONENT UNDER DATA_SOURCES IN CONFIGURATION. Feature
@@ -340,10 +456,10 @@ def main(args_config_path, args_influx_token):
         # Now create a sorted list of label names according to sorted keys
         sorted_labels = sorted(label_map_dict.keys())
         label_map = [label_map_dict[k] for k in sorted_labels]
-        
+        n_subsets, samples_per_subset = get_subset_stats(configuration)
 
         for reporter_instance in reporter_instances:
-            reporter_instance.end_processing([4], [5000, 5000, 5000, 5000], label_map)
+            reporter_instance.end_processing(n_subsets, samples_per_subset, label_map)
 
         if model_specification["save_data"]:
             dataset_suffix_name = model_specification["dataset_name"] if "dataset_name" in model_specification else "_test-data"
@@ -380,7 +496,12 @@ def main(args_config_path, args_influx_token):
                 pickle.dump(model_instance.get_test_data(), xai_file)
 
 
-    # XAI starts
+
+    #################
+    ### XAI PHASE ###
+    #################
+
+
     elif model_specification["ml_task"] == "xai":
 
         matplotlib.rcParams['font.family'] = 'DejaVu Serif'  # Or another installed serif font

@@ -17,6 +17,7 @@ from river.compose import Pipeline
 
 from datetime import datetime
 from joblib import dump, load
+from pathlib import Path
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
 from common.functions import report_performance
@@ -167,13 +168,11 @@ class AdaptativeRandomForestModelXAI(IAnomalyDetectionModelXAI, ITrusteeExplaina
                 # River don't allow for batch training/testing
                 raise TypeError("Streaming algorithms cannot handle batches of samples.")
             else:
-                # print(f"@@@ Debugging prediction. encoding[0]: {encoding} {encoding[0].values} ")
                 feature_sample = encoding[0].values
                 feature_dict = dict(zip(feature_names, feature_sample))
                 label = sample[PredictionField.GROUND_TRUTH]
-                prediction = self.model_instance.predict_one(feature_dict)
-                # self.model_instance.learn_one(feature_dict, label) # After scaling, learn
 
+                prediction = self.model_instance.predict_one(feature_dict)
                 feature_array.append(feature_sample)
                 labels.append(label)
                 predicted_labels.append(prediction)
@@ -197,6 +196,77 @@ class AdaptativeRandomForestModelXAI(IAnomalyDetectionModelXAI, ITrusteeExplaina
         self.feature_names = feature_names
 
         report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
+
+
+    def train_test(
+        self,
+        data: Generator[Tuple[Dict[IFeature, Any], List[float]], None, None],
+        **kwargs,
+    ) -> SampleGenerator:
+        log.info("Train-and-test method for stream-data supervised model with online prediction before learning.")
+
+        data_prep_time = 0
+        sum_processing_time = 0
+        labels = []
+        feature_array = []
+        feature_names = []
+        predicted_labels = []
+
+        self.sample_count = 0
+        start = time.process_time_ns()
+        training_start = time.process_time_ns()
+
+        for sample, encoding in data:
+            if len(feature_names) == 0:
+                feature_names = list(encoding.features.values)
+
+            if isinstance(sample, list):
+                # River don't allow for batch training/testing
+                raise TypeError("Streaming algorithms cannot handle batches of samples.")
+            else:
+                feature_sample = encoding[0].values
+                feature_dict = dict(zip(feature_names, feature_sample))
+                label = sample[PredictionField.GROUND_TRUTH]
+
+                # Predict before learning
+                prediction = self.model_instance.predict_one(feature_dict)
+                feature_array.append(feature_sample)
+                labels.append(label)
+                predicted_labels.append(prediction)
+
+                sample[PredictionField.MODEL_NAME] = self.model_name
+                sample[PredictionField.OUTPUT_BINARY] = prediction
+
+                # Learn
+                self.model_instance.learn_one(feature_dict, label)
+
+                # Save checkpoint
+                self.sample_count += 1
+                if not self.skip_saving_model:
+                    folder_name = f"{self.model_name}{self.sample_count:05d}"
+                    file_name = f"{folder_name}.pickle"
+                    full_dir = Path(self.store_file).parent / folder_name
+                    full_dir.mkdir(parents=True, exist_ok=True)
+                    model_path = full_dir / file_name
+                    dump(self.model_instance, model_path)
+                    log.info(f"Saved model checkpoint to {model_path}")
+
+                yield sample
+
+
+        data_prep_time += time.process_time_ns() - start
+        training_time = time.process_time_ns() - training_start
+
+        self.train_data['X'] = feature_array
+        self.train_data['y'] = labels
+        self.train_data['feature_names'] = feature_names
+        self.train_data['y_pred'] = predicted_labels
+
+        report_performance(type(self).__name__ + "-preparation", log, len(labels), data_prep_time)
+        report_performance(type(self).__name__ + "-training", log, len(labels), training_time)
+
+        if not self.skip_saving_model:
+            dump(self.model_instance, self.store_file)
 
 
    

@@ -87,3 +87,11 @@ Testing sequence to implement:
 - choose 10 model cases and test them with testing dataset
 - 
 
+
+bruteforce200-2
+25 - only benign training and testing (anomaly will start at around 26)
+35 - halfway between the beginning of anomaly and the beginning of anomaly detection (halfway learning, maybe? maybe learning is not linear, since detections are not linearly increasing!)
+45 - mostly learned. all anomalies of this first batch (of 2) are detected
+110 - beginning of second phase of anomaly. still some misses
+125 - completely learned
+

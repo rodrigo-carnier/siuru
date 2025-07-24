@@ -17,6 +17,7 @@ from river.compose import Pipeline
 
 from datetime import datetime
 from joblib import dump, load
+from pathlib import Path
 
 from common.features import EncodedSampleGenerator, IFeature, PredictionField, SampleGenerator
 from common.functions import report_performance
@@ -148,102 +149,52 @@ class AdaptativeRandomForestModel(IAnomalyDetectionModel):
         if not self.model_instance:
             log.error(f"Failed to load model from: {self.store_file}")
 
+
+
     def predict(self, data: EncodedSampleGenerator, **kwargs) -> SampleGenerator:
 
+        self.sample_count = 0
+        data_prep_time = 0
         sum_processing_time = 0
         sum_samples = 0
-        self.sample_count = 0
-        
+        label = []
+        feature_array = []
+        feature_names = []
+        feature_dict = {}
+        predicted_labels = []
+
         labels = []
-        encoded_features = []
-        self.sample_count = 0
-        
-        i = 0
+        feature_sample = []
 
-        for sample, encoded_sample in data:
-            i = i+1
-            start_time_ref = time.process_time_ns()
-
-            print(f"sample {encoded_sample}")
-            # Necessary to scale samples, but River only works with dictionaries, so transforming
-            feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
-                'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
-                'feature11', 'feature12']
-            
-            encoded_sample_dict = [dict(zip(feature_names, arr)) for arr in encoded_sample]
-            print(f"sample dict {encoded_sample_dict}")
+        for sample, encoding in data:
+            if len(feature_names) == 0:
+                feature_names = list(encoding.features.values)
 
             y = sample[PredictionField.GROUND_TRUTH]
 
-            for encoded_sample in encoded_sample_dict:
-                prediction = self.model_instance.predict_one(encoded_sample)
-                self.model_instance.learn_one(encoded_sample, y) # After scaling, learn
-
-        # for sample, encoded_sample in data:
-        #     i = i+1
-        #     start_time_ref = time.process_time_ns()
-        #     print(f"Enc sample {encoded_sample}")
-
-        #     if isinstance(sample, list):
-        #         # Handle the list with multiple samples used together with
-        #         # xarray DataArray encodings.
-        #         for f in sample:
-        #             labels.append(f[PredictionField.GROUND_TRUTH])
-        #         if not encoded_features:
-        #             encoded_features = [list(encoded_sample)]  # Convert to a list of lists
-        #         else:
-        #             # Instead of concatenating, extend the list directly
-        #             encoded_features.extend(encoded_sample)
-        #     else:
-        #         labels = sample[PredictionField.GROUND_TRUTH]
-        #         encoded_features = list(encoded_sample[0])  # Ensure this is a list
-
-        #     print(f"Enc feat {encoded_features}")
-                
-            
-        #     # print(f"Labels {labels}")
-        #     # print(f"Enc feat {encoded_features}")
-            
-        #     # Necessary to scale samples, but River only works with dictionaries, so transforming
-            
-        #     feature_names = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5',
-        #         'feature6', 'feature7', 'feature8', 'feature9', 'feature10',
-        #         'feature11', 'feature12']
-
-        #     encoded_features = [dict(zip(feature_names, arr)) for arr in encoded_features]
-
-        #     # riverdataset = stream.iter_array(encoded_features, labels, feature_names=['x1', 'x2', 'x3', 'x4'])
-
-        #     for x, y in zip(encoded_features, labels):
-        #         print(x, y)
-        #         # self.scaler.learn_one(x)
-        #         # x = self.scaler.transform_one(x)  # Scale the features
-        #         prediction = self.model_instance.predict_one(x)
-        #         self.model_instance.learn_one(x, y) # After scaling, learn
-
-
-                self.sample_count += 1
-                if self.sample_count % self.save_interval == 0 and not self.skip_saving_model:
-                    self._save_model()
-
-                if i<25:
-                    print(f"Prediction is {prediction}")
-
+            start_time_ref = time.process_time_ns()
             if isinstance(sample, list):
-                for i, s in enumerate(sample):
-                    s[PredictionField.MODEL_NAME] = self.model_name
-                    s[PredictionField.OUTPUT_BINARY] = prediction[i]
-                    sum_processing_time += time.process_time_ns() - start_time_ref
-                    sum_samples += 1
-                    yield s
+                # River don't allow for batch training/testing
+                raise TypeError("Streaming algorithms cannot handle batches of samples.")
             else:
+                feature_sample = encoding[0].values
+                feature_dict = dict(zip(feature_names, feature_sample))
+                label = sample[PredictionField.GROUND_TRUTH]
+                prediction = self.model_instance.predict_one(feature_dict)
+                self.model_instance.learn_one(encoded, y)
+
+                feature_array.append(feature_sample)
+                labels.append(label)
+                predicted_labels.append(prediction)
+
                 sample[PredictionField.MODEL_NAME] = self.model_name
                 sample[PredictionField.OUTPUT_BINARY] = prediction
                 sum_processing_time += time.process_time_ns() - start_time_ref
                 sum_samples += 1
                 yield sample
-        
+
         report_performance(type(self).__name__ + "-testing", log, sum_samples, sum_processing_time)
+
     
 
     def evaluate(self, data: Generator, **kwargs) -> Tuple[list[int], list[float]]:
