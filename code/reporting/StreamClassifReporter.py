@@ -60,7 +60,7 @@ class StreamClassifReporter(IReporter):
         plt.title('Time-Series Predictions')
 
         # Adding a grid for better readability
-        plt.xticks(fontsize=12)
+        plt.xticks(fontsize=12, rotation=90)
         plt.yticks(fontsize=12)
         plt.gca().xaxis.set_major_locator(MultipleLocator(10))
         plt.gca().yaxis.set_major_locator(MultipleLocator(25))
@@ -109,7 +109,7 @@ class StreamClassifReporter(IReporter):
         plt.xlabel('Data Points Processed', fontsize=24)
         plt.ylabel('Cumulative Accuracy (%)', fontsize=24)
         plt.title('Cumulative Accuracy Over Time')
-        plt.xticks(fontsize=12)
+        plt.xticks(fontsize=12, rotation=90)
         plt.yticks(fontsize=12)
         plt.gca().xaxis.set_major_locator(MultipleLocator(10))
         plt.gca().yaxis.set_major_locator(MultipleLocator(25))
@@ -153,7 +153,7 @@ class StreamClassifReporter(IReporter):
         plt.xlabel('Data Points Processed', fontsize=24)
         plt.ylabel('Window Accuracy (%)', fontsize=24)
         plt.title(f'Cumulative Accuracy (Window={n_samples})')
-        plt.xticks(fontsize=12)
+        plt.xticks(fontsize=12, rotation=90)
         plt.yticks(fontsize=12)
         plt.gca().xaxis.set_major_locator(MultipleLocator(10))
         plt.gca().yaxis.set_major_locator(MultipleLocator(25))
